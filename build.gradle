@@ -1,0 +1,33 @@
+plugins {
+	id 'java-library'
+	id 'com.github.johnrengelman.shadow' version "6.1.0"
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	//For your dependencies, use the shadow keyword instead of implementation, EX:
+	//shadow group: 'commons-io', name: 'commons-io', version: '2.8.0'
+
+
+
+	/**********
+	don't alter the dependencies below
+	***********/
+	
+	//Wildermyth, Scratchpad
+	implementation fileTree(dir: './bin/', include: ['*.jar'])
+	
+	//All dependencies of Wildermyth itself
+	implementation fileTree(dir: './bin/lib/', include: ['*.jar'])
+}
+
+shadowJar {
+	mergeServiceFiles()
+	configurations = [project.configurations.shadow]
+}
+
+build.finalizedBy shadowJar
