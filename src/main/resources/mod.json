@@ -1,0 +1,10 @@
+{
+	"modid":"wilderforge",
+	"version":"0.0.0.0",
+	"requires":[
+		{
+			"modid":"wildermyth",
+			"version":"[1.0*]"
+		}
+	]
+}
