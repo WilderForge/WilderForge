@@ -1,0 +1,78 @@
+labels:
+    -
+        name: "Category - Bug"
+        color: "ee0701"
+        description: "Something isn't working"
+    -
+        name: "Category - Conflict"
+        color: "f9b848"
+        description: "A conflict with another program"
+    -
+        name: "Category - Enhancement"
+        color: "84b6eb"
+        description: "New feature or request"
+    -
+        name: "Category - Invalid"
+        color: "e6e6e6"
+        description: "This issue or pull request is invalid or otherwise outside the scope of this project"
+    -
+        name: "Category - Task"
+        color: "c5def5"
+        description: "Something that needs to be done that doesn't involve coding"
+    -
+        name: "Category - Working as Intended"
+        color: "bfdadc"
+        description: "This is working as intended"
+    -
+        name: "Category - Upstream"
+        color: "3961c6"
+        description: "This is an issue that soley within another program that the project relies on"
+    -
+        name: "Priority - Blocker  ⟰⊘⟰"
+        color: "ff009d"
+        description: "This issue blocks development or is so important it must be addressed immediately"
+    -
+        name: "Priority - Critical ⟰"
+        color: "b60205"
+        description: "Critical issues render most of the game or mod unusable, includes unavoidable crashes"
+    -
+        name: "Priority - High ⇑"
+        color: "d93f0b"
+        description: "Issues or bugs that have more impact than normal"
+    -
+        name: "Priority - Low ⇣"
+        color: "00e1ff"
+        description: "Minor issues. Ex: spelling mistakes or minor graphical issues"
+    -
+        name: "Priority - Normal ↓"
+        color: "fffa00"
+        description: "Normal priority"
+    -
+        name: "Status - Deferred"
+        color: "ee0701"
+        description: "This issue was transferred to (or is awaiting a fix from) another project"
+    -
+        name: "Status - Duplicate"
+        color: "cfd3d7"
+        description: "This issue or pull request already exists"
+    -
+        name: "Status - In Progress"
+        color: "ff7fd6"
+        description: "This issue is actively being worked on or implemented"
+    -
+        name: "Status - Postponed"
+        color: "ffc6dc"
+        description: "This issue or pull request is postponed for a later date"
+    -
+        name: "Status - Resolved"
+        color: "0e8a16"
+        description: "This issue or pull request was valid and was resolved"
+    -
+        name: "Status - Won't Fix"
+        color: "ffffff"
+        description: "This will not be worked on"
+
+    -
+        name: "Status - Unable to Reproduce"
+        color: "ffffff"
+        description: "Unable to reproduce this issue"
