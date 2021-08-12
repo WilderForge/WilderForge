@@ -8,6 +8,7 @@ import org.apache.logging.log4j.message.MessageFormatMessageFactory;
 import org.apache.logging.log4j.Level;
 import static org.apache.logging.log4j.Level.*;
 
+import com.badlogic.gdx.ApplicationLogger;
 import com.worldwalkergames.logging.FilteringConsumer;
 
 public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger {
@@ -55,4 +56,35 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 			return INFO;
 		}
 	}
+
+	@Override
+	public void log(String tag, String message) {
+		log(new String[] {tag}, 2, 0, message, new Object[0]);
+	}
+
+	@Override
+	public void log(String tag, String message, Throwable exception) {
+		getLogger(tag).catching(INFO, exception);
+	}
+
+	@Override
+	public void error(String tag, String message) {
+		log(new String[] {tag}, 4, 0, message, new Object[0]);
+	}
+
+	@Override
+	public void error(String tag, String message, Throwable exception) {
+		getLogger(tag).catching(ERROR, exception);
+	}
+
+	@Override
+	public void debug(String tag, String message) {
+		log(new String[] {tag}, 1, 0, message, new Object[0]);
+	}
+
+	@Override
+	public void debug(String tag, String message, Throwable exception) {
+		getLogger(tag).catching(DEBUG, exception);
+	}
+	
 }

@@ -6,6 +6,8 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1,
     "mixins": [
-	"LegacyDesktopMixin"
+    	"AggregatorMixin",
+	"LegacyDesktopMixin",
+	"NiceLwjgl3ApplicationMixin"
     ]
 }
