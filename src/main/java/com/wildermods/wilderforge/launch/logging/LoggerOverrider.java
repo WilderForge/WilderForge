@@ -10,11 +10,11 @@ import static org.apache.logging.log4j.Level.*;
 
 import com.worldwalkergames.logging.FilteringConsumer;
 
-public class FilteringConsumerOverride extends FilteringConsumer {
+public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger {
 	
 	public static final LinkedHashMap<String, Logger> LOGGERS = new LinkedHashMap<String, Logger>();
 	
-	public FilteringConsumerOverride(Filter... filters) {
+	public LoggerOverrider(Filter... filters) {
 		super(filters);
 	}
 	
@@ -55,5 +55,4 @@ public class FilteringConsumerOverride extends FilteringConsumer {
 			return INFO;
 		}
 	}
-	
 }

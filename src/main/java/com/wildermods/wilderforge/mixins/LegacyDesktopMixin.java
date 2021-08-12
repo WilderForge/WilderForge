@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.wildermods.wilderforge.launch.logging.FilteringConsumerOverride;
+import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.FilteringConsumer;
@@ -17,7 +17,7 @@ public class LegacyDesktopMixin {
 	private static void initializeLogging(CallbackInfo c) {
 		ALogger.Aggregator aggregator = ALogger.getDefaultAggregator();
 		aggregator.consumers.clear();
-		aggregator.consumers.add(new FilteringConsumerOverride(new FilteringConsumer.Filter()));
+		aggregator.consumers.add(new LoggerOverrider(new FilteringConsumer.Filter()));
 	}
 	
 }
