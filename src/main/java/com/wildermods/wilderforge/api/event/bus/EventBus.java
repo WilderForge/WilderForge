@@ -36,7 +36,6 @@ public class EventBus {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public boolean fire(Event e) {
 		removeCollectedReferences();
-		HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> allListeners = LISTENERS;
 		Set<IEventListener<? extends Event>> listeners = LISTENERS.get(e.getClass());
 		if(listeners == null) { //nothing is subscribing to the event
 			return false;
@@ -101,6 +100,7 @@ public class EventBus {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	static interface IEventListener<T extends Event> extends SubscribeEvent, Comparable<IEventListener> {
 		public Method getMethod();
 		
@@ -183,7 +183,7 @@ public class EventBus {
 		protected final SubscribeEvent subscriberInfo;
 		protected final Method method;
 		protected final Class<? extends T> subscribedTo;
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ObjectEventListener(Object o, Method method) throws EventTargetError  {
 			super(o, (ReferenceQueue)refQueue);
 			if(o == null) {
@@ -229,7 +229,9 @@ public class EventBus {
 			return ObjectEventListener.class;
 		}
 
+
 		@Override
+		@SuppressWarnings("rawtypes")
 		public int compareTo(IEventListener e) {
 			return priority() - e.priority();
 		}
