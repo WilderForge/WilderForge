@@ -13,7 +13,7 @@ public abstract class Event {
 		return cancelled && cancellable;
 	}
 	
-	private void setCancelled(boolean cancelled) {
+	public void setCancelled(boolean cancelled) {
 		if(cancellable) {
 			this.cancelled = cancelled;
 		}
