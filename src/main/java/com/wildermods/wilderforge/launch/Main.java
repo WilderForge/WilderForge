@@ -18,6 +18,7 @@ import com.worldwalkergames.legacy.Version;
 
 public class Main {
 	public static final Logger LOGGER = LogManager.getLogger(Main.class);
+	private static ReflectionsHelper reflectionsHelper;
 
 	public static void main(String[] args) throws IOException {
 		checkClassloader();
@@ -90,6 +91,10 @@ public class Main {
 	
 	private static final void launchGame(String[] args) {
 		LegacyDesktop.main(args);
+	}
+	
+	public static ReflectionsHelper getReflectionsHelper() {
+		return reflectionsHelper;
 	}
 	
 }

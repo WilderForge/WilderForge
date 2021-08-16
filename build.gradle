@@ -14,6 +14,7 @@ dependencies {
 
 	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.9'
 	shadow group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
+	shadow group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.5'
 	shadow group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
 
 	//mixin requirements:
