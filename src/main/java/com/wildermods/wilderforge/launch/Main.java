@@ -21,16 +21,17 @@ public class Main {
 	private static ReflectionsHelper reflectionsHelper;
 
 	public static void main(String[] args) throws IOException {
-		checkClassloader();
+		ClassLoader loader = checkClassloader();
 		
-		discoverCoremods();
+		setupReflectionsHelper(loader);
 		
-		//do modloading stuff
+		
+		discoverCoremods(loader);
 		
 		launchGame(args);
 	}
 	
-	private static final void checkClassloader() throws VerifyError {
+	private static final ClassLoader checkClassloader() throws VerifyError {
 		ClassLoader classloader = LegacyDesktop.class.getClassLoader();
 		if(!(classloader.getClass().getName().equals("cpw.mods.modlauncher.TransformingClassLoader"))) {
 			System.out.println(LegacyDesktop.class.getClassLoader().getClass().getName());
@@ -38,13 +39,20 @@ public class Main {
 		}
 		System.out.println("Correct classloader detected.");
 		Version.PATCHLINE = "WilderForge 0.0.0.0";
+		return classloader;
 	}
 	
-	private static final void discoverCoremods() throws IOException {
-		ClassLoader classLoader = Main.class.getClassLoader();
+	private static final void setupReflectionsHelper(ClassLoader classLoader) {
+		reflectionsHelper = new ReflectionsHelper(classLoader);
+	}
+	
 		
+	
+	private static final void discoverCoremods(ClassLoader classLoader) throws IOException{
+
+		Set<Class<?>> classes = reflectionsHelper.getAllClassesAnnotatedWith(com.wildermods.wilderforge.api.Coremod.class);
+
 		try {
-			
 			Field jarField = classLoader.getClass().getDeclaredField("specialJars");
 			jarField.setAccessible(true);
 			URL[] jarLocs = (URL[]) jarField.get(classLoader);
