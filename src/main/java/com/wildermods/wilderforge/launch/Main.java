@@ -5,9 +5,12 @@ import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.wildermods.wilderforge.api.event.bus.EventBus;
 
 import com.wildermods.wilderforge.launch.coremods.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Wildermyth;
@@ -19,12 +22,14 @@ import com.worldwalkergames.legacy.Version;
 public class Main {
 	public static final Logger LOGGER = LogManager.getLogger(Main.class);
 	private static ReflectionsHelper reflectionsHelper;
+	public static final EventBus EVENT_BUS = new EventBus();
 
 	public static void main(String[] args) throws IOException {
 		ClassLoader loader = checkClassloader();
 		
 		setupReflectionsHelper(loader);
 		
+		setupEventBusses(loader);
 		
 		discoverCoremods(loader);
 		
@@ -46,7 +51,9 @@ public class Main {
 		reflectionsHelper = new ReflectionsHelper(classLoader);
 	}
 	
+	private static final void setupEventBusses(ClassLoader classLoader) {
 		
+	}
 	
 	private static final void discoverCoremods(ClassLoader classLoader) throws IOException{
 
