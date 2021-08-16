@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.wildermods.wilderforge.api.event.Event;
 import com.wildermods.wilderforge.launch.Main;
@@ -65,7 +65,7 @@ public class EventBus {
 				if(Modifier.isStatic(m.getModifiers())) {
 					EventListener listener = new StaticEventListener(m);
 					if(!LISTENERS.containsKey(listener.subscribedTo)) {
-						LISTENERS.put(listener.subscribedTo, new HashSet<IEventListener<? extends Event>>());
+						LISTENERS.put(listener.subscribedTo, new TreeSet<IEventListener<? extends Event>>());
 					}
 					Set<IEventListener<? extends Event>> staticListeners = LISTENERS.get(listener.subscribedTo);
 					staticListeners.add(listener);
@@ -82,7 +82,7 @@ public class EventBus {
 				}
 				ObjectEventListener listener = new ObjectEventListener(o, m);
 				if(!LISTENERS.containsKey(listener.subscribedTo)) {
-					LISTENERS.put(listener.subscribedTo, new HashSet<IEventListener<? extends Event>>());
+					LISTENERS.put(listener.subscribedTo, new TreeSet<IEventListener<? extends Event>>());
 				}
 				Set<IEventListener<? extends Event>> objectListeners = LISTENERS.get(listener.subscribedTo);
 				objectListeners.add(listener);
