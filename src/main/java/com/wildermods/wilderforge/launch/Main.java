@@ -5,12 +5,16 @@ import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager.Log4jMarker;
 
 import com.wildermods.wilderforge.api.event.bus.EventBus;
+import com.wildermods.wilderforge.launch.exception.CoremodNotFoundError;
 import com.wildermods.wilderforge.launch.exception.DuplicateCoremodError;
 
 import com.worldwalkergames.legacy.LegacyDesktop;
@@ -28,14 +32,15 @@ public class Main {
 		
 		setupEventBusses(loader);
 		
-		discoverCoremods(loader);
+		discoverCoremodJsons(loader);
 		
+		validateCoremods(loader);
 		launchGame(args);
 	}
 	
 	private static final ClassLoader checkClassloader() throws VerifyError {
 		ClassLoader classloader = LegacyDesktop.class.getClassLoader();
-		if(!(classloader.getClass().getName().equals("cpw.mods.modlauncher.TransformingClassLoader"))) {
+		if(!(classloader.getClass().getName().equals("cpw.mods.modlauncher.TransformingClassLoader"))) { //Do not use instanceof or cast the classLoader, instanceof will always return false, and you will get ClassCastExceptions due to differing classLoaders
 			System.out.println(LegacyDesktop.class.getClassLoader().getClass().getName());
 			throw new VerifyError("Incorrect classloader. Mixins are not loaded. " + LegacyDesktop.class.getClassLoader());
 		}
@@ -52,9 +57,7 @@ public class Main {
 		
 	}
 	
-	private static final void discoverCoremods(ClassLoader classLoader) throws IOException{
-
-		Set<Class<?>> classes = reflectionsHelper.getAllClassesAnnotatedWith(com.wildermods.wilderforge.api.Coremod.class);
+	private static final void discoverCoremodJsons(ClassLoader classLoader) throws IOException{
 
 		try {
 			Field jarField = classLoader.getClass().getDeclaredField("specialJars");
@@ -98,6 +101,38 @@ public class Main {
 			}
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			throw new AssertionError(e);
+		}
+	}
+	
+	private static final void validateCoremods(ClassLoader classLoader) {
+		Logger logger = LogManager.getLogger("Coremod Validator");
+		for(Coremod coremod : LoadableCoremod.dependencyGraph.vertexSet()) {
+			for(LoadableCoremod.DependencyEdge edge : LoadableCoremod.dependencyGraph.outgoingEdgesOf(coremod)) {
+				Log4jMarker marker = new Log4jMarker(coremod.value());
+				Coremod dep = LoadableCoremod.dependencyGraph.getEdgeTarget(edge);
+				if(edge.isRequired()) {
+					if(dep instanceof LoadableCoremod) {
+						logger.info(marker, "Found required dependency " + dep.value());
+					}
+					else {
+						System.out.println(dep.getClass().getName());
+						throw new CoremodNotFoundError(coremod, dep);
+					}
+				}
+				else {
+					if(dep instanceof LoadableCoremod) {
+						logger.info(marker, "Found optional dependency " + dep.value());
+					}
+					else {
+						logger.info(marker, "Did not find optional dependency " + dep.value());
+					}
+				}
+			}
+		}
+		Set<Class<?>> classes = reflectionsHelper.getAllClassesAnnotatedWith(com.wildermods.wilderforge.api.Coremod.class);
+		Main.LOGGER.info("Found " + classes.size() + " classes annotated with @Coremod:");
+		for(Class<?> clazz : classes) {
+			Main.LOGGER.info("@Coremod(" + clazz.getAnnotation(com.wildermods.wilderforge.api.Coremod.class).value() + ") is " + clazz.getCanonicalName());
 		}
 	}
 	

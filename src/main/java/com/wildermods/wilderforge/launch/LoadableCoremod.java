@@ -58,14 +58,18 @@ public abstract class LoadableCoremod extends Coremod {
 			System.out.println(this.toString());
 			System.out.println(dependencyGraph.containsVertex(this));
 			System.out.println(dependencyGraph.toString());
-			for(Dependency dep : required) {
-				dependencyGraph.addVertex(dep);
+			for(Coremod dep : required) {
+				if(!dependencyGraph.addVertex(dep)) {
+					dep = getCoremod(dep);
+				}
 				if(!dependencyGraph.addEdge(this, dep, new DependencyEdge(true))) {
 					throw new DuplicateDependencyDeclarationError(this, dep);
 				}
 			}
-			for(Dependency dep : optional) {
-				dependencyGraph.addVertex(dep);
+			for(Coremod dep : optional) {
+				if(!dependencyGraph.addVertex(dep)) {
+					dep = getCoremod(dep);
+				}
 				if(!dependencyGraph.addEdge(this, dep, new DependencyEdge(false))) {
 					throw new DuplicateDependencyDeclarationError(this, dep);
 				}
@@ -76,7 +80,7 @@ public abstract class LoadableCoremod extends Coremod {
 		}
 	}
 	
-	private static class DependencyEdge extends DefaultEdge {
+	static class DependencyEdge extends DefaultEdge {
 		private final boolean required;
 		
 		public DependencyEdge(boolean required) {
@@ -86,6 +90,17 @@ public abstract class LoadableCoremod extends Coremod {
 		public boolean isRequired() {
 			return required;
 		}
+	}
+	
+	Coremod getCoremod(Coremod coremod) {
+		Iterator<Coremod> iterator = dependencyGraph.vertexSet().iterator();
+		while(iterator.hasNext()) {
+			Coremod vertex = iterator.next();
+			if(vertex.equals(coremod)) {
+				return vertex;
+			}
+		}
+		return null;
 	}
 	
 }
