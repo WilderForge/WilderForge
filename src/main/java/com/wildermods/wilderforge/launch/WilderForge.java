@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch.coremods;
+package com.wildermods.wilderforge.launch;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,13 +8,12 @@ import java.net.URL;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import com.wildermods.wilderforge.api.Coremod;
 import com.wildermods.wilderforge.api.Version;
-import com.wildermods.wilderforge.launch.HardCodedCoremod;
-import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
-public class WilderForge extends HardCodedCoremod {
+@Coremod("wilderforge")
+class WilderForge extends HardCodedCoremod {
 	
 	private static final URL versionURL;
 	static {
@@ -25,7 +24,7 @@ public class WilderForge extends HardCodedCoremod {
 		}
 	}
 	
-	public WilderForge() throws IOException {
+	WilderForge() throws IOException {
 		construct(getModJson().get("modid").getAsString(), new Version(getModJson().get("version").getAsString()));
 		parseDependencies();
 	}

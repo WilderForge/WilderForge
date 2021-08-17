@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch.coremods;
+package com.wildermods.wilderforge.launch;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,16 +6,16 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 
 import com.google.gson.JsonObject;
+import com.wildermods.wilderforge.api.Coremod;
 import com.wildermods.wilderforge.api.Version;
-import com.wildermods.wilderforge.launch.HardCodedCoremod;
-import com.wildermods.wilderforge.launch.LoadableCoremod;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
-public class Wildermyth extends HardCodedCoremod {
+@Coremod("wildermyth")
+class Wildermyth extends HardCodedCoremod {
 	
 	private static final File VERSION_FILE = new File("./version.txt");
 	
-	public Wildermyth() throws IOException {
+	Wildermyth() throws IOException {
 		construct("wildermyth", getWildermythVersion(new File(".")));
 		parseDependencies();
 	}

@@ -11,9 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.wildermods.wilderforge.api.event.bus.EventBus;
-
-import com.wildermods.wilderforge.launch.coremods.WilderForge;
-import com.wildermods.wilderforge.launch.coremods.Wildermyth;
 import com.wildermods.wilderforge.launch.exception.DuplicateCoremodException;
 
 import com.worldwalkergames.legacy.LegacyDesktop;
