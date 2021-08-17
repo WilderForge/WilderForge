@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.wildermods.wilderforge.api.event.bus.EventBus;
-import com.wildermods.wilderforge.launch.exception.DuplicateCoremodException;
+import com.wildermods.wilderforge.launch.exception.DuplicateCoremodError;
 
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.Version;
@@ -77,7 +77,7 @@ public class Main {
 								}
 								else {
 									if(coremod.equals(jarCoremod)) {
-										throw new DuplicateCoremodException(coremod);
+										throw new DuplicateCoremodError(coremod);
 									}
 								}
 							}

@@ -11,9 +11,9 @@ import com.wildermods.wilderforge.launch.Coremod;
  */
 
 @SuppressWarnings("serial")
-public class DuplicateCoremodException extends CoremodLinkageError {
+public class DuplicateCoremodError extends CoremodLinkageError {
 
-	public DuplicateCoremodException(Coremod dupe) {
+	public DuplicateCoremodError(Coremod dupe) {
 		super("Two or more coremods found with the same modid: " + dupe);
 	}
 	
