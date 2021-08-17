@@ -73,7 +73,7 @@ public class MultiVersionRange {
 			int splitIndex = versionRange.indexOf(',');
 			if(splitIndex != -1) {
 				start = new Version(versionRange.substring(1, splitIndex - 1));
-				end = new Version(versionRange.substring(splitIndex + 1, versionRange.length() - 1));
+				end = new Version(versionRange.substring(splitIndex + 1, versionRange.length() - 2));
 				int startWildCard = start.toString().indexOf('*');
 				int endWildCard = end.toString().indexOf('*');
 				if(startWildCard != -1) {
