@@ -72,8 +72,8 @@ public class MultiVersionRange {
 			
 			int splitIndex = versionRange.indexOf(',');
 			if(splitIndex != -1) {
-				start = new Version(versionRange.substring(1, splitIndex - 1));
-				end = new Version(versionRange.substring(splitIndex + 1, versionRange.length() - 2));
+				start = Version.getVersion(versionRange.substring(1, splitIndex - 1));
+				end = Version.getVersion(versionRange.substring(splitIndex + 1, versionRange.length() - 2));
 				int startWildCard = start.toString().indexOf('*');
 				int endWildCard = end.toString().indexOf('*');
 				if(startWildCard != -1) {
@@ -92,8 +92,8 @@ public class MultiVersionRange {
 					throw new InvalidVersionException("Version range must include a non-zero range of versions! (One version is compatible? Use only inclusive tokens!)");
 				}
 				String versionString = versionRange.substring(1, versionRange.length() - 1);
-				start = new Version(versionString);
-				end = new Version(versionString);
+				start = Version.getVersion(versionString);
+				end = Version.getVersion(versionString);
 			}
 			
 			if(start.compareTo(end) > 0) {
@@ -114,11 +114,11 @@ public class MultiVersionRange {
 		}
 		
 		private Version getMin(Version version) {
-			return new Version(version.toString().replace('*', '0'));
+			return Version.getVersion(version.toString().replace('*', '0'));
 		}
 		
 		private Version getMax(Version version) {
-			return new Version(version.toString().replace('*', '9'));
+			return Version.getVersion(version.toString().replace('*', '9'));
 		}
 		
 	}

@@ -8,7 +8,7 @@ public class Version implements Comparable {
 	
 	public static final NoVersion NO_VERSION = new NoVersion();
 	
-	public Version(String version) {
+	private Version(String version) {
 		this.version = version;
 	}
 	
@@ -52,6 +52,13 @@ public class Version implements Comparable {
 	
 	public String toString() {
 		return version;
+	}
+	
+	public static Version getVersion(String version) {
+		if(version == null || version.isBlank()) {
+			return NO_VERSION;
+		}
+		return new Version(version);
 	}
 	
 	public static final class NoVersion extends Version {

@@ -27,7 +27,7 @@ class JarCoremod extends LoadableCoremod {
 	public JarCoremod(JarURLConnection jar) throws IOException {
 		this.jar = jar;
 		this.modJson = getModJson();
-		construct(modJson.get("modid").getAsString(), new Version(modJson.get("version").getAsString()));
+		construct(modJson.get("modid").getAsString(), Version.getVersion(modJson.get("version").getAsString()));
 		JsonObject root = modJson;
 		JsonElement modidElement = root.get("modid");
 		if(modidElement != null) {

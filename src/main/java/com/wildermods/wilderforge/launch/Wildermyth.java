@@ -32,7 +32,7 @@ class Wildermyth extends HardCodedCoremod {
 	private static Version getWildermythVersion(File gameDir) throws IOException {
 		File versionFile = new File(gameDir.getAbsolutePath() + "/version.txt");
 		if(versionFile.exists()) {
-			return new Version(FileUtils.readFileToString(versionFile).split(" ")[0]);
+			return Version.getVersion(FileUtils.readFileToString(versionFile).split(" ")[0]);
 		}
 		else {
 			throw new CoremodFormatError("No version.txt detected for wildermyth!");

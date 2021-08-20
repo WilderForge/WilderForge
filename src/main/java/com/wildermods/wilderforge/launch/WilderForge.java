@@ -25,7 +25,7 @@ class WilderForge extends HardCodedCoremod {
 	}
 	
 	WilderForge() throws IOException {
-		construct(getModJson().get("modid").getAsString(), new Version(getModJson().get("version").getAsString()));
+		construct(getModJson().get("modid").getAsString(), Version.getVersion(getModJson().get("version").getAsString()));
 		parseDependencies();
 	}
 	
