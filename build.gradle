@@ -30,6 +30,8 @@ dependencies {
 	
 	//JUNIT TESTS
 	testImplementation 'junit:junit:4.13'
+	testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
+	testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
 
 
 	/**********
@@ -43,6 +45,10 @@ dependencies {
 	implementation fileTree(dir: './bin/lib/', include: ['*.jar'])
 }
 
+test {
+	testLogging.showStandardStreams = true
+}
+
 shadowJar {
 	mergeServiceFiles()
 	configurations = [project.configurations.shadow]
@@ -54,8 +60,6 @@ shadowJar {
 	exclude 'META-INF/DEPENDENCIES'
 	exclude 'LICENSE.txt'
 }
-
-
 
 jar {
 	manifest {
