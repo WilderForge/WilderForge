@@ -27,6 +27,9 @@ dependencies {
 	shadow group: 'org.ow2.asm', name: 'asm-util', version: '7.2'
 	shadow group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
 	shadow group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
+	
+	//JUNIT TESTS
+	testImplementation 'junit:junit:4.13'
 
 
 	/**********
