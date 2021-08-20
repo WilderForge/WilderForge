@@ -91,6 +91,11 @@ public class MultiVersionRange {
 				if(startChar != '[' || endChar != ']') {
 					throw new InvalidVersionException("Version range must include a non-zero range of versions! (One version is compatible? Use only inclusive tokens!)");
 				}
+				if(versionRange.indexOf('*') != -1) {
+					if(versionRange.indexOf('*') != versionRange.length() - 2) {
+						throw new InvalidVersionException("Wildcard can only be at the end of a version " + versionRange);
+					}
+				}
 				String versionString = versionRange.substring(1, versionRange.length() - 1);
 				start = Version.getVersion(versionString);
 				end = Version.getVersion(versionString);

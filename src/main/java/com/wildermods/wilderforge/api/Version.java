@@ -81,6 +81,9 @@ public class Version implements Comparable {
 		@Override
 		public int compareTo(Object o) {
 			if(o instanceof Version || o instanceof CharSequence) {
+				if(o.equals(NO_VERSION)) {
+					return 0;
+				}
 				return -1;
 			}
 			throw new IllegalArgumentException(o.getClass().getCanonicalName());
