@@ -5,9 +5,11 @@ import java.lang.annotation.Annotation;
 
 import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.versionV1.Version;
+import com.wildermods.wilderforge.api.versionV1.Versioned;
+import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 
 @SuppressWarnings("intfAnnotation")
-public abstract class Coremod implements Comparable<Coremod>, com.wildermods.wilderforge.api.Coremod{
+public abstract class Coremod implements com.wildermods.wilderforge.api.Coremod, Versioned{
 
 	protected String modid;
 	protected Version version;
@@ -36,11 +38,14 @@ public abstract class Coremod implements Comparable<Coremod>, com.wildermods.wil
 	}
 	
 	@Override
-	public final int compareTo(Coremod o) {
-		if(value().equals(o.value())) {
-			return getVersion().compareTo(o);
+	public final int compareTo(Versioned o) {
+		if(o instanceof com.wildermods.wilderforge.api.Coremod) {
+			if(value().equals(((com.wildermods.wilderforge.api.Coremod) o).value())) {
+				return getVersion().compareTo(o);
+			}
+			throw new UnsupportedOperationException("Cannot compare versions of two diffrent coremods: " + this + " and " + o);
 		}
-		throw new UnsupportedOperationException("Cannot compare versions of two diffrent coremods: " + this + " and " + o);
+		return Versioned.super.compareTo(o);
 	}
 	
 	protected abstract JsonObject getModJson() throws IOException;
