@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.versionV1;
 
-public interface Versioned extends Comparable<Version> {
+public interface Versioned extends Comparable<Versioned> {
 
 	public Version getVersion();
 	

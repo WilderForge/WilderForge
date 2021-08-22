@@ -34,7 +34,6 @@ public class Version implements Versioned {
 	/**
 	 * Returns 0 if this version matches the target version.
 	 */
-	@Override
 	public int compareTo(Version o) {
 		int min = Math.min(version.length, o.version.length);
 		int i = 0;

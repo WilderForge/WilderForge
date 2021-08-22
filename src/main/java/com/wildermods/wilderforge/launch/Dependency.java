@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
-public class Dependency extends Coremod{
+public class Dependency extends Coremod {
 
 	private final JsonObject modJson;
 	private final boolean required;
