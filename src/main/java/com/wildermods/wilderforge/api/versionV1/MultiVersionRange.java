@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api;
+package com.wildermods.wilderforge.api.versionV1;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -72,8 +72,8 @@ public class MultiVersionRange {
 			
 			int splitIndex = versionRange.indexOf(',');
 			if(splitIndex != -1) {
-				start = Version.getVersion(versionRange.substring(1, splitIndex - 1));
-				end = Version.getVersion(versionRange.substring(splitIndex + 1, versionRange.length() - 2));
+				start = Version.getVersion(versionRange.substring(1, splitIndex));
+				end = Version.getVersion(versionRange.substring(splitIndex + 1, versionRange.length() - 1));
 				int startWildCard = start.toString().indexOf('*');
 				int endWildCard = end.toString().indexOf('*');
 				if(startWildCard != -1) {
@@ -82,7 +82,7 @@ public class MultiVersionRange {
 					}
 				}
 				if(endWildCard != -1) {
-					if(endWildCard != end.toString().length()) {
+					if(endWildCard != end.toString().length() - 1) {
 						throw new InvalidVersionException("Wildcard can only be at the end of a version: " + end);
 					}
 				}
@@ -107,8 +107,8 @@ public class MultiVersionRange {
 		}
 		
 		public boolean isWithinRange(Version version) {
-			int beginCompare = getMin(start).compareTo(version);
-			int endCompare = getMax(end).compareTo(version);
+			int beginCompare = start.compareTo(version);
+			int endCompare = end.compareTo(version);
 			if(beginCompare == 0 && startInclusive || endCompare == 0 && endInclusive) {
 				return true;
 			}
@@ -116,14 +116,6 @@ public class MultiVersionRange {
 				return true;
 			}
 			return false;
-		}
-		
-		private Version getMin(Version version) {
-			return Version.getVersion(version.toString().replace('*', '0'));
-		}
-		
-		private Version getMax(Version version) {
-			return Version.getVersion(version.toString().replace('*', '9'));
 		}
 		
 	}

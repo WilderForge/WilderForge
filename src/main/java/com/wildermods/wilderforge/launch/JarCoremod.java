@@ -12,7 +12,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.wildermods.wilderforge.api.Version;
+import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 class JarCoremod extends LoadableCoremod {

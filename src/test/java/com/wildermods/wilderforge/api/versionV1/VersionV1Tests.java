@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api;
+package com.wildermods.wilderforge.api.versionV1;
 
 import org.junit.Test;
 
@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 
-public class VersionTests {
+public class VersionV1Tests {
 
 	private static final Logger LOGGER = LogManager.getLogger();
 	
@@ -39,7 +39,12 @@ public class VersionTests {
 			LOGGER.info("Comparing [" + versions[i] + "] & [" + versions[j] + "]");
 			Assert.assertTrue(versions[i].compareTo(versions[j]) == 0);
 		}
-		
+		Version wildcard = Version.getVersion("*");
+		for(int i = 0; i < versions.length; i++) {
+			LOGGER.info(versions[i].compareTo(wildcard));
+			Assert.assertTrue(versions[i].compareTo(wildcard) == 0);
+			Assert.assertTrue(wildcard.compareTo(versions[i]) == 0);
+		}
 	}
 	
 	@Test
@@ -53,6 +58,39 @@ public class VersionTests {
 		Assert.assertThrows(InvalidVersionException.class, () -> {new MultiVersionRange("(1.*.2,1.2]");});
 		Assert.assertThrows(InvalidVersionException.class, () -> {new MultiVersionRange("[1.*.2]");});
 		Assert.assertThrows(InvalidVersionException.class, () -> {new MultiVersionRange("[1.2,1.*.2]");});
+		Assert.assertThrows(InvalidVersionException.class, () -> {new MultiVersionRange("[2,1]");});
+	}
+	
+	@Test
+	public void testRanges() {
+		Assert.assertTrue(new MultiVersionRange("[*]").isWithinRange(Version.getVersion("999999999.99999")));
+		Assert.assertTrue(new MultiVersionRange("[1.2.5]").isWithinRange(Version.getVersion("1.2.5")));
+		Assert.assertFalse(new MultiVersionRange("[1.2.5]").isWithinRange(Version.getVersion("1.2.4")));
+		
+		Assert.assertTrue(new MultiVersionRange("[1.3.*]").isWithinRange(new Version("1.3")));
+		
+		Assert.assertTrue(new MultiVersionRange("[1.2.5,1.2.9]").isWithinRange(Version.getVersion("1.2.8")));
+		Assert.assertTrue(new MultiVersionRange("[1.2.5,1.2.9]").isWithinRange(Version.getVersion("1.2.9")));
+		Assert.assertFalse(new MultiVersionRange("[1.2.5,1.2.9)").isWithinRange(Version.getVersion("1.2.9")));
+		Assert.assertFalse(new MultiVersionRange("[1.2.5,1.2.9]").isWithinRange(Version.getVersion("1.2.91")));
+		
+		Assert.assertFalse(new MultiVersionRange("(1.2.5,1.2.9)").isWithinRange(Version.getVersion("1.2.5")));
+		Assert.assertTrue(new MultiVersionRange("(1.2.5,1.2.9)").isWithinRange(Version.getVersion("1.2.5.1")));
+		
+		MultiVersionRange splitRange = new MultiVersionRange("[1.2.5,1.2.7][1.3.*][1.4.*]");
+		
+		Assert.assertFalse(splitRange.isWithinRange(new Version("1.2.4")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.2.5")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.2.6")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.2.7")));
+		Assert.assertFalse(splitRange.isWithinRange(new Version("1.2.7.1")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.3")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.3.9")));
+		Assert.assertFalse(splitRange.isWithinRange(new Version("1.39")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.4")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.4.1")));
+		Assert.assertTrue(splitRange.isWithinRange(new Version("1.4.1 beta")));
+		Assert.assertFalse(splitRange.isWithinRange(new Version("1.5.0")));
 	}
 	
 	private Version[] getVersions(String... versions) {

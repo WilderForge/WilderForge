@@ -9,7 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wildermods.wilderforge.api.Coremod;
-import com.wildermods.wilderforge.api.Version;
+import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 @Coremod("wilderforge")

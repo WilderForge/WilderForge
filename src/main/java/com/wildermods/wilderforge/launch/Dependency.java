@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.wildermods.wilderforge.api.MultiVersionRange;
+import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 public class Dependency extends Coremod{

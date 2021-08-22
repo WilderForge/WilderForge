@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 
 import com.google.gson.JsonObject;
-import com.wildermods.wilderforge.api.Version;
+import com.wildermods.wilderforge.api.versionV1.Version;
 
 @SuppressWarnings("intfAnnotation")
 public abstract class Coremod implements Comparable<Coremod>, com.wildermods.wilderforge.api.Coremod{
