@@ -22,7 +22,7 @@ class JarCoremod extends LoadableCoremod {
 	private final JarURLConnection jar;
 	private final JsonObject modJson;
 	private final String modid;
-	private final HashSet<com.wildermods.wilderforge.api.Coremod> dependencies = new HashSet<>();
+	private final HashSet<com.wildermods.wilderforge.api.modLoadingV1.Coremod> dependencies = new HashSet<>();
 	
 	public JarCoremod(JarURLConnection jar) throws IOException {
 		this.jar = jar;

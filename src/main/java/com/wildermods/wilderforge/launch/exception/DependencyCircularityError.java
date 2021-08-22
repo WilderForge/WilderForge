@@ -3,7 +3,7 @@ package com.wildermods.wilderforge.launch.exception;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
-import com.wildermods.wilderforge.api.Coremod;
+import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 
 /**
  * Thrown when Wilderforge detects a circularity in the dependency hierarchy of a mod being

@@ -5,12 +5,10 @@ import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager.Log4jMarker;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
@@ -132,10 +130,10 @@ public class Main {
 				}
 			}
 		}
-		Set<Class<?>> classes = reflectionsHelper.getAllClassesAnnotatedWith(com.wildermods.wilderforge.api.Coremod.class);
+		Set<Class<?>> classes = reflectionsHelper.getAllClassesAnnotatedWith(com.wildermods.wilderforge.api.modLoadingV1.Coremod.class);
 		Main.LOGGER.info("Found " + classes.size() + " classes annotated with @Coremod:");
 		for(Class<?> clazz : classes) {
-			Main.LOGGER.info("@Coremod(" + clazz.getAnnotation(com.wildermods.wilderforge.api.Coremod.class).value() + ") is " + clazz.getCanonicalName());
+			Main.LOGGER.info("@Coremod(" + clazz.getAnnotation(com.wildermods.wilderforge.api.modLoadingV1.Coremod.class).value() + ") is " + clazz.getCanonicalName());
 		}
 	}
 	

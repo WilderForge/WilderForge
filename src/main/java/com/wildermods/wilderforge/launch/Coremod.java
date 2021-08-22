@@ -9,7 +9,7 @@ import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 
 @SuppressWarnings("intfAnnotation")
-public abstract class Coremod implements com.wildermods.wilderforge.api.Coremod, Versioned{
+public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadingV1.Coremod, Versioned{
 
 	protected String modid;
 	protected Version version;
@@ -39,8 +39,8 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.Coremod,
 	
 	@Override
 	public final int compareTo(Versioned o) {
-		if(o instanceof com.wildermods.wilderforge.api.Coremod) {
-			if(value().equals(((com.wildermods.wilderforge.api.Coremod) o).value())) {
+		if(o instanceof com.wildermods.wilderforge.api.modLoadingV1.Coremod) {
+			if(value().equals(((com.wildermods.wilderforge.api.modLoadingV1.Coremod) o).value())) {
 				return getVersion().compareTo(o);
 			}
 			throw new UnsupportedOperationException("Cannot compare versions of two diffrent coremods: " + this + " and " + o);
@@ -52,7 +52,7 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.Coremod,
 	
 	@Override
 	public final Class<? extends Annotation> annotationType() {
-		return com.wildermods.wilderforge.api.Coremod.class;
+		return com.wildermods.wilderforge.api.modLoadingV1.Coremod.class;
 	}
 	
 	@Override 
@@ -68,5 +68,10 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.Coremod,
 			return (value().equals(o.toString()));
 		}
 		return false;
+	}
+	
+	@Deprecated
+	public ModEntry getModEntry() {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 }
