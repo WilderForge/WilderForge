@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.event.bus;
+package com.wildermods.wilderforge.api.eventV1.bus;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

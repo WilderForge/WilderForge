@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.event.bus;
+package com.wildermods.wilderforge.api.eventV1.bus;
 
 import java.lang.annotation.Annotation;
 import java.lang.ref.ReferenceQueue;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.wildermods.wilderforge.api.event.Event;
+import com.wildermods.wilderforge.api.eventV1.Event;
 import com.wildermods.wilderforge.launch.Main;
 
 @SuppressWarnings("deprecation")
@@ -27,7 +27,7 @@ public class EventBus {
 	/**
 	 * Registers a class to receive events.
 	 * <p>
-	 * All <code>static</code> <code>{@link com.wildermods.wilderforge.api.event.bus.SubscribeEvent @SubscribeEvent}</code> methods become
+	 * All <code>static</code> <code>{@link com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent @SubscribeEvent}</code> methods become
 	 * eligible to receive their events.
 	 * <p>
 	 * Unlike standard objects, Once registered, classes are always eligible to receive events, and they will not become
@@ -43,7 +43,7 @@ public class EventBus {
 	/**
 	 * Registers an object instance to receive events.
 	 * <p>
-	 * All non-<code>static</code> <code>{@link com.wildermods.wilderforge.api.event.bus.SubscribeEvent @SubscribeEvent}</code> methods become
+	 * All non-<code>static</code> <code>{@link com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent @SubscribeEvent}</code> methods become
 	 * eligible to receive their events.
 	 * <p>
 	 * Note that EventBus will only keep {@link java.lang.ref.WeakReference weak references} to your object in order to prevent memory leaks. This means you 

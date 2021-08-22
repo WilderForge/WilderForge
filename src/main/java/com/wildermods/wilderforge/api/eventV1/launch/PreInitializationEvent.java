@@ -1,6 +1,6 @@
-package com.wildermods.wilderforge.api.event.launch;
+package com.wildermods.wilderforge.api.eventV1.launch;
 
-import com.wildermods.wilderforge.api.event.Event;
+import com.wildermods.wilderforge.api.eventV1.Event;
 
 public class PreInitializationEvent extends Event {
 

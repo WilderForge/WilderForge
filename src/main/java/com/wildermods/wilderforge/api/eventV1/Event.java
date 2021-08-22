@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.event;
+package com.wildermods.wilderforge.api.eventV1;
 
 public abstract class Event {
 

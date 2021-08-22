@@ -13,8 +13,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager.Log4jMarker;
 
-import com.wildermods.wilderforge.api.event.bus.EventBus;
-import com.wildermods.wilderforge.api.event.launch.PreInitializationEvent;
+import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
+import com.wildermods.wilderforge.api.eventV1.launch.PreInitializationEvent;
 import com.wildermods.wilderforge.launch.exception.CoremodNotFoundError;
 import com.wildermods.wilderforge.launch.exception.DuplicateCoremodError;
 
