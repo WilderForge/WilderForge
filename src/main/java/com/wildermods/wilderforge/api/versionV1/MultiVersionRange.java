@@ -77,7 +77,7 @@ public class MultiVersionRange {
 				int startWildCard = start.toString().indexOf('*');
 				int endWildCard = end.toString().indexOf('*');
 				if(startWildCard != -1) {
-					if(startWildCard != start.toString().length()) {
+					if(startWildCard != start.toString().length() - 1) {
 						throw new InvalidVersionException("Wildcard can only be at the end of a version: " + start);
 					}
 				}

@@ -91,6 +91,8 @@ public class VersionV1Tests {
 		Assert.assertTrue(splitRange.isWithinRange(new Version("1.4.1")));
 		Assert.assertTrue(splitRange.isWithinRange(new Version("1.4.1 beta")));
 		Assert.assertFalse(splitRange.isWithinRange(new Version("1.5.0")));
+		
+		Assert.assertTrue(new MultiVersionRange("[1.0.*,1.1.*][1.0+*,1.1+*]").isWithinRange(new Version("1.1+345")));
 	}
 	
 	private Version[] getVersions(String... versions) {
