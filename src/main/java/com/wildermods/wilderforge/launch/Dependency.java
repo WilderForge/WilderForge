@@ -32,6 +32,10 @@ public class Dependency extends Coremod {
 		}
 	}
 	
+	public MultiVersionRange getVersionRange() {
+		return versionRange;
+	}
+	
 	public boolean required() {
 		return required;
 	}

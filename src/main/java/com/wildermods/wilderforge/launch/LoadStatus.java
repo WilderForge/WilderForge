@@ -20,7 +20,7 @@ public enum LoadStatus {
 	 * (aka UNDISCOVERED) will remain in this state.
 	 * 
 	 * Implementation detail: this is also the state of the 'wildermyth' and 'wilderforge' 
-	 * coremods as soon as launching is attempted.
+	 * coremods as soon as mod loading is attempted.
 	 */
 	UNDISCOVERED,
 	

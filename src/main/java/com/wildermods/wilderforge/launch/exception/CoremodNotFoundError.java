@@ -9,4 +9,8 @@ public class CoremodNotFoundError extends CoremodLinkageError {
 		super(declarer + " is missing required dependency " + requiredDep);
 	}
 	
+	public CoremodNotFoundError(Coremod declarer, String requiredDep) {
+		super(declarer + " is missing required dependency " + requiredDep);
+	}
+	
 }

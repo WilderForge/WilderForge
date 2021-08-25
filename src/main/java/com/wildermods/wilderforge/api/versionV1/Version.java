@@ -67,6 +67,11 @@ public class Version implements Versioned {
 		return this;
 	}
 	
+	@Override
+	public String toString() {
+		return new String(version);
+	}
+	
 	public static final class NoVersion extends Version {
 		
 		private NoVersion() {

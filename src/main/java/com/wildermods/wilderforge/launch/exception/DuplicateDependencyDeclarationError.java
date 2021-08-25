@@ -9,4 +9,8 @@ public class DuplicateDependencyDeclarationError extends CoremodLinkageError {
 		super(declarer + " has declared " + declaree + " as a dependency more than once!");
 	}
 	
+	public DuplicateDependencyDeclarationError(String declarer, Coremod declaree) {
+		super(declarer + " has delcared " + declaree + " as a dependency more than once!");
+	}
+	
 }

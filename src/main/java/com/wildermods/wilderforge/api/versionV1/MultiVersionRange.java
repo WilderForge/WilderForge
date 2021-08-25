@@ -39,6 +39,11 @@ public class MultiVersionRange {
 		return false;
 	}
 	
+	@Override
+	public String toString() {
+		return versionRange;
+	}
+	
 	public static final class VersionRange {
 		
 		private Version start;

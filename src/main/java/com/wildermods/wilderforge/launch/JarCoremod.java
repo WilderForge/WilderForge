@@ -15,7 +15,7 @@ import com.google.gson.JsonParser;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
-class JarCoremod extends LoadableCoremod {
+class JarCoremod extends Coremod {
 	
 	private static final Gson gson = new Gson();
 	

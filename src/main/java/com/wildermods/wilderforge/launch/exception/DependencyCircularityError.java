@@ -1,10 +1,5 @@
 package com.wildermods.wilderforge.launch.exception;
 
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-
-import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
-
 /**
  * Thrown when Wilderforge detects a circularity in the dependency hierarchy of a mod being
  * loaded.
@@ -13,13 +8,8 @@ import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 @SuppressWarnings("serial")
 public class DependencyCircularityError extends CoremodLinkageError {
 
-	public DependencyCircularityError(DefaultDirectedGraph<Coremod, DefaultEdge> graph) {
-		super(getDependencyGraph(graph));
-	}
-	
-	private static String getDependencyGraph(DefaultDirectedGraph<Coremod, DefaultEdge> graph) {
-		
-		return null;
+	public DependencyCircularityError(String message) {
+		super(message);
 	}
 
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 
-public abstract class HardCodedCoremod extends LoadableCoremod {
+public abstract class HardCodedCoremod extends Coremod {
 
 	protected HardCodedCoremod() throws IOException, CoremodLinkageError {
 		super();

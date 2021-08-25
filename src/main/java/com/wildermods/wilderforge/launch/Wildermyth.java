@@ -5,7 +5,9 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
@@ -17,16 +19,14 @@ class Wildermyth extends HardCodedCoremod {
 	
 	Wildermyth() throws IOException {
 		construct("wildermyth", getWildermythVersion(new File(".")));
-		parseDependencies();
-	}
-	
-	protected void parseDependencies() {
-		LoadableCoremod.dependencyGraph.addVertex(this);
 	}
 
 	@Override
 	protected JsonObject getModJson() throws IOException {
-		throw new AssertionError(new UnsupportedOperationException());
+		JsonObject json = new JsonObject();
+		json.add("modid", new JsonPrimitive("wildermyth"));
+		json.add("version", new JsonPrimitive(getVersion().toString()));
+		return json;
 	}
 	
 	private static Version getWildermythVersion(File gameDir) throws IOException {

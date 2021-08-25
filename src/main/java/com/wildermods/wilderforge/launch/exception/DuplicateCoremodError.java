@@ -3,9 +3,9 @@ package com.wildermods.wilderforge.launch.exception;
 import com.wildermods.wilderforge.launch.Coremod;
 
 /**
- * Thrown when two coremods are loaded with the same modid
+ * Thrown when two coremods attemt to load with the same modid
  * 
- * It may be the same coremod as in separate files, or
+ * It may be the same coremod in separate files, or
  * completely different coremods which have the same
  * modid. Regardless, loading cannot continue.
  */
@@ -14,6 +14,10 @@ import com.wildermods.wilderforge.launch.Coremod;
 public class DuplicateCoremodError extends CoremodLinkageError {
 
 	public DuplicateCoremodError(Coremod dupe) {
+		super("Two or more coremods found with the same modid: " + dupe);
+	}
+	
+	public DuplicateCoremodError(String dupe) {
 		super("Two or more coremods found with the same modid: " + dupe);
 	}
 	

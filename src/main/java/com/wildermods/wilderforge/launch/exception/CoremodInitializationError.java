@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.launch.exception;
 
-import com.wildermods.wilderforge.launch.LoadableCoremod;
+import com.wildermods.wilderforge.launch.Coremod;
 
 /**
  * Thrown whenwilderforge attempts to load a coremod, but the coremod has
@@ -10,7 +10,7 @@ import com.wildermods.wilderforge.launch.LoadableCoremod;
 @SuppressWarnings("serial")
 public class CoremodInitializationError extends CoremodLinkageError {
 
-	public CoremodInitializationError(LoadableCoremod coremod, Throwable t) {
+	public CoremodInitializationError(Coremod coremod, Throwable t) {
 		super("Could not load " + coremod.value() + " because it threw an exception ", t);
 	}
 	
