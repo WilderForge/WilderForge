@@ -1,7 +1,5 @@
 package com.wildermods.wilderforge.launch;
 
-import com.worldwalkergames.logging.ALogger;
-
 public enum LoadStatus {
 	
 	/**
@@ -50,7 +48,5 @@ public enum LoadStatus {
 	 * The coremod in question was found and loaded successfully.
 	 */
 	LOADED;
-	
-	ALogger logger;
 	
 }
