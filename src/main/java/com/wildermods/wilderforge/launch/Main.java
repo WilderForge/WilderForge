@@ -18,8 +18,6 @@ public final class Main {
 		
 		setupReflectionsHelper(loader);
 		
-		setupEventBusses(loader);
-		
 		loadCoremods(loader);
 		
 		EVENT_BUS.fire(new PreInitializationEvent());
@@ -39,10 +37,6 @@ public final class Main {
 	
 	private static final void setupReflectionsHelper(ClassLoader classLoader) {
 		reflectionsHelper = new ReflectionsHelper(classLoader);
-	}
-	
-	private static final void setupEventBusses(ClassLoader classLoader) {
-		
 	}
 	
 	private static final void loadCoremods(ClassLoader classLoader) {
