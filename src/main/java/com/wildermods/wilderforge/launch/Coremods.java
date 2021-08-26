@@ -84,6 +84,18 @@ public class Coremods {
 		return coremods.get(modid);
 	}
 	
+	public static LoadStatus getStatus(String coremod) {
+		LoadStatus loadStatus = loadStatuses.get(coremod);
+		if(loadStatus == null) {
+			return UNDISCOVERED;
+		}
+		return loadStatus;
+	}
+	
+	public static LoadStatus getStatus(Coremod coremod) {
+		return getStatus(coremod.value());
+	}
+	
 	static void loadCoremods(ClassLoader classLoader) {
 		LOGGER.info("Looking for coremod jsons...");
 		discoverCoremodJsons(classLoader);
