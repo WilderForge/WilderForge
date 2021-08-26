@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
