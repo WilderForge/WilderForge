@@ -87,7 +87,7 @@ public class Coremods {
 	public static LoadStatus getStatus(String coremod) {
 		LoadStatus loadStatus = loadStatuses.get(coremod);
 		if(loadStatus == null) {
-			return UNDISCOVERED;
+			return UNREFERENCED;
 		}
 		return loadStatus;
 	}
