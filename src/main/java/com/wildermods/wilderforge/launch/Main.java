@@ -27,10 +27,10 @@ public final class Main {
 	private static final ClassLoader checkClassloader() throws VerifyError {
 		ClassLoader classloader = LegacyDesktop.class.getClassLoader();
 		if(!(classloader.getClass().getName().equals("cpw.mods.modlauncher.TransformingClassLoader"))) { //Do not use instanceof or cast the classLoader, instanceof will always return false, and you will get ClassCastExceptions due to differing classLoaders
-			System.out.println(LegacyDesktop.class.getClassLoader().getClass().getName());
+			Main.LOGGER.info("Classloader: " + LegacyDesktop.class.getClassLoader().getClass().getName());
 			throw new VerifyError("Incorrect classloader. Mixins are not loaded. " + LegacyDesktop.class.getClassLoader());
 		}
-		System.out.println("Correct classloader detected.");
+		Main.LOGGER.info("Correct classloader detected.");
 		Version.PATCHLINE = "WilderForge 0.0.0.0";
 		return classloader;
 	}
