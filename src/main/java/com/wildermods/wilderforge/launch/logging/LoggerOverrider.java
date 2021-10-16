@@ -9,9 +9,10 @@ import org.apache.logging.log4j.Level;
 import static org.apache.logging.log4j.Level.*;
 
 import com.badlogic.gdx.ApplicationLogger;
+import com.codedisaster.steamworks.SteamAPIWarningMessageHook;
 import com.worldwalkergames.logging.FilteringConsumer;
 
-public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger {
+public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger, SteamAPIWarningMessageHook {
 	
 	public static final LinkedHashMap<String, Logger> LOGGERS = new LinkedHashMap<String, Logger>();
 	
@@ -85,6 +86,14 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 	@Override
 	public void debug(String tag, String message, Throwable exception) {
 		getLogger(tag).catching(DEBUG, exception);
+	}
+
+	/**
+	 * Fires when a steam api warning message occurs
+	 */
+	@Override
+	public void onWarningMessage(int severity, String message) {
+		getLogger("Steam").log(getLevel(severity), message.substring(message.lastIndexOf(']')));
 	}
 	
 }

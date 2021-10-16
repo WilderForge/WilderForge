@@ -8,6 +8,7 @@
     "mixins": [
     	"AggregatorMixin",
 	"LegacyDesktopMixin",
-	"NiceLwjgl3ApplicationMixin"
+	"NiceLwjgl3ApplicationMixin",
+	"SteamAPIMixin"
     ]
 }
