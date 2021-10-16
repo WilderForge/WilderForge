@@ -3,6 +3,7 @@ package com.wildermods.wilderforge.launch;
 import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.worldwalkergames.legacy.LegacyDesktop;
