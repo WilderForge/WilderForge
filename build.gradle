@@ -1,5 +1,6 @@
 plugins {
 	id 'java-library'
+	id 'eclipse'
 	id 'com.github.johnrengelman.shadow' version "6.1.0"
 }
 
@@ -9,6 +10,9 @@ repositories {
 		url "https://repo.spongepowered.org/maven/"
 	}
 }
+
+sourceCompatibility = '9'
+targetCompatibility = '9'
 
 dependencies {
 
@@ -59,6 +63,30 @@ shadowJar {
 	exclude 'META-INF/NOTICE.txt'
 	exclude 'META-INF/DEPENDENCIES'
 	exclude 'LICENSE.txt'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs += 'bin/decomp'
+		}
+	}
+}
+
+
+eclipse {
+	classpath {
+		file {
+			whenMerged {
+				def lib = entries.find { it.path.contains 'wildermyth.jar'}
+				lib.sourcePath = fileReference(file('bin/decomp/wildermyth_DECOMP.jar'))
+				lib = entries.find { it.path.contains 'scratchpad.jar'}
+				lib.sourcePath = fileReference(file('bin/decomp/scratchpad_DECOMP.jar'))
+				lib = entries.find { it.path.contains 'server-1.0.jar'}
+				lib.sourcePath = fileReference(file('bin/decomp/server-1.0_DECOMP.jar'))
+			}
+		}
+	}
 }
 
 jar {
