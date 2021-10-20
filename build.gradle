@@ -69,14 +69,6 @@ shadowJar {
 	exclude 'LICENSE.txt'
 }
 
-sourceSets {
-	main {
-		java {
-			srcDirs += 'bin/decomp'
-		}
-	}
-}
-
 
 eclipse {
 	classpath {
