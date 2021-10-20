@@ -62,7 +62,7 @@ public class Coremods {
 		if(!loadStatuses.containsKey(dep.value())) {
 			loadStatuses.put(dep.value(), UNDISCOVERED);
 		}
-		if(!dependencyGraph.addEdge(declarer, dep.value(), new DependencyEdge(dep, dep.getVersionRange(), true))) {
+		if(!dependencyGraph.addEdge(declarer, dep.value(), new DependencyEdge(dep, dep.getVersionRange(), false))) {
 			loadStatuses.put(declarer, ERRORED);
 			loadStatuses.put(dep.value(), ERRORED);
 			throw new DuplicateDependencyDeclarationError(declarer, dep);
@@ -71,7 +71,7 @@ public class Coremods {
 	
 	public static void addRequiredDependency(String declarer, Dependency dep) {
 		dependencyGraph.addVertex(dep.value());
-		if(!dependencyGraph.addEdge(declarer, dep.value(), new DependencyEdge(dep, dep.getVersionRange(), false))) {
+		if(!dependencyGraph.addEdge(declarer, dep.value(), new DependencyEdge(dep, dep.getVersionRange(), true))) {
 			throw new DuplicateDependencyDeclarationError(declarer, dep);
 		}
 	}
