@@ -12,6 +12,7 @@ import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.logging.ALogger;
+import com.worldwalkergames.logging.ALogger.ILogConsumer;
 import com.worldwalkergames.logging.FilteringConsumer;
 
 @Mixin(value = LegacyDesktop.class, remap = false)
@@ -22,13 +23,16 @@ public class LegacyDesktopMixin {
 		ALogger.Aggregator aggregator = ALogger.getDefaultAggregator();
 		aggregator.consumers.clear();
 		LoggerOverrider loggerOverrider = new LoggerOverrider(new FilteringConsumer.Filter());
-		aggregator.consumers.add(loggerOverrider);
+		aggregator.consumers.add(new LoggerOverrider(new FilteringConsumer.Filter()));
 		try {
 			new SteamUtils(new SteamUtilityCallback()).setWarningMessageHook(loggerOverrider);
 		}
 		catch(LinkageError e) {
 			Main.LOGGER.warn("Could not redirect steam error output. Is there a steam context?");
 			Main.LOGGER.catching(Level.WARN, e);
+		}
+		for(ILogConsumer consumer : aggregator.consumers) {
+			System.out.println(consumer.getClass());
 		}
 	}
 	
