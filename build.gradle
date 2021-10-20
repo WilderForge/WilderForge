@@ -82,12 +82,15 @@ eclipse {
 	classpath {
 		file {
 			whenMerged {
+				def decomp = fileReference(file('bin/decomp'))
 				def lib = entries.find { it.path.contains 'wildermyth.jar'}
-				lib.sourcePath = fileReference(file('bin/decomp/wildermyth_DECOMP.jar'))
+				lib.sourcePath = decomp
 				lib = entries.find { it.path.contains 'scratchpad.jar'}
-				lib.sourcePath = fileReference(file('bin/decomp/scratchpad_DECOMP.jar'))
+				lib.sourcePath = decomp
 				lib = entries.find { it.path.contains 'server-1.0.jar'}
-				lib.sourcePath = fileReference(file('bin/decomp/server-1.0_DECOMP.jar'))
+				lib.sourcePath = decomp
+				lib = entries.find { it.path.contains 'gameEngine-1.0.jar'}
+				lib.sourcePath = decomp
 			}
 		}
 	}
