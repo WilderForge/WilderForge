@@ -14,6 +14,10 @@ repositories {
 sourceCompatibility = '9'
 targetCompatibility = '9'
 
+version = "0.0.0.0"
+group = "com.wildermods"
+archivesBaseName = "wilderforge"
+
 dependencies {
 
 	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.9'
