@@ -263,6 +263,8 @@ public class Coremods {
 						logger.info(marker, "Found required dependency " + dep.value());
 					}
 					else {
+						loadStatuses.put(depID, UNDISCOVERED);
+						loadStatuses.put(modid, ERRORED);
 						throw new CoremodNotFoundError(coremod, depID);
 					}
 				}
@@ -272,9 +274,10 @@ public class Coremods {
 					}
 					else {
 						logger.info(marker, "Did not find optional dependency " + depID);
+						loadStatuses.put(depID, UNDISCOVERED);
 					}
 				}
-				if(!edge.getVersionRange().isWithinRange(dep.getVersion())) {
+				if(dep != null && !edge.getVersionRange().isWithinRange(dep.getVersion())) {
 					throw new CoremodVersionError(coremod, dep, edge.getVersionRange());
 				}
 			}
