@@ -21,7 +21,7 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 	}
 	
 	@Override
-	protected void log(String[] tags, int level, long time, String message, Object... parameters) {
+	protected void log(String[] tags, int level, long time, String message, Object[] parameters) {
 		String tag = tags[0];
 		if(tag == null) {
 			tag = "UNKNOWN-WILDERFORGE";
