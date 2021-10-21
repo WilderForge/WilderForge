@@ -12,7 +12,7 @@ import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 @Coremod("wildermyth")
-class Wildermyth extends HardCodedCoremod {
+final class Wildermyth extends HardCodedCoremod {
 	
 	private static final File VERSION_FILE = new File("./version.txt");
 	

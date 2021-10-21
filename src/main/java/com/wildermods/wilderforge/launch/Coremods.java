@@ -20,7 +20,7 @@ import org.jgrapht.graph.DefaultEdge;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
+import com.wildermods.wilderforge.api.modLoadingV1.event.ModLoadedEvent;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
@@ -150,7 +150,7 @@ public class Coremods {
 	}
 	
 	@SuppressWarnings("serial")
-	static class DependencyEdge extends DefaultEdge {
+	private static class DependencyEdge extends DefaultEdge {
 		private final boolean required;
 		private final MultiVersionRange versionRange;
 		
@@ -188,7 +188,7 @@ public class Coremods {
 		}
 	}
 	
-	static final void discoverCoremodJsons(ClassLoader classLoader) {
+	private static final void discoverCoremodJsons(ClassLoader classLoader) {
 		try {
 			Field jarField = classLoader.getClass().getDeclaredField("specialJars");
 			jarField.setAccessible(true);
@@ -244,7 +244,7 @@ public class Coremods {
 		}
 	}
 	
-	static final void validateCoremods(ClassLoader classLoader) {
+	private static final void validateCoremods(ClassLoader classLoader) {
 		Set<Class<?>> classes = Main.reflectionsHelper.getAllClassesAnnotatedWith(com.wildermods.wilderforge.api.modLoadingV1.Coremod.class);
 		LOGGER.info("Found " + classes.size() + " classes annotated with @Coremod:");
 		for(Class<?> clazz : classes) {
