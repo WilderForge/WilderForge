@@ -251,6 +251,8 @@ public class Coremods {
 			LOGGER.info("@Coremod(" + clazz.getAnnotation(com.wildermods.wilderforge.api.modLoadingV1.Coremod.class).value() + ") is " + clazz.getCanonicalName());
 		}
 		
+		detectCircularities(new CycleDetector<String, DependencyEdge>(dependencyGraph));
+		
 		Logger logger = LogManager.getLogger("Coremod Validator");
 		for(String modid: dependencyGraph.vertexSet()) {
 			Coremod coremod = getCoremod(modid);
@@ -281,9 +283,14 @@ public class Coremods {
 					throw new CoremodVersionError(coremod, dep, edge.getVersionRange());
 				}
 			}
+			
+			WilderForge.EVENT_BUS.fire(new ModLoadedEvent(coremod));
+			
 		}
 		
-		CycleDetector<String, DependencyEdge> cycleDetector = new CycleDetector<String, DependencyEdge>(dependencyGraph);
+	}
+	
+	private static final void detectCircularities(CycleDetector<String, DependencyEdge> cycleDetector) throws DependencyCircularityError {
 		if(cycleDetector.detectCycles()) {	
 			Set<String> cycleVerticies;
 			LOGGER.fatal("Dependency circularity detected");

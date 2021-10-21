@@ -8,12 +8,15 @@ import java.net.URL;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 @Coremod("wilderforge")
-class WilderForge extends HardCodedCoremod {
+final class WilderForge extends HardCodedCoremod {
+	
+	public static final EventBus EVENT_BUS = new EventBus();
 	
 	private static final URL versionURL;
 	static {

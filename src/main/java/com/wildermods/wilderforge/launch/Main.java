@@ -4,7 +4,7 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
+import static com.wildermods.wilderforge.launch.WilderForge.EVENT_BUS;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.Version;
@@ -12,7 +12,6 @@ import com.worldwalkergames.legacy.Version;
 public final class Main {
 	public static final Logger LOGGER = LogManager.getLogger(Main.class);
 	static ReflectionsHelper reflectionsHelper;
-	public static final EventBus EVENT_BUS = new EventBus();
 
 	public static void main(String[] args) throws IOException {
 		ClassLoader loader = checkClassloader();
