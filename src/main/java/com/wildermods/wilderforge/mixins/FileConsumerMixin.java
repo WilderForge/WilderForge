@@ -27,7 +27,7 @@ public class FileConsumerMixin {
 			),
 			require = 2
 	)
-	public FileChannel dontCreateLogChannels(Path path, OpenOption... options) {
+	public FileChannel dontCreateLogChannels(Path path, OpenOption... options) { //so wildermyth doesn't create empty log files
 		return null;
 	}
 	
