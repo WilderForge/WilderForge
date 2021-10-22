@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
@@ -34,7 +33,6 @@ public final class WilderForge extends HardCodedCoremod {
 	@Override
 	protected JsonObject getModJson() throws IOException {
 		try {
-			JsonElement jsonElement = JsonParser.parseReader(new InputStreamReader(Main.class.getResourceAsStream("/mod.json")));
 			return JsonParser.parseReader(new InputStreamReader(Main.class.getResourceAsStream("/mod.json"))).getAsJsonObject();
 		}
 		catch(Throwable t) {
