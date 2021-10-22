@@ -5,9 +5,11 @@ import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -316,6 +318,17 @@ public class Coremods {
 			}
 			throw new DependencyCircularityError(errMsg);
 		}
+	}
+	
+	public static final int getCoremodCountByStatus(LoadStatus... loadStatuses) {
+		List<LoadStatus> loadStatusesList = Arrays.asList(loadStatuses);
+		int ret = 0;
+		for(LoadStatus modStatus : Coremods.loadStatuses.values()) {
+			if (loadStatusesList.contains(modStatus)) {
+				ret++;
+			}
+		}
+		return ret;
 	}
 	
 }
