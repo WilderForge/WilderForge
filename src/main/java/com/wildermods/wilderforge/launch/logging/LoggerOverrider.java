@@ -10,6 +10,7 @@ import static org.apache.logging.log4j.Level.*;
 
 import com.badlogic.gdx.ApplicationLogger;
 import com.codedisaster.steamworks.SteamAPIWarningMessageHook;
+import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.FilteringConsumer;
 
 public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger, SteamAPIWarningMessageHook {
@@ -26,7 +27,7 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 		if(tag == null) {
 			tag = "UNKNOWN-WILDERFORGE";
 		}
-		getLogger(tag).log(getLevel(level), message, parameters);
+		getLogger(tag).log(getLevel(level), ALogger.compile(message, parameters));
 	}
 	
 	private Logger getLogger(String name) { 
