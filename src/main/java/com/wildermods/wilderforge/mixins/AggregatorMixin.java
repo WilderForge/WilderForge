@@ -19,6 +19,9 @@ public class AggregatorMixin {
 
 	public @Shadow LinkedList<ILogConsumer> consumers;
 	
+	/*
+	 * Redirect Wildermyth's logging to Wildermyth's logger
+	 */
 	@Inject(at = @At("RETURN"), method = "<init>()V")
 	public void initTraceConsumerWilderForge(CallbackInfo c) {
 		System.out.println(Arrays.toString(consumers.toArray()));

@@ -14,6 +14,9 @@ import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 public class NiceLwjgl3ApplicationMixin {
 	private @Shadow ApplicationLogger applicationLogger;
 	
+	/**
+	 * Set the game's logger to be WilderForge's logger
+	 */
 	@Inject(method = "setApplicationLogger(Lcom/badlogic/gdx/ApplicationLogger;)V", at = @At("HEAD"), cancellable = true)
 	private void setApplicationLogger(ApplicationLogger applicationLogger, CallbackInfo callback) {
 		this.applicationLogger = new LoggerOverrider();

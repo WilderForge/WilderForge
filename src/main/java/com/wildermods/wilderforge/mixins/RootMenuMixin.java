@@ -38,6 +38,9 @@ public class RootMenuMixin {
 		),
 		require = 3
 	)
+	/*
+	 * Setup the custom patchline
+	 */
 	public Label overwritePatchLine(CharSequence text, LabelStyle style) {
 		if(style == getVersionStyle()) {
 			text = StringUtils.capitalize(Coremods.getCoremod("wilderforge").getVersionString()) + " (" + Coremods.getCoremodCountByStatus(LOADED) + "/" + Coremods.getCoremodCountByStatus(LOADED, NOT_LOADED, ERRORED, DISCOVERED, LOADING) + " coremods loaded)";
@@ -45,8 +48,11 @@ public class RootMenuMixin {
 		return new Label(text, style);
 	}
 	
+	/*
+	 * the class RootMenu.Style is package private, so we cannot reference it directly. Ugly reflection to the rescue!
+	 */
 	@Unique
-	public Object getVersionStyle() { //the class RootMenu.Style is package private, so we cannot reference it directly. Ugly reflection to the rescue!
+	public Object getVersionStyle() { 
 		try {
 			return VERSION_STYLE_FIELD.get(STYLE_FIELD.get(this));
 		} catch (IllegalArgumentException | IllegalAccessException e) {

@@ -20,6 +20,9 @@ import com.worldwalkergames.logging.FilteringConsumer;
 @Mixin(value = LegacyDesktop.class, remap = false)
 public class LegacyDesktopMixin {
 
+	/**
+	 * Set steam's logger to be WilderForge's logger
+	 */
 	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/LinkedList;add(Ljava/lang/Object;)Z"), method = "initializeLogging()V")
 	private static void initializeLogging(CallbackInfo c) {
 		ALogger.Aggregator aggregator = ALogger.getDefaultAggregator();
@@ -38,6 +41,9 @@ public class LegacyDesktopMixin {
 		}
 	}
 	
+	/*
+	 * Fires the PostInitializationEvent
+	 */
 	@Inject(at = @At(value = "RETURN"), method = "create()V")
 	private void create(CallbackInfo c) {
 		WilderForge.EVENT_BUS.fire(new PostInitializationEvent());
