@@ -255,6 +255,7 @@ public class Coremods {
 		
 		Logger logger = LogManager.getLogger("Coremod Validator");
 		for(String modid: dependencyGraph.vertexSet()) {
+			loadStatuses.put(modid, LOADING);
 			Coremod coremod = getCoremod(modid);
 			for(DependencyEdge edge : dependencyGraph.outgoingEdgesOf(modid)) {
 				Log4jMarker marker = new Log4jMarker(modid);
@@ -284,6 +285,7 @@ public class Coremods {
 				}
 			}
 			
+			loadStatuses.put(modid, LOADED);
 			WilderForge.EVENT_BUS.fire(new ModLoadedEvent(coremod));
 			
 		}
