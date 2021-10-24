@@ -29,9 +29,6 @@ public class LegacyUIRootMixin {
 	 * Fires the PostInitializationEvent and sets LegacyViewDependencies
 	 */
 	public void before(CallbackInfo c) {
-		for(int i = 0; i < 100; i++) {
-			Main.LOGGER.info("XXX");
-		}
 		Wildermyth.init(new PostInitializationEvent(), dependencies);
 	}
 	
