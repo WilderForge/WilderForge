@@ -9,6 +9,7 @@
 		"AggregatorMixin",
 		"FileConsumerMixin",
 		"LegacyDesktopMixin",
+		"LegacyUIRootMixin",
 		"MainMenuMixin",
 		"NiceLwjgl3ApplicationMixin",
 		"RootMenuMixin"

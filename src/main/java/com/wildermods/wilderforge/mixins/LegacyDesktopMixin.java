@@ -7,11 +7,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.codedisaster.steamworks.SteamUtils;
-import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
+
 import com.wildermods.wilderforge.launch.Main;
-import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
+
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.ALogger.ILogConsumer;
@@ -39,14 +39,6 @@ public class LegacyDesktopMixin {
 		for(ILogConsumer consumer : aggregator.consumers) {
 			System.out.println(consumer.getClass());
 		}
-	}
-	
-	/*
-	 * Fires the PostInitializationEvent
-	 */
-	@Inject(at = @At(value = "RETURN"), method = "create()V")
-	private void create(CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new PostInitializationEvent());
 	}
 	
 }
