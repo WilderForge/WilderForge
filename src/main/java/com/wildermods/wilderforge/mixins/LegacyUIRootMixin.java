@@ -35,4 +35,17 @@ public class LegacyUIRootMixin {
 		Wildermyth.init(new PostInitializationEvent(), dependencies);
 	}
 	
+	/*
+	 * Disables Wildermyth's feedback gui.
+	 * 
+	 * This method is intentionally overwritten.
+	 */
+	@Overwrite(remap = false)
+	private void onGiveFeedback() {
+		if(!FeedbackPopup.isActive) {
+			dependencies.popUpManager.pushFront(new NoFeedbackPopup(dependencies), false);
+		}
+		return;
+	}
+	
 }
