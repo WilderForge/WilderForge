@@ -9,6 +9,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.Version;
 
+@InternalOnly
 public final class Main {
 	public static final Logger LOGGER = LogManager.getLogger(Main.class);
 	static ReflectionsHelper reflectionsHelper;
@@ -47,6 +48,7 @@ public final class Main {
 		LegacyDesktop.main(args);
 	}
 	
+	@InternalOnly
 	public static ReflectionsHelper getReflectionsHelper() {
 		return reflectionsHelper;
 	}

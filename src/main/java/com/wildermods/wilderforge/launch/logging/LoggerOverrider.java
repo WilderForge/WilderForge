@@ -10,13 +10,16 @@ import static org.apache.logging.log4j.Level.*;
 
 import com.badlogic.gdx.ApplicationLogger;
 import com.codedisaster.steamworks.SteamAPIWarningMessageHook;
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.FilteringConsumer;
 
+@InternalOnly
 public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger, SteamAPIWarningMessageHook {
 	
 	public static final LinkedHashMap<String, Logger> LOGGERS = new LinkedHashMap<String, Logger>();
 	
+	@InternalOnly
 	public LoggerOverrider(Filter... filters) {
 		super(filters);
 	}

@@ -8,6 +8,7 @@ import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 
+@InternalOnly
 @SuppressWarnings("intfAnnotation")
 public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadingV1.Coremod, Versioned{
 

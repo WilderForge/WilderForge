@@ -20,14 +20,18 @@ import java.util.jar.JarFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.wildermods.wilderforge.launch.InternalOnly;
+
 import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 
+@InternalOnly
 public class WilderLauncherService implements ILaunchHandlerService {
 
+	@InternalOnly
 	public WilderLauncherService() {
 
 	}
