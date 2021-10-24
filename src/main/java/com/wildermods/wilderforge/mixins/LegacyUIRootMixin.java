@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
-import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.Wildermyth;
 import com.wildermods.wilderforge.launch.ui.NoFeedbackPopup;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
