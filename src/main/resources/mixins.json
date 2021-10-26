@@ -11,7 +11,9 @@
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
+		"ModAwareResourceBundleMixin",
 		"NiceLwjgl3ApplicationMixin",
-		"RootMenuMixin"
+		"RootMenuMixin",
+		"ServerDataContextMixin"
 	]
 }

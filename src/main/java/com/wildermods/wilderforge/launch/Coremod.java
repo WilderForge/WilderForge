@@ -2,8 +2,12 @@ package com.wildermods.wilderforge.launch;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import com.google.gson.JsonObject;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
@@ -15,10 +19,12 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 
 	protected String modid;
 	protected Version version;
+	protected CoremodInfo coremodInfo;
 	
 	protected void construct(String modid, Version version) {
 		this.modid = modid;
 		this.version = version;
+		this.coremodInfo = new CoremodInfo(this);
 	}
 	
 	@Override
@@ -80,5 +86,18 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 	@Deprecated
 	public ModEntry getModEntry() {
 		throw new UnsupportedOperationException("Not yet implemented");
+	}
+	
+	public CoremodInfo getCoremodInfo() {
+		return coremodInfo;
+	}
+	
+	public ResourceBundle getResourceBundle(String path, Locale locale) {
+		try {
+			return ResourceBundle.getBundle(value() + "/" + path.replace(".properties", ""), locale);
+		}
+		catch (MissingResourceException e) {
+			return null;
+		}
 	}
 }

@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ public class Coremods {
 	};
 	protected static final HashMap<String, Coremod> coremods = new HashMap<String, Coremod>();
 	
+	@InternalOnly
 	public static void addFoundCoremod(Coremod coremod) throws CoremodLinkageError {
 		if(coremods.put(coremod.value(), coremod) == null) {
 			loadStatuses.put(coremod.value(), DISCOVERED);
@@ -53,12 +55,14 @@ public class Coremods {
 		throw new DuplicateCoremodError(coremod);
 	}
 	
+	@InternalOnly
 	public static void addDeclaredCoremod(String modid) {
 		if(!dependencyGraph.addVertex(modid)) {
 			loadStatuses.put(modid, UNDISCOVERED);
 		}
 	}
 	
+	@InternalOnly
 	public static void addOptionalDependency(String declarer, Dependency dep) {
 		dependencyGraph.addVertex(dep.value());
 		if(!loadStatuses.containsKey(dep.value())) {
@@ -71,6 +75,7 @@ public class Coremods {
 		}
 	}
 	
+	@InternalOnly
 	public static void addRequiredDependency(String declarer, Dependency dep) {
 		dependencyGraph.addVertex(dep.value());
 		if(!dependencyGraph.addEdge(declarer, dep.value(), new DependencyEdge(dep, dep.getVersionRange(), true))) {
@@ -318,6 +323,21 @@ public class Coremods {
 			}
 			throw new DependencyCircularityError(errMsg);
 		}
+	}
+	
+	public static List<Coremod> getCoremodsByStatus(LoadStatus... loadStatuses) {
+		List<Coremod> coremods = new ArrayList<Coremod>();
+		List<LoadStatus> loadStatusesList = Arrays.asList(loadStatuses);
+		coremods:
+		for(Coremod coremod : Coremods.coremods.values()) {
+			for(LoadStatus modStatus : loadStatusesList) {
+				if(Coremods.loadStatuses.get(coremod) == modStatus) {
+					coremods.add(coremod);
+					continue coremods;
+				}
+			}
+		}
+		return coremods;
 	}
 	
 	public static final int getCoremodCountByStatus(LoadStatus... loadStatuses) {

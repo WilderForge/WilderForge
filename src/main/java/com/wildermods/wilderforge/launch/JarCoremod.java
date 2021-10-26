@@ -2,7 +2,9 @@ package com.wildermods.wilderforge.launch;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.net.JarURLConnection;
+
 import java.util.HashSet;
 import java.util.zip.ZipEntry;
 
@@ -12,6 +14,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
@@ -24,7 +27,7 @@ class JarCoremod extends Coremod {
 	private final String modid;
 	private final HashSet<com.wildermods.wilderforge.api.modLoadingV1.Coremod> dependencies = new HashSet<>();
 	
-	public JarCoremod(JarURLConnection jar) throws IOException {
+	JarCoremod(JarURLConnection jar) throws IOException {
 		this.jar = jar;
 		this.modJson = getModJson();
 		construct(modJson.get("modid").getAsString(), Version.getVersion(modJson.get("version").getAsString()));

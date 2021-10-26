@@ -2,6 +2,8 @@ package com.wildermods.wilderforge.launch;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.apache.commons.io.FileUtils;
 
@@ -54,6 +56,11 @@ public final class Wildermyth extends HardCodedCoremod {
 	
 	public static LegacyViewDependencies getViewDependencies() {
 		return legacyViewDependencies;
+	}
+	
+	@Override
+	public ResourceBundle getResourceBundle(String assetPath, Locale locale) {
+		return null;
 	}
 
 }
