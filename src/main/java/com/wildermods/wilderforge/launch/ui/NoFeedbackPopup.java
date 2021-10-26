@@ -41,7 +41,7 @@ public class NoFeedbackPopup extends PopUp {
 				Table description = new Table((Skin)skin);
 				NiceLabel descriptionLabel = new NiceLabel(I18N.ui("wilderforge.ui.nofeedback.description"), skin, "dialogBody");
 				descriptionLabel.setWrap(true);
-				description.add(descriptionLabel);
+				frame.addOuter(descriptionLabel);
 
 			Table button = new Table();
 				button.defaults().expandX();
