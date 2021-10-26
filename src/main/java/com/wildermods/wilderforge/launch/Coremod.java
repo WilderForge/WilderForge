@@ -7,10 +7,11 @@ import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
+import com.worldwalkergames.legacy.game.mods.IModAware;
 
 @InternalOnly
 @SuppressWarnings("intfAnnotation")
-public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadingV1.Coremod, Versioned{
+public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadingV1.Coremod, IModAware, Versioned{
 
 	protected String modid;
 	protected Version version;
@@ -23,6 +24,11 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 	@Override
 	public final String value() {
 		return modid;
+	}
+	
+	@Override
+	public final String getModId() {
+		return value();
 	}
 	
 	@Override
