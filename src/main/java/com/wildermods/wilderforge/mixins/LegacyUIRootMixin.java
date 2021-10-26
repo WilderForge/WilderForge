@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.launch.Wildermyth;
 import com.wildermods.wilderforge.launch.ui.NoFeedbackPopup;
+
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.LegacyUIRoot;
 import com.worldwalkergames.legacy.ui.feedback.FeedbackPopup;
@@ -34,7 +35,8 @@ public class LegacyUIRootMixin {
 	/*
 	 * Disables Wildermyth's feedback gui.
 	 * 
-	 * This method is intentionally overwritten.
+	 * This method is intentionally using @Overwrite, as no other mixins should alter this method.
+	 * Wildermyth developers should not get spammed with issues caused by a coremodded environment.
 	 */
 	@Overwrite(remap = false)
 	private void onGiveFeedback() {
