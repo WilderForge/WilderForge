@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.game.common.ui.OptionButton;
@@ -13,11 +13,14 @@ import com.worldwalkergames.legacy.options.Keymap;
 import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.PopUp;
 import com.worldwalkergames.legacy.ui.feedback.FeedbackPopup;
+import com.worldwalkergames.ui.NiceLabel;
 
+@InternalOnly
 public class NoFeedbackPopup extends PopUp {
 
 	private DialogFrame frame;
 	
+	@InternalOnly
 	public NoFeedbackPopup(LegacyViewDependencies dependencies) {
 		super(true, dependencies);
 		FeedbackPopup.isActive = true;
@@ -36,7 +39,9 @@ public class NoFeedbackPopup extends PopUp {
 				Label titleLabel = new Label((CharSequence)title, (Skin)skin, "dialogTitle");  
 				frame.addInner((Actor)titleLabel).expandX().left().padBottom(10f);
 				Table description = new Table((Skin)skin);
-				description.add(I18N.ui("wilderforge.ui.nofeedback.description"), "dialogBody").spaceRight(screenInfo.scale(10.0f));
+				NiceLabel descriptionLabel = new NiceLabel(I18N.ui("wilderforge.ui.nofeedback.description"), skin, "dialogBody");
+				descriptionLabel.setWrap(true);
+				description.add(descriptionLabel);
 
 			Table button = new Table();
 				button.defaults().expandX();
