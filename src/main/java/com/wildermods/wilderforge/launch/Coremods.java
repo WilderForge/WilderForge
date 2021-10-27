@@ -295,8 +295,9 @@ public class Coremods {
 			}
 			
 			loadStatuses.put(modid, LOADED);
+
+			WilderForge.EVENT_BUS.register(coremod.getClass());
 			WilderForge.EVENT_BUS.fire(new ModLoadedEvent(coremod));
-			
 		}
 		
 	}
