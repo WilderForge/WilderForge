@@ -2,7 +2,6 @@ package com.wildermods.wilderforge.api.versionV1;
 
 import com.wildermods.wilderforge.api.exception.InvalidVersionException;
 
-@SuppressWarnings({ "rawtypes", "deprecation" })
 public class Version implements Versioned {
 
 	static final String SPLITTER = "\\.";

@@ -35,6 +35,7 @@ public class ReflectionsHelper {
 		return reflections.getMethodsAnnotatedWith(annotation);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public Set<Method> getAllMethodsInAnnotatedWith(Class clazz, Class<? extends Annotation> annotation) {
 		HashSet<Method> methods = new HashSet<Method>();
 		for(Method m : clazz.getDeclaredMethods()) {
@@ -46,10 +47,12 @@ public class ReflectionsHelper {
 		return methods;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public Set<Method> getAllMethodsInAnnotatedWith(Class clazz, Annotation annotation) {
 		return getAllMethodsInAnnotatedWith(clazz, annotation.annotationType());
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Set<Method> getAllMethodsInAnnotatedWithParams(Class clazz, Class<? extends Annotation> annotation, boolean strict, Class... params) {
 		HashSet<Method> methods = new HashSet<Method>();
 		methodloop:
@@ -69,6 +72,7 @@ public class ReflectionsHelper {
 		return methods;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public Set<Method> getAllMethodsInAnnotatedWithParams(Class clazz, Annotation annotation, boolean strict, Class... params) {
 		return getAllMethodsInAnnotatedWithParams(clazz, annotation.annotationType(), strict, params);
 	}

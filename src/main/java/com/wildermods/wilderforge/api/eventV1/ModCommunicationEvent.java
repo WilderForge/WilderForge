@@ -12,7 +12,6 @@ import com.wildermods.wilderforge.launch.Coremods;
  *
  * @param <T> the type of data this communication event holds
  */
-@SuppressWarnings("deprecation")
 public final class ModCommunicationEvent<T extends Object> extends ModEvent {
 
 	private final T data;

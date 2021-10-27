@@ -5,10 +5,8 @@ import java.io.InputStreamReader;
 
 import java.net.JarURLConnection;
 
-import java.util.HashSet;
 import java.util.zip.ZipEntry;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
@@ -18,14 +16,11 @@ import com.google.gson.JsonParser;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
+@SuppressWarnings("deprecation")
 class JarCoremod extends Coremod {
-	
-	private static final Gson gson = new Gson();
 	
 	private final JarURLConnection jar;
 	private final JsonObject modJson;
-	private final String modid;
-	private final HashSet<com.wildermods.wilderforge.api.modLoadingV1.Coremod> dependencies = new HashSet<>();
 	
 	JarCoremod(JarURLConnection jar) throws IOException {
 		this.jar = jar;

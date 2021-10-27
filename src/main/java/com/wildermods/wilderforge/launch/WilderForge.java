@@ -15,6 +15,7 @@ import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 @Coremod("wilderforge")
+@SuppressWarnings("deprecation")
 public final class WilderForge extends HardCodedCoremod {
 	
 	public static final EventBus EVENT_BUS = new EventBus();

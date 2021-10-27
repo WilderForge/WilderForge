@@ -14,7 +14,6 @@ import java.util.TreeSet;
 import com.wildermods.wilderforge.api.eventV1.Event;
 import com.wildermods.wilderforge.launch.Main;
 
-@SuppressWarnings("deprecation")
 public class EventBus {
 	private static final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
 	private static final HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> LISTENERS = new HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>>();

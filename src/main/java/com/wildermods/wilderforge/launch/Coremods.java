@@ -36,6 +36,7 @@ import com.wildermods.wilderforge.launch.exception.DuplicateDependencyDeclaratio
 
 import static com.wildermods.wilderforge.launch.LoadStatus.*;
 
+@SuppressWarnings("deprecation")
 public class Coremods {
 	public static final Logger LOGGER = LogManager.getLogger(Coremods.class);
 	protected static final DefaultDirectedGraph<String, DependencyEdge> dependencyGraph = new DefaultDirectedGraph<String, DependencyEdge>(DependencyEdge.class);
@@ -174,6 +175,7 @@ public class Coremods {
 			return versionRange;
 		}
 		
+		@SuppressWarnings("unused")
 		public boolean isWithinRange(Versioned versioned) {
 			return versionRange.isWithinRange(versioned.getVersion());
 		}
@@ -325,6 +327,7 @@ public class Coremods {
 		}
 	}
 	
+	@SuppressWarnings("unlikely-arg-type")
 	public static List<Coremod> getCoremodsByStatus(LoadStatus... loadStatuses) {
 		List<Coremod> coremods = new ArrayList<Coremod>();
 		List<LoadStatus> loadStatusesList = Arrays.asList(loadStatuses);

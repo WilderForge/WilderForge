@@ -2,7 +2,6 @@ package com.wildermods.wilderforge.api.eventV1;
 
 import com.wildermods.wilderforge.launch.Coremod;
 
-@SuppressWarnings("deprecation")
 public abstract class ModEvent extends Event {
 
 	protected final Coremod coremod;
