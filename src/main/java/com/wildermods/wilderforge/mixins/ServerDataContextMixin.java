@@ -3,7 +3,11 @@ package com.wildermods.wilderforge.mixins;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import static org.spongepowered.asm.mixin.injection.At.Shift.BY;
+
+import java.util.Arrays;
+
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.badlogic.gdx.utils.Array;
@@ -11,8 +15,10 @@ import com.wildermods.wilderforge.launch.Coremod;
 import com.wildermods.wilderforge.launch.Coremods;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
+import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
 import com.worldwalkergames.legacy.server.context.ServerDataContext;
+import com.worldwalkergames.legacy.server.context.ServerDataContext.LoadingProgressFrameCallback;
 
 @Mixin(value = ServerDataContext.class, remap = false)
 public class ServerDataContextMixin {
@@ -59,6 +65,30 @@ public class ServerDataContextMixin {
 		}
 		else {
 			Main.LOGGER.warn("No coremod of modid '" + modId + "' was found.");
+		}
+	}
+	
+	@Inject(
+		at = @At(
+			value = "HEAD"
+		),
+		method = "applyGameSettings("
+			+ "Lcom/badlogic/gdx/utils/Array;"
+			+ "Lcom/worldwalkergames/legacy/server/context/ServerDataContext$LoadingProgressFrameCallback;"
+		+ ")V",
+		require = 1
+		
+	)
+	/*
+	 * Adds coremods to campaigns
+	 */
+	private synchronized void applyGameSettings(Array<ModEntry> requested, LoadingProgressFrameCallback progressFrameCallback, CallbackInfo c) {
+		Main.LOGGER.info("Requesting: " + Arrays.toString(requested.items));
+		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
+			ModEntry entry = new ModEntry(coremod.getCoremodInfo());
+			if(!requested.contains(entry, false)) {
+				requested.add(entry);
+			}
 		}
 	}
 	

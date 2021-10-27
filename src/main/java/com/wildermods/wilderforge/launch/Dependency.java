@@ -42,7 +42,7 @@ public class Dependency extends Coremod {
 	}
 
 	@Override
-	protected JsonObject getModJson() throws IOException {
+	public JsonObject getModJson() throws IOException {
 		return modJson;
 	}
 	

@@ -22,7 +22,13 @@ public final class Wildermyth extends HardCodedCoremod {
 	private static final File VERSION_FILE = new File("./version.txt");
 	
 	Wildermyth() throws IOException {
-		construct("wildermyth", getWildermythVersion(new File(".")));
+		construct("wildermyth", "Wildermyth", getWildermythVersion(new File(".")));
+	}
+	
+	@Override
+	protected void construct(String modid, String name, Version version) {
+		super.construct(modid, name, version);
+		this.coremodInfo.listInCredits = false;
 	}
 	
 	@InternalOnly
@@ -37,7 +43,7 @@ public final class Wildermyth extends HardCodedCoremod {
 	}
 
 	@Override
-	protected JsonObject getModJson() throws IOException {
+	public JsonObject getModJson() throws IOException {
 		JsonObject json = new JsonObject();
 		json.add("modid", new JsonPrimitive("wildermyth"));
 		json.add("version", new JsonPrimitive(getVersion().toString()));

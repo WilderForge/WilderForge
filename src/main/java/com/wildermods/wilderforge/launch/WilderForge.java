@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -17,6 +18,9 @@ import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 @Coremod("wilderforge")
 @SuppressWarnings("deprecation")
 public final class WilderForge extends HardCodedCoremod {
+	
+	@InternalOnly
+	public static Gson gson = new Gson();
 	
 	public static final EventBus EVENT_BUS = new EventBus();
 	
@@ -30,16 +34,16 @@ public final class WilderForge extends HardCodedCoremod {
 	}
 	
 	WilderForge() throws IOException {
-		construct(getModJson().get("modid").getAsString(), Version.getVersion(getModJson().get("version").getAsString()));
+		construct(getModJson().get("modid").getAsString(), getModJson().get("name").getAsString(), Version.getVersion(getModJson().get("version").getAsString()));
 	}
 
 	@Override
-	protected JsonObject getModJson() throws IOException {
+	public JsonObject getModJson() throws IOException {
 		try {
 			return JsonParser.parseReader(new InputStreamReader(Main.class.getResourceAsStream("/mod.json"))).getAsJsonObject();
 		}
 		catch(Throwable t) {
-			throw new AssertionError(new CoremodFormatError(t));
+			throw new CoremodFormatError(t);
 		}
 	}
 

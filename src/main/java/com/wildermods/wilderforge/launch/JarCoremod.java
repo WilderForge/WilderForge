@@ -25,7 +25,7 @@ class JarCoremod extends Coremod {
 	JarCoremod(JarURLConnection jar) throws IOException {
 		this.jar = jar;
 		this.modJson = getModJson();
-		construct(modJson.get("modid").getAsString(), Version.getVersion(modJson.get("version").getAsString()));
+		construct(modJson.get("modid").getAsString(), modJson.get("name").getAsString(), Version.getVersion(modJson.get("version").getAsString()));
 		JsonObject root = modJson;
 		JsonElement modidElement = root.get("modid");
 		if(modidElement != null) {
@@ -37,7 +37,7 @@ class JarCoremod extends Coremod {
 	}
 
 	@Override
-	protected JsonObject getModJson() throws IOException {
+	public JsonObject getModJson() throws IOException {
 		if(jar == null) {
 			throw new Error();
 		}

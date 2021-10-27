@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
-import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 import com.worldwalkergames.legacy.game.mods.IModAware;
 
 @InternalOnly
@@ -18,13 +17,22 @@ import com.worldwalkergames.legacy.game.mods.IModAware;
 public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadingV1.Coremod, IModAware, Versioned{
 
 	protected String modid;
+	protected String name;
 	protected Version version;
 	protected CoremodInfo coremodInfo;
 	
-	protected void construct(String modid, Version version) {
+	protected void construct(String modid, String name, Version version) {
 		this.modid = modid;
+		this.name = name;
 		this.version = version;
 		this.coremodInfo = new CoremodInfo(this);
+	}
+	
+	protected void construct(JsonObject json) {
+		construct(
+			json.get("modid").getAsString(),
+			json.get("name").getAsString(),
+			Version.getVersion(json.get("version").getAsString()));
 	}
 	
 	@Override
@@ -35,6 +43,10 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 	@Override
 	public final String getModId() {
 		return value();
+	}
+	
+	public final String getName() {
+		return name;
 	}
 	
 	@Override
@@ -61,7 +73,8 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 		return Versioned.super.compareTo(o);
 	}
 	
-	protected abstract JsonObject getModJson() throws IOException;
+	@InternalOnly
+	public abstract JsonObject getModJson() throws IOException;
 	
 	@Override
 	public final Class<? extends Annotation> annotationType() {
@@ -81,11 +94,6 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 			return (value().equals(o.toString()));
 		}
 		return false;
-	}
-	
-	@Deprecated
-	public ModEntry getModEntry() {
-		throw new UnsupportedOperationException("Not yet implemented");
 	}
 	
 	public CoremodInfo getCoremodInfo() {
