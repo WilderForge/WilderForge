@@ -14,18 +14,18 @@ import com.worldwalkergames.logging.FileConsumer;
 public class FileConsumerMixin {
 	
 	@Redirect(
-			method = "<init>("																				//method (constructor)
-				+ "Ljava/lang/String;"																			//param1
-				+ "Lcom/worldwalkergames/logging/FileConsumer$FileConsumerConfig;"								//param2
-				+ "[Lcom/worldwalkergames/logging/FilteringConsumer$Filter;)V", 								//param3
-			at = @At(value = "INVOKE", 
-				target = "Ljava/nio/channels/FileChannel;"		 											//class
-					+ "open("																				//method
-						+ "Ljava/nio/file/Path;"																//param1
-						+ "[Ljava/nio/file/OpenOption;"															//param2
-					+ ")Ljava/nio/channels/FileChannel;"													//return type
-			),
-			require = 2
+		method = "<init>("
+			+ "Ljava/lang/String;"
+			+ "Lcom/worldwalkergames/logging/FileConsumer$FileConsumerConfig;"
+			+ "[Lcom/worldwalkergames/logging/FilteringConsumer$Filter;)V",
+		at = @At(value = "INVOKE", 
+			target = "Ljava/nio/channels/FileChannel;"
+				+ "open("
+					+ "Ljava/nio/file/Path;"
+					+ "[Ljava/nio/file/OpenOption;"
+				+ ")Ljava/nio/channels/FileChannel;"
+		),
+		require = 2
 	)
 	/*
 	 * So wildermyth doesn't create empty log files

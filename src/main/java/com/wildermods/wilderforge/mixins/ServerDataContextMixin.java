@@ -30,9 +30,16 @@ public class ServerDataContextMixin {
 		c.setReturnValue(modInfos);
 	}
 	
-	@Inject(at = @At(value = "TAIL", 
-			shift = BY, by = -5), 
-			method = "loadModInfo(Ljava/lang/String;Z)Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
+	@Inject(
+			at = @At(
+				value = "TAIL", 
+				shift = BY,
+				by = -5
+			), 
+			method = "loadModInfo("
+				+ "Ljava/lang/String;"
+				+ "Z"
+			+ ")Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
 			require = 1,
 			cancellable = true)
 	/*

@@ -20,7 +20,7 @@ public class AggregatorMixin {
 	public @Shadow LinkedList<ILogConsumer> consumers;
 	
 	/*
-	 * Redirect Wildermyth's logging to Wildermyth's logger
+	 * Redirect Wildermyth's logging to Wilderforge's logger
 	 */
 	@Inject(at = @At("RETURN"), method = "<init>()V")
 	public void initTraceConsumerWilderForge(CallbackInfo c) {

@@ -32,13 +32,14 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 	public @Shadow HashMap<String, HashMap<String, Object>> contentByMod;
 	
 	
-	@Inject(at = @At("RETURN"), method = "<init>("
-			+ "Lcom/worldwalkergames/legacy/server/context/ServerDataContext;"
-			+ "Ljava/lang/String;"
-			+ "Lcom/badlogic/gdx/files/FileHandle;"
-			+ "Z"
-			+ "Ljava/util/Locale;"
-		+ ")V",
+	@Inject(at = @At("RETURN"), method = 
+			"<init>("
+				+ "Lcom/worldwalkergames/legacy/server/context/ServerDataContext;"
+				+ "Ljava/lang/String;"
+				+ "Lcom/badlogic/gdx/files/FileHandle;"
+				+ "Z"
+				+ "Ljava/util/Locale;"
+			+ ")V",
 		require = 1)
 	public void constructor(ServerDataContext parentObj, String assetPath, FileHandle bundleForDependencies, boolean fromAllMods, Locale locale, CallbackInfo c) {
 		Main.LOGGER.debug("ASSET PATH: " + assetPath);
