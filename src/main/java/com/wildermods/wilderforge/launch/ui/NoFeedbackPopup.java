@@ -29,6 +29,9 @@ public class NoFeedbackPopup extends PopUp {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public void build() {
+		if(frame != null) {
+			group.removeActor(frame);
+		}
 		GameStrings I18N = this.dependencies.gameStrings;
 		LegacyViewDependencies.ScreenInfo screenInfo = this.dependencies.screenInfo;
 		RuntimeSkin skin = dependencies.skin;
