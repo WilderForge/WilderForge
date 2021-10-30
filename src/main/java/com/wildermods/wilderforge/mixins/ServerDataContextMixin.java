@@ -38,6 +38,22 @@ public class ServerDataContextMixin {
 	
 	@Inject(
 			at = @At(
+				value = "HEAD"
+			), 
+			method = "loadModInfo("
+				+ "Ljava/lang/String;"
+				+ "Z"
+			+ ")Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
+			require = 1)
+	/*
+	 * Always log if any mods or coremods are missing
+	 */
+	private void loadModInfoHead(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
+		logIfMissing = true;
+	}
+	
+	@Inject(
+			at = @At(
 				value = "TAIL", 
 				shift = BY,
 				by = -5
@@ -51,7 +67,7 @@ public class ServerDataContextMixin {
 	/*
 	 * Lets Wildermyth load resources from coremods
 	 */
-	private void loadModInfo(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
+	private void loadModInfoTail(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
 		Coremod coremod = Coremods.getCoremod(modId);
 		if(coremod != null) {
 			LoadStatus loadStatus = Coremods.getStatus(coremod);
