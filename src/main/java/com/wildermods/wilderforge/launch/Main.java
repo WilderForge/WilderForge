@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.wildermods.wilderforge.launch.WilderForge.EVENT_BUS;
+import static com.wildermods.wilderforge.launch.LoadStage.*;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.Version;
@@ -21,6 +22,7 @@ public final class Main {
 		
 		loadCoremods(loader);
 		
+		LoadStage.setLoadStage(PRE_INIT);
 		EVENT_BUS.fire(new PreInitializationEvent());
 		launchGame(args);
 	}
@@ -45,6 +47,7 @@ public final class Main {
 	}
 	
 	private static final void launchGame(String[] args) {
+		LoadStage.setLoadStage(INIT);
 		LegacyDesktop.main(args);
 	}
 	
