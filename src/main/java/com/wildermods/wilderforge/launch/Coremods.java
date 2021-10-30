@@ -25,6 +25,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.modLoadingV1.event.ModLoadedEvent;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
+import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
@@ -236,6 +237,7 @@ public class Coremods {
 					LOGGER.debug("Skipping non-mod url: " + url);
 				}
 			}
+			//addTestCoremods(100);
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			throw new AssertionError(e);
 		}
@@ -353,6 +355,28 @@ public class Coremods {
 			}
 		}
 		return ret;
+	}
+	
+	private static void addTestCoremods(int amount) {
+		for(int i = 1; i < amount + 1; i++) {
+			final int j = i;
+			Coremod dummy = new Coremod() {
+				@Override
+				public @InternalOnly JsonObject getModJson() throws IOException {
+					JsonObject json = new JsonObject();
+					json.addProperty("modid", "test_mod_" + j);
+					json.addProperty("name", "Dummy mod " + j);
+					json.addProperty("version", "0");
+					JsonArray authors = new JsonArray();
+					authors.add("none");
+					json.add("authors", authors);
+					json.addProperty("description", "Dummy mod #" + j);
+					return json;
+				}
+			};
+			dummy.construct("test_mod_" + i, "Dummy mod " + i, Version.getVersion("0"));
+			addFoundCoremod(dummy);
+		}
 	}
 	
 }
