@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import org.apache.commons.collections4.list.SetUniqueList;
 import org.jetbrains.annotations.Nullable;
 
 import com.wildermods.wilderforge.launch.LoadStage;
@@ -26,7 +29,7 @@ import com.wildermods.wilderforge.launch.Main;
 public class ExtendableEnum<X extends Enum<X>> {
 	private static final HashMap<Class<?>, ExtendableEnum<? extends Enum<?>>> extendableEnums = new HashMap<Class<?>, ExtendableEnum<? extends Enum<?>>>();
 	private final Class<X> type;
-	protected LockableArrayList<EnumValue> values = new LockableArrayList<EnumValue>();
+	protected SetUniqueList<EnumValue> values = SetUniqueList.setUniqueList(new ArrayList<EnumValue>());
 	
 	private ExtendableEnum(Class<X> enumClass) {
 		this.type = enumClass;
@@ -46,7 +49,7 @@ public class ExtendableEnum<X extends Enum<X>> {
 			return eEnum;
 		}
 		catch(Throwable t) {
-			throw new EnumExtensionFailureError((Class<Enum<?>>) enumClass, t);
+			throw new EnumExtensionError((Class<Enum<?>>) enumClass, t);
 		}
 	}
 	
@@ -103,7 +106,7 @@ public class ExtendableEnum<X extends Enum<X>> {
 		private final String name;
 		private final X enumValue;
 		
-		public EnumValue(X enumValue) {
+		protected EnumValue(X enumValue) {
 			this.name = enumValue.name();
 			this.enumValue = enumValue;
 			if(!values.add(this)) {
@@ -150,30 +153,45 @@ public class ExtendableEnum<X extends Enum<X>> {
 	}
 	
 	@SuppressWarnings("serial")
-	protected final class LockableArrayList<E> extends ArrayList<E> {
+	protected final class LockableSetList<E> extends SetUniqueList<E> {
 		
+		protected LockableSetList(List<E> list, Set<E> set) {
+			super(list, set);
+		}
+
 		@Override
 		public boolean add(E e) {
 			checkLock();
+			if(contains(e)) {
+				return false;
+			}
 			return super.add(e);
 		}
 		
 		@Override
 		public void add(int index, E e) {
 			checkLock();
+			if(contains(e)) {
+				return;
+			}
 			super.add(index, e);
 		}
 		
 		@Override
 		public boolean addAll(Collection<? extends E> c) {
 			checkLock();
-			return super.addAll(c);
+			boolean success = c.size() > 0;
+			for(E element : c) {
+				if(!add(element)) {
+					success = false;
+				}
+			}
+			return success;
 		}
 		
 		@Override
 		public boolean addAll(int index, Collection<? extends E> c) {
-			checkLock();
-			return super.addAll(index, c);
+			throw new UnsupportedOperationException();
 		}
 		
 		@Override
@@ -204,12 +222,6 @@ public class ExtendableEnum<X extends Enum<X>> {
 		public boolean removeIf(Predicate<? super E> filter) {
 			checkLock();
 			return super.removeIf(filter);
-		}
-		
-		@Override
-		protected void removeRange(int fromIndex, int toIndex) {
-			checkLock();
-			super.removeRange(fromIndex, toIndex);
 		}
 		
 		@Override
