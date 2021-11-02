@@ -7,12 +7,14 @@
 	"mixinPriority": 1,
 	"mixins": [
 		"AggregatorMixin",
+		"BiomeMixin",
 		"FileConsumerMixin",
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
 		"ModAwareResourceBundleMixin",
 		"NiceLwjgl3ApplicationMixin",
+		"OverlandTileMapGeneratorMixin",
 		"RootMenuMixin",
 		"ServerDataContextMixin"
 	]
