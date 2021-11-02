@@ -21,12 +21,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.wildermods.wilderforge.api.TraitV1.Trait;
+import com.wildermods.wilderforge.api.overlandV1.WFBiome;
 import com.worldwalkergames.collection.WeightedList;
 import com.worldwalkergames.legacy.game.world.model.OverlandTile.Biome;
 import static com.worldwalkergames.legacy.game.world.model.OverlandTile.Biome.*;
 
 @Mixin(value = Biome.class, remap = false)
-public class BiomeMixin implements com.wildermods.wilderforge.api.overlandV1.Biome {
+public class BiomeMixin implements WFBiome {
 
 	static {
 		Biome.values();
@@ -63,7 +64,7 @@ public class BiomeMixin implements com.wildermods.wilderforge.api.overlandV1.Bio
 	@Unique
 	private static void setVanillaWeights() {
 		for(Biome vanillaBiome : $VALUES) {
-			com.wildermods.wilderforge.api.overlandV1.Biome biome = (com.wildermods.wilderforge.api.overlandV1.Biome)(Object)vanillaBiome;
+			WFBiome biome = (WFBiome)(Object)vanillaBiome;
 			if((Biome)(Object)biome == none) {
 				setDefaultTraits(biome, 0f);
 			}
@@ -97,13 +98,13 @@ public class BiomeMixin implements com.wildermods.wilderforge.api.overlandV1.Bio
 	private static void createWeightedList(Random random, CallbackInfoReturnable<WeightedList<Biome>> c) {
 		WeightedList<Biome> list = new WeightedList<Biome>(random);
 		for(Biome biome : $VALUES) {
-			list.add(biome, ((com.wildermods.wilderforge.api.overlandV1.Biome)(Object)biome).getWeight());
+			list.add(biome, ((WFBiome)(Object)biome).getWeight());
 		}
 		c.setReturnValue(list);
 	}
 	
 	@Unique
-	private static void setDefaultTraits(com.wildermods.wilderforge.api.overlandV1.Biome biome, float weight) {
+	private static void setDefaultTraits(WFBiome biome, float weight) {
 		biome.setTrait(WEIGHT, weight);
 		biome.setTrait(PASSABLE, true);
 		biome.setTrait(IS_WATER, false);

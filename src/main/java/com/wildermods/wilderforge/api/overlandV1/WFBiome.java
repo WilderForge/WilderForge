@@ -2,7 +2,7 @@ package com.wildermods.wilderforge.api.overlandV1;
 
 import com.wildermods.wilderforge.api.TraitV1.Traited;
 
-public interface Biome extends Traited {
+public interface WFBiome extends Traited {
 	
 	public static final String WEIGHT = "weight";
 	public static final String PASSABLE = "passable";
