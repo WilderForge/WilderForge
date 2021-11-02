@@ -8,14 +8,16 @@
 	"mixins": [
 		"AggregatorMixin",
 		"BiomeMixin",
+		"CampaignGeneratorMixin",
 		"FileConsumerMixin",
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
 		"ModAwareResourceBundleMixin",
 		"NiceLwjgl3ApplicationMixin",
-		"OverlandTileMapGeneratorMixin",
+		"OverlandTileMapLabMixin",
 		"RootMenuMixin",
-		"ServerDataContextMixin"
+		"ServerDataContextMixin",
+		"TileMapGenerator"
 	]
 }
