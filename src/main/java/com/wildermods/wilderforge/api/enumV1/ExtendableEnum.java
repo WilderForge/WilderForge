@@ -26,13 +26,17 @@ import com.wildermods.wilderforge.launch.Main;
  * If adding values after Post-Initialization, an IllegalStateException should be thrown.
  * @param <T>
  */
-public class ExtendableEnum<X extends Enum<X>> {
+public class ExtendableEnum<X extends Enum<X>> implements EnumConstructor<X>{
 	private static final HashMap<Class<?>, ExtendableEnum<? extends Enum<?>>> extendableEnums = new HashMap<Class<?>, ExtendableEnum<? extends Enum<?>>>();
 	private final Class<X> type;
-	protected SetUniqueList<EnumValue> values = SetUniqueList.setUniqueList(new ArrayList<EnumValue>());
+	private SetUniqueList<EnumValue> values = SetUniqueList.setUniqueList(new ArrayList<EnumValue>());
 	
-	private ExtendableEnum(Class<X> enumClass) {
+	@SuppressWarnings("unchecked")
+	protected ExtendableEnum(Class<X> enumClass) {
 		this.type = enumClass;
+		if(extendableEnums.containsKey(enumClass)) {
+			throw new EnumExtensionError("Multiple ExtendableEnums of type " + enumClass.getSimpleName() + " constructed.");
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -49,7 +53,7 @@ public class ExtendableEnum<X extends Enum<X>> {
 			return eEnum;
 		}
 		catch(Throwable t) {
-			throw new EnumExtensionError((Class<Enum<?>>) enumClass, t);
+			throw new EnumExtensionError(t);
 		}
 	}
 	
@@ -57,11 +61,11 @@ public class ExtendableEnum<X extends Enum<X>> {
 		return type;
 	}
 	
-	public EnumValue newEnumValue(String name) {
+	public EnumValue<X> newEnumValue(String name) {
 		return newEnumValue(name, new Object[0], new String[0]);
 	}
 	
-	public EnumValue newEnumValue(String name, Object[] parameters, String[] names) {
+	public EnumValue<X> newEnumValue(String name, Object[] parameters, String[] names) {
 		Class<?>[] types = new Class<?>[names.length];
 		if(parameters.length == names.length) {
 			for(int i = 0; i < names.length; i++) {
@@ -74,17 +78,17 @@ public class ExtendableEnum<X extends Enum<X>> {
 		return newEnumValue(name, parameters, names, types);
 	}
 	
-	public EnumValue newEnumValue(String name, Object[] parameters, String[] names, Class<?>[] types) {
-		return new EnumValue(name);
+	public EnumValue<X> newEnumValue(String name, Object[] parameters, String[] names, Class<?>[] types) {
+		return new EnumValue<X>(this, name);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public final EnumValue[] values() {
+	public final EnumValue<X>[] values() {
 		return values.toArray((EnumValue[])Array.newInstance(EnumValue.class, 0));
 	}
 	
-	private final EnumValue newEnumValue(X enumValue) {
-		return new EnumValue(enumValue);
+	private final EnumValue<X> newEnumValue(X enumValue) {
+		return new EnumValue<X>(this, enumValue);
 	}
 	
 	public final int hashCode() {
@@ -101,24 +105,27 @@ public class ExtendableEnum<X extends Enum<X>> {
 		return false;
 	}
 	
-	public class EnumValue {
+	public static class EnumValue<X extends Enum<X>> {
 		
+		private final ExtendableEnum<X> extendedEnum;
 		private final String name;
 		private final X enumValue;
 		
-		protected EnumValue(X enumValue) {
+		protected EnumValue(ExtendableEnum<X> extendedEnum, X enumValue) {
 			this.name = enumValue.name();
 			this.enumValue = enumValue;
-			if(!values.add(this)) {
+			this.extendedEnum = extendedEnum;
+			if(!extendedEnum.values.add(this)) {
 				throw new AssertionError("Multiple enum values with same name?!");
 			}
 		}
 		
-		public EnumValue(String name) {
+		protected EnumValue(ExtendableEnum<X> extendedEnum, String name) {
 			this.name = name;
 			this.enumValue = null;
-			if(!values.add(this)) {
-				Main.LOGGER.warn("Creation of duplicate enum value " + name + " in ExtendableEnum " + getType().getSimpleName() + " was attempted. Subsuquent value discarded");
+			this.extendedEnum = extendedEnum;
+			if(!extendedEnum.values.add(this)) {
+				Main.LOGGER.warn("Creation of duplicate enum value " + name + " in ExtendableEnum " + extendedEnum.getType().getSimpleName() + " was attempted. Subsuquent value discarded");
 			}
 		}
 		
@@ -137,7 +144,7 @@ public class ExtendableEnum<X extends Enum<X>> {
 		}
 		
 		public int ordinal() {
-			return values.indexOf(this);
+			return extendedEnum.values.indexOf(this);
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -145,7 +152,7 @@ public class ExtendableEnum<X extends Enum<X>> {
 			if(o instanceof ExtendableEnum.EnumValue) {
 				return name.equals(((ExtendableEnum.EnumValue) o).name());
 			}
-			else if (getType().isInstance(o)) {
+			else if (extendedEnum.getType().isInstance(o)) {
 				return name.equals(((X)o).name());
 			}
 			return false;
