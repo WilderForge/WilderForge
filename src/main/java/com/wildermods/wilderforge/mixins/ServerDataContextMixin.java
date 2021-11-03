@@ -99,12 +99,17 @@ public class ServerDataContextMixin {
 	 * Adds coremods to campaigns
 	 */
 	private synchronized void applyGameSettings(Array<ModEntry> requested, LoadingProgressFrameCallback progressFrameCallback, CallbackInfo c) {
-		Main.LOGGER.info("Requesting: " + Arrays.toString(requested.items));
-		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
-			ModEntry entry = new ModEntry(coremod.getCoremodInfo());
-			if(!requested.contains(entry, false)) {
-				requested.add(entry);
+		if(requested != null) {
+			Main.LOGGER.info("Requesting: " + Arrays.toString(requested.items));
+			for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
+				ModEntry entry = new ModEntry(coremod.getCoremodInfo());
+				if(!requested.contains(entry, false)) {
+					requested.add(entry);
+				}
 			}
+		}
+		else {
+			Main.LOGGER.warn("Requesting NO MODS");
 		}
 	}
 	
