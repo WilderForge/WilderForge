@@ -20,8 +20,8 @@ import java.util.Random;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.wildermods.wilderforge.api.TraitV1.Trait;
 import com.wildermods.wilderforge.api.overlandV1.WFBiome;
+import com.wildermods.wilderforge.api.traitV1.Trait;
 import com.worldwalkergames.collection.WeightedList;
 import com.worldwalkergames.legacy.game.world.model.OverlandTile.Biome;
 import static com.worldwalkergames.legacy.game.world.model.OverlandTile.Biome.*;

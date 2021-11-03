@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.overlandV1;
 
-import com.wildermods.wilderforge.api.TraitV1.Traited;
+import com.wildermods.wilderforge.api.traitV1.Traited;
 
 public interface WFBiome extends Traited {
 	

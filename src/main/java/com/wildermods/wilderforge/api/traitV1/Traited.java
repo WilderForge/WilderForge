@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.TraitV1;
+package com.wildermods.wilderforge.api.traitV1;
 
 import org.jetbrains.annotations.Nullable;
 
