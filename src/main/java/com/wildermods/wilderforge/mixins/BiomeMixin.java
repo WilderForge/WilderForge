@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -42,6 +44,7 @@ public class BiomeMixin implements WFBiome {
 		throw new AssertionError();
 	}
 	
+	
 	@Inject(method = "<clinit>",
 		at = @At(
 			value = "FIELD", 
@@ -55,52 +58,70 @@ public class BiomeMixin implements WFBiome {
 	)
 	private static void addCustomBiome(CallbackInfo ci) {
 		List<Biome> biomes = new ArrayList<Biome>(Arrays.asList($VALUES));
-		Biome lastBiome = biomes.get(biomes.size() - 1);
-		Biome biome = newBiome("testBiome", lastBiome.ordinal() + 1, true);
-		biomes.add(biome);
+		setVanillaWeights();
+		//TODO: CreateCustomBiomesEvent
+		
+		//TODO: Add the custom biomes
+		
+		//Biome lastBiome = biomes.get(biomes.size() - 1);
+		//Biome biome = newBiome("testBiome", lastBiome.ordinal() + 1, true);
+		//((WFBiome)(Object)biome).setTrait(IS_WATER, false);
+		//((WFBiome)(Object)biome).setTrait(PASSABLE, true);
+		//((WFBiome)(Object)biome).setTrait(WEIGHT, 1f);
+		//biomes.add(biome);
+		
 		$VALUES = biomes.toArray(new Biome[0]);
 	}
 	
 	@Unique
 	private static void setVanillaWeights() {
-		for(Biome vanillaBiome : $VALUES) {
-			WFBiome biome = (WFBiome)(Object)vanillaBiome;
-			if((Biome)(Object)biome == none) {
-				setDefaultTraits(biome, 0f);
-			}
-			else if ((Biome)(Object)biome == forestConiferous) {
+		for(Biome vBiome : $VALUES) {
+			WFBiome biome = (WFBiome)(Object)vBiome;
+			if (vBiome == forestConiferous) {
 				setDefaultTraits(biome, 0.6f);
 			}
-			else if ((Biome)(Object)biome == forestDeciduous) {
+			else if (vBiome == forestDeciduous) {
 				setDefaultTraits(biome, 0.7f);
 			}
-			else if ((Biome)(Object)biome == grassland) {
+			else if (vBiome == grassland) {
 				setDefaultTraits(biome, 1f);
 			}
-			else if ((Biome)(Object)biome == swamp) {
+			else if (vBiome == swamp) {
 				setDefaultTraits(biome, 0.4f);
 			}
-			else if ((Biome)(Object)biome == hills) {
+			else if (vBiome == hills) {
 				setDefaultTraits(biome, 0.6f);
 			}
+			else if (vBiome == none || vBiome == mountains || vBiome == ocean || vBiome == lake) {
+				setDefaultTraits(biome, 0f);
+			}
 			else {
-				throw new AssertionError("Unexpected Biome " + vanillaBiome + " were new biomes added by vanilla? If not, make sure you're adding biomes AFTER Wilderforge.");
+				throw new AssertionError("Unexpected Biome " + vBiome + " were new biomes added by vanilla? If not, make sure you're adding biomes AFTER Wilderforge's BiomeMixin.");
 			}
 		}
 	}
+	
 	
 	@Inject(method = "createWeightedList",
 			at = @At(
 				value = "HEAD"
 			),
-			require = 1
+			require = 1,
+			cancellable = true
 		)
 	private static void createWeightedList(Random random, CallbackInfoReturnable<WeightedList<Biome>> c) {
-		WeightedList<Biome> list = new WeightedList<Biome>(random);
-		for(Biome biome : $VALUES) {
-			list.add(biome, ((WFBiome)(Object)biome).getWeight());
+		try {
+			WeightedList<Biome> list = new WeightedList<Biome>(random);
+			for(Biome biome : $VALUES) {
+				if(biome != none && biome != mountains && biome != ocean && biome != lake) {
+					list.add(biome, 1f);
+				}
+			}
+			c.setReturnValue(list);
 		}
-		c.setReturnValue(list);
+		catch(Throwable t) {
+			throw new Error(t); //Wildermyth is swallowing exceptions, so throw an error instead.
+		}
 	}
 	
 	@Unique
@@ -108,6 +129,14 @@ public class BiomeMixin implements WFBiome {
 		biome.setTrait(WEIGHT, weight);
 		biome.setTrait(PASSABLE, true);
 		biome.setTrait(IS_WATER, false);
+	}
+	
+	@Unique
+	public Biome setTraits(boolean passable, float weight, boolean isWater) {
+		setTrait(WEIGHT, weight);
+		setTrait(PASSABLE, passable);
+		setTrait(IS_WATER, isWater);
+		return (Biome)(Object)this;
 	}
 
 	@Unique
@@ -142,20 +171,30 @@ public class BiomeMixin implements WFBiome {
 
 	@Unique
 	@Override
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> T getTrait(String name) {
-		return ((Trait<T>) traits.get(name)).getValue();
+		if(hasTrait(name)) {
+			return ((Trait<T>) traits.get(name)).getValue();
+		}
+		return null;
 	}
 
 	@Unique
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> void setTrait(String name, T value) throws IllegalArgumentException {
-		((Trait<T>)traits.get(name)).setValue(value);
+		if(!hasTrait(name)) {
+			traits.put(name, new Trait<T>(name, value));
+		}
+		else {
+			((Trait<T>)traits.get(name)).setValue(value);
+		}
 	}
 
 	@Unique
 	@Override
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> Trait<T> getRawTrait(String name) {
 		return (Trait<T>) traits.get(name);
@@ -171,6 +210,12 @@ public class BiomeMixin implements WFBiome {
 	@Override
 	public float getWeight() {
 		return getTrait("weight");
+	}
+
+	@Unique
+	@Override
+	public HashMap<String, Trait<?>> getTraits() {
+		return traits;
 	}
 
 }
