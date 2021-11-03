@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,7 @@ import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
+import com.wildermods.wilderforge.launch.exception.CoremodIncompatabilityError;
 import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 import com.wildermods.wilderforge.launch.exception.CoremodNotFoundError;
 import com.wildermods.wilderforge.launch.exception.CoremodVersionError;
@@ -46,6 +48,7 @@ public class Coremods {
 			put("wilderforge", UNDISCOVERED);//put("wildermyth", UNDISCOVERED); 
 		}
 	};
+	protected static final ArrayList<Incompatability> incompatabilities = new ArrayList<Incompatability>();
 	protected static final HashMap<String, Coremod> coremods = new HashMap<String, Coremod>();
 	
 	@InternalOnly
@@ -114,6 +117,7 @@ public class Coremods {
 	}
 	
 	protected static void parseDependencies(JsonObject json) throws IOException, CoremodLinkageError {
+		incompatabilities.addAll(Arrays.asList(Incompatability.getIncompatabilities(json)));
 		HashSet<Dependency> required = new HashSet<Dependency>();
 		HashSet<Dependency> optional = new HashSet<Dependency>();
 		JsonElement reqDepsEle = json.get("requires");
@@ -266,34 +270,40 @@ public class Coremods {
 		
 		Logger logger = LogManager.getLogger("Coremod Validator");
 		for(String modid: dependencyGraph.vertexSet()) {
-			loadStatuses.put(modid, LOADING);
 			Coremod coremod = getCoremod(modid);
-			for(DependencyEdge edge : dependencyGraph.outgoingEdgesOf(modid)) {
-				Log4jMarker marker = new Log4jMarker(modid);
-				String depID = dependencyGraph.getEdgeTarget(edge);
-				Coremod dep = getCoremod(depID);
-				if(edge.isRequired()) {
-					if(dep != null) {
-						logger.info(marker, "Found required dependency " + dep.value());
+			try {
+				checkIncompatabilities(coremod);
+				loadStatuses.put(modid, LOADING);
+				for(DependencyEdge edge : dependencyGraph.outgoingEdgesOf(modid)) {
+					Log4jMarker marker = new Log4jMarker(modid);
+					String depID = dependencyGraph.getEdgeTarget(edge);
+					Coremod dep = getCoremod(depID);
+					if(edge.isRequired()) {
+						if(dep != null) {
+							logger.info(marker, "Found required dependency " + dep.value());
+						}
+						else {
+							loadStatuses.put(depID, UNDISCOVERED);
+							throw new CoremodNotFoundError(coremod, depID);
+						}
 					}
 					else {
-						loadStatuses.put(depID, UNDISCOVERED);
-						loadStatuses.put(modid, ERRORED);
-						throw new CoremodNotFoundError(coremod, depID);
+						if(dep != null) {
+							logger.info(marker, "Found optional dependency " + dep.value());
+						}
+						else {
+							logger.info(marker, "Did not find optional dependency " + depID);
+							loadStatuses.put(depID, UNDISCOVERED);
+						}
+					}
+					if(dep != null && !edge.getVersionRange().isWithinRange(dep.getVersion())) {
+						throw new CoremodVersionError(coremod, dep, edge.getVersionRange());
 					}
 				}
-				else {
-					if(dep != null) {
-						logger.info(marker, "Found optional dependency " + dep.value());
-					}
-					else {
-						logger.info(marker, "Did not find optional dependency " + depID);
-						loadStatuses.put(depID, UNDISCOVERED);
-					}
-				}
-				if(dep != null && !edge.getVersionRange().isWithinRange(dep.getVersion())) {
-					throw new CoremodVersionError(coremod, dep, edge.getVersionRange());
-				}
+			}
+			catch(Throwable t) {
+				loadStatuses.put(modid, ERRORED);
+				throw t;
 			}
 			
 			loadStatuses.put(modid, LOADED);
@@ -302,6 +312,22 @@ public class Coremods {
 			WilderForge.EVENT_BUS.fire(new ModLoadedEvent(coremod));
 		}
 		
+	}
+	
+	public static void checkIncompatabilities(Coremod coremod) throws CoremodIncompatabilityError {
+		ListIterator<Incompatability> incompatabilities = Coremods.incompatabilities.listIterator();
+		while(incompatabilities.hasNext()) {
+			Incompatability incompatability = incompatabilities.next();
+			if(incompatability.possiblyIncompatible(coremod)) {
+				if(incompatability.isIncompatible(coremod)) {
+					loadStatuses.put(incompatability.modid, ERRORED);
+					throw new CoremodIncompatabilityError(incompatability, coremod);
+				}
+				else {
+					incompatabilities.remove();
+				}
+			}
+		}
 	}
 	
 	private static final void detectCircularities(CycleDetector<String, DependencyEdge> cycleDetector) throws DependencyCircularityError {
