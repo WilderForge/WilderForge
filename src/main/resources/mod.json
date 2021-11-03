@@ -80,7 +80,7 @@
 	"incompatible":[
 		{
 			"modid":"wildermyth",
-			"version":"[0*][BETA*][ALPHA*]"
+			"version":"[0*][BETA*][ALPHA*][git*]"
 		}
 	]
 }
