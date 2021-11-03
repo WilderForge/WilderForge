@@ -1,5 +1,7 @@
 package com.wildermods.wilderforge.api.traitV1;
 
+import java.util.HashMap;
+
 import org.jetbrains.annotations.Nullable;
 
 public interface Traited {
@@ -15,5 +17,7 @@ public interface Traited {
 	
 	@Nullable
 	public <T> Trait<T> getRawTrait(String name);
+	
+	public HashMap<String, Trait<?>> getTraits();
 	
 }
