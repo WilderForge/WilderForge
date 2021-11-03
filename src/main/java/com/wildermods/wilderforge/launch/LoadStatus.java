@@ -14,13 +14,14 @@ public enum LoadStatus {
 	 * Wilderforge has a reference to a mod with this name but has not discovered it.
 	 * 
 	 * This generally means that the mod in question has been declared as a required
-	 * or optional dependency of another mod, but wilderforge hasn't discovered it yet. 
+	 * or optional dependency of another mod, or has been declared incompatible
+	 * but wilderforge hasn't discovered it yet.
 	 * 
-	 * Coremods that are referenced as a dependency but do not exist at runtime
-	 * (aka UNDISCOVERED) will remain in this state.
+	 * Coremods that are referenced as incompatible or as a dependency but do not exist at
+	 * runtime (aka UNDISCOVERED) will remain in this state.
 	 * 
 	 * Implementation detail: this is also the state of the 'wildermyth' and 'wilderforge' 
-	 * coremods as soon as mod loading is attempted.
+	 * coremods as soon as mod loading is attempted. They are never UNREFERENCED.
 	 */
 	UNDISCOVERED,
 	
@@ -31,6 +32,9 @@ public enum LoadStatus {
 	
 	/**
 	 * The coremod in question is loading.
+	 * 
+	 * If a mod that has been declared incompatible enters this state, it shall
+	 * immediately enter the ERRORED state, along with the declarer.
 	 */
 	LOADING,
 	
