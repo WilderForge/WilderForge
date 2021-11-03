@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
@@ -25,9 +26,9 @@ class JarCoremod extends Coremod {
 	JarCoremod(JarURLConnection jar) throws IOException {
 		this.jar = jar;
 		this.modJson = getModJson();
-		construct(modJson.get("modid").getAsString(), modJson.get("name").getAsString(), Version.getVersion(modJson.get("version").getAsString()));
+		construct(modJson.get(MODID).getAsString(), modJson.get(NAME).getAsString(), Version.getVersion(modJson.get(VERSION).getAsString()));
 		JsonObject root = modJson;
-		JsonElement modidElement = root.get("modid");
+		JsonElement modidElement = root.get(MODID);
 		if(modidElement != null) {
 			modid = modidElement.getAsString();
 		}

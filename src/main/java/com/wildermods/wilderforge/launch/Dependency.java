@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
@@ -17,8 +19,8 @@ public class Dependency extends Coremod {
 	public Dependency(boolean required, JsonObject json) {
 		this.required = required;
 		this.modJson = json;
-		JsonElement modid = json.get("modid");
-		JsonElement versionRange = json.get("version");
+		JsonElement modid = json.get(MODID);
+		JsonElement versionRange = json.get(VERSION);
 		if(modid != null) {
 			this.modid = modid.getAsString();
 		}

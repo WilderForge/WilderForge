@@ -24,6 +24,8 @@ import org.jgrapht.graph.DefaultEdge;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.event.ModLoadedEvent;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.api.versionV1.Version;
@@ -120,8 +122,8 @@ public class Coremods {
 		incompatabilities.addAll(Arrays.asList(Incompatability.getIncompatabilities(json)));
 		HashSet<Dependency> required = new HashSet<Dependency>();
 		HashSet<Dependency> optional = new HashSet<Dependency>();
-		JsonElement reqDepsEle = json.get("requires");
-		JsonElement optDepsEle = json.get("optional");
+		JsonElement reqDepsEle = json.get(REQUIRES);
+		JsonElement optDepsEle = json.get(OPTIONAL);
 		JsonArray reqDeps = null;
 		JsonArray optDeps = null;
 		
@@ -190,7 +192,7 @@ public class Coremods {
 		if(o == null) {
 			throw new CoremodFormatError("Could not parse json");
 		}
-		JsonElement modidElement = o.get("modid");
+		JsonElement modidElement = o.get(MODID);
 		if(modidElement == null) {
 			throw new CoremodFormatError("No modid declared in json");
 		}
@@ -390,13 +392,13 @@ public class Coremods {
 				@Override
 				public @InternalOnly JsonObject getModJson() throws IOException {
 					JsonObject json = new JsonObject();
-					json.addProperty("modid", "test_mod_" + j);
-					json.addProperty("name", "Dummy mod " + j);
-					json.addProperty("version", "0");
+					json.addProperty(MODID, "test_mod_" + j);
+					json.addProperty(NAME, "Dummy mod " + j);
+					json.addProperty(VERSION, "0");
 					JsonArray authors = new JsonArray();
 					authors.add("none");
-					json.add("authors", authors);
-					json.addProperty("description", "Dummy mod #" + j);
+					json.add(AUTHORS, authors);
+					json.addProperty(DESCRIPTION, "Dummy mod #" + j);
 					return json;
 				}
 			};

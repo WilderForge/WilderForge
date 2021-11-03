@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
@@ -34,7 +35,7 @@ public final class WilderForge extends HardCodedCoremod {
 	}
 	
 	WilderForge() throws IOException {
-		construct(getModJson().get("modid").getAsString(), getModJson().get("name").getAsString(), Version.getVersion(getModJson().get("version").getAsString()));
+		construct(getModJson().get(MODID).getAsString(), getModJson().get(NAME).getAsString(), Version.getVersion(getModJson().get(VERSION).getAsString()));
 	}
 
 	@Override
