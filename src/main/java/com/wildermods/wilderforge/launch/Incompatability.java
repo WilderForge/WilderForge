@@ -6,18 +6,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 
-class Incompatability extends Coremod {
+@InternalOnly
+public class Incompatability extends Coremod {
 	private final JsonObject modJson;
 	private final String incompatModId;
 	private final MultiVersionRange incompatVersionRange;
 	
 	@InternalOnly
 	public static Incompatability[] getIncompatabilities(JsonObject json) {
-		JsonElement incompatJsonEle = json.get("incompatability");
+		JsonElement incompatJsonEle = json.get(INCOMPATIBLE);
 		if(incompatJsonEle != null) {
-			JsonArray array = json.get("incompatability").getAsJsonArray();
+			JsonArray array = json.get(INCOMPATIBLE).getAsJsonArray();
 			Incompatability[] incompatabilities = new Incompatability[array.size()];
 			for(int i = 0; i < array.size(); i++) {
 				incompatabilities[i] = new Incompatability(json, array.get(i).getAsJsonObject());
@@ -28,10 +30,11 @@ class Incompatability extends Coremod {
 	}
 	
 	private Incompatability(JsonObject json, JsonObject incompatability) {
-		construct(json);
 		modJson = json;
-		incompatModId = incompatability.get("modid").getAsString();
-		incompatVersionRange = new MultiVersionRange(incompatability.get("version").getAsString());
+		construct(json);
+		incompatModId = incompatability.get(MODID).getAsString();
+		incompatVersionRange = new MultiVersionRange(incompatability.get(VERSION).getAsString());
+		
 	}
 
 	@Override

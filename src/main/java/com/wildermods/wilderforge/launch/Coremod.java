@@ -12,6 +12,8 @@ import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
 import com.worldwalkergames.legacy.game.mods.IModAware;
 
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
+
 @InternalOnly
 @SuppressWarnings("intfAnnotation")
 public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadingV1.Coremod, IModAware, Versioned{
@@ -30,9 +32,9 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 	
 	protected void construct(JsonObject json) {
 		construct(
-			json.get("modid").getAsString(),
-			json.get("name").getAsString(),
-			Version.getVersion(json.get("version").getAsString()));
+			json.get(MODID).getAsString(),
+			json.get(NAME).getAsString(),
+			Version.getVersion(json.get(VERSION).getAsString()));
 	}
 	
 	@Override

@@ -76,5 +76,11 @@
 			"modid":"wildermyth",
 			"version":"[1.0.*,1.3.*][1.0+*,1.3+*]"
 		}
+	],
+	"incompatible":[
+		{
+			"modid":"wildermyth",
+			"version":"[0*][BETA*][ALPHA*]"
+		}
 	]
 }
