@@ -1,7 +1,9 @@
 package com.wildermods.wilderforge.mixins;
 
 import org.apache.logging.log4j.Level;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -19,6 +21,8 @@ import com.worldwalkergames.logging.FilteringConsumer;
 
 @Mixin(value = LegacyDesktop.class, remap = false)
 public class LegacyDesktopMixin {
+	
+	private static @Shadow @Final ALogger LOGGER;
 
 	/**
 	 * Set steam's logger to be WilderForge's logger
@@ -40,5 +44,14 @@ public class LegacyDesktopMixin {
 			System.out.println(consumer.getClass());
 		}
 	}
+	
+	@Inject(at = @At(value = "HEAD"), method = "fatalError")
+	public void fatalError(Throwable t, CallbackInfo c) throws Throwable {
+		dispose();
+		throw t;
+	}
+	
+	@Shadow
+	public void dispose() {}
 	
 }

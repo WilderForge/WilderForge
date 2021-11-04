@@ -16,15 +16,23 @@ public final class Main {
 	static ReflectionsHelper reflectionsHelper;
 
 	public static void main(String[] args) throws IOException {
-		ClassLoader loader = checkClassloader();
-		
-		setupReflectionsHelper(loader);
-		
-		loadCoremods(loader);
-		
-		LoadStage.setLoadStage(PRE_INIT);
-		EVENT_BUS.fire(new PreInitializationEvent());
-		launchGame(args);
+		try {
+			ClassLoader loader = checkClassloader();
+			
+			setupReflectionsHelper(loader);
+			
+			loadCoremods(loader);
+			
+			LoadStage.setLoadStage(PRE_INIT);
+			EVENT_BUS.fire(new PreInitializationEvent());
+			launchGame(args);
+		}
+		catch(Throwable t) {
+			if(!(t instanceof OutOfMemoryError)) {
+				new CrashInfo(t);
+			}
+			throw t;
+		}
 	}
 	
 	private static final ClassLoader checkClassloader() throws VerifyError {
