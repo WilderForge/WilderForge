@@ -25,7 +25,6 @@ import com.wildermods.wilderforge.launch.InternalOnly;
 import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 
 @InternalOnly
@@ -58,9 +57,9 @@ public class WilderLauncherService implements ILaunchHandlerService {
 	}
 
 	@Override
-	public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
+	public Callable<Void> launchService(String[] arguments, ModuleLayer gameLayer) {
 		return () -> {
-			Class<?> mainClass = launchClassLoader.getInstance().loadClass("com.wildermods.wilderforge.launch.Main");
+			Class<?> mainClass = Class.forName(gameLayer.findModule("wilderforge").orElseThrow(), "com.wildermods.wilderforge.launch.Main");
 			final Method mainMethod = mainClass.getMethod("main", String[].class);
 			mainMethod.invoke(null, new Object[] {arguments});
 			return null;
