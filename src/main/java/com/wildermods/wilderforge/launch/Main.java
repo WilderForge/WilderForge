@@ -3,7 +3,6 @@ package com.wildermods.wilderforge.launch;
 import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import static com.wildermods.wilderforge.launch.WilderForge.EVENT_BUS;
 import static com.wildermods.wilderforge.launch.LoadStage.*;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
@@ -42,7 +41,6 @@ public final class Main {
 			throw new VerifyError("Incorrect classloader. Mixins are not loaded. " + LegacyDesktop.class.getClassLoader());
 		}
 		Main.LOGGER.info("Correct classloader detected.");
-		Version.PATCHLINE = "WilderForge 0.0.0.0";
 		return classloader;
 	}
 	
@@ -52,6 +50,8 @@ public final class Main {
 	
 	private static final void loadCoremods(ClassLoader classLoader) {
 		Coremods.loadCoremods(classLoader);
+		WilderForge wf = (WilderForge) Coremods.getCoremod("wilderforge");
+		Version.PATCHLINE = wf.getVersionString();
 	}
 	
 	private static final void launchGame(String[] args) {
