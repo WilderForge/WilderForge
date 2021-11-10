@@ -9,6 +9,7 @@ public class Version implements Versioned {
 	private int wildcard;
 	
 	public static final NoVersion NO_VERSION = new NoVersion();
+	public static final Missing MISSING = new Missing();
 	
 	public Version(String version) throws InvalidVersionException {
 		this.version = version.trim().toCharArray();
@@ -71,7 +72,7 @@ public class Version implements Versioned {
 		return new String(version);
 	}
 	
-	public static final class NoVersion extends Version {
+	public static class NoVersion extends Version {
 		
 		private NoVersion() {
 			super("");
@@ -91,7 +92,7 @@ public class Version implements Versioned {
 		@Override
 		public int compareTo(Versioned o) {
 			if(o instanceof Version) {
-				if(o.equals(NO_VERSION)) {
+				if(o instanceof NoVersion) {
 					return 0;
 				}
 				return -1;
@@ -103,6 +104,12 @@ public class Version implements Versioned {
 			return "No version";
 		}
 		
+	}
+	
+	public static class Missing extends NoVersion {
+		public String toString() {
+			return "Missing";
+		}
 	}
 
 }
