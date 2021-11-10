@@ -95,7 +95,12 @@ public class Coremods {
 	}
 	
 	public static Coremod getCoremod(String modid) {
-		return coremods.get(modid);
+		Coremod coremod = coremods.get(modid);
+		if(coremod == null) {
+			new Error().printStackTrace();
+			coremod = new MissingCoremod(modid);
+		}
+		return coremod;
 	}
 	
 	public static LoadStatus getStatus(String coremod) {
@@ -281,7 +286,7 @@ public class Coremods {
 					String depID = dependencyGraph.getEdgeTarget(edge);
 					Coremod dep = getCoremod(depID);
 					if(edge.isRequired()) {
-						if(dep != null) {
+						if(!(dep instanceof MissingCoremod)) {
 							logger.info(marker, "Found required dependency " + dep.value());
 						}
 						else {
@@ -290,7 +295,7 @@ public class Coremods {
 						}
 					}
 					else {
-						if(dep != null) {
+						if(!(dep instanceof MissingCoremod)) {
 							logger.info(marker, "Found optional dependency " + dep.value());
 						}
 						else {
@@ -298,7 +303,7 @@ public class Coremods {
 							loadStatuses.put(depID, UNDISCOVERED);
 						}
 					}
-					if(dep != null && !edge.getVersionRange().isWithinRange(dep.getVersion())) {
+					if(!(dep instanceof MissingCoremod) && !edge.getVersionRange().isWithinRange(dep.getVersion())) {
 						throw new CoremodVersionError(coremod, dep, edge.getVersionRange());
 					}
 				}
@@ -363,7 +368,8 @@ public class Coremods {
 		List<Coremod> coremods = new ArrayList<Coremod>();
 		List<LoadStatus> loadStatusesList = Arrays.asList(loadStatuses);
 		coremods:
-		for(Coremod coremod : Coremods.coremods.values()) {
+		for(String modid : Coremods.loadStatuses.keySet()) {
+			Coremod coremod = Coremods.getCoremod(modid);
 			for(LoadStatus modStatus : loadStatusesList) {
 				if(Coremods.loadStatuses.get(coremod) == modStatus) {
 					coremods.add(coremod);
