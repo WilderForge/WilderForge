@@ -65,8 +65,9 @@ class CrashInfo {
 			for(int i = 0; i < t2.getSuppressed().length; i++) {
 				throwables.add((Class<Throwable>) t2.getSuppressed()[i].getClass());
 			}
+			t2 = t2.getCause();
 		}
-		while(t.getCause() != null);
+		while(t2 != null);
 		
 		ArrayList<String> messages = new ArrayList<String>();
 		
