@@ -47,7 +47,10 @@ public class Coremods {
 	protected static final DefaultDirectedGraph<String, DependencyEdge> dependencyGraph = new DefaultDirectedGraph<String, DependencyEdge>(DependencyEdge.class);
 	protected static final @SuppressWarnings("serial") HashMap<String, LoadStatus> loadStatuses = new HashMap<String, LoadStatus>(){
 		{
-			put("wilderforge", UNDISCOVERED);//put("wildermyth", UNDISCOVERED); 
+			put("wildermyth", UNDISCOVERED);
+			put("asm", UNDISCOVERED);
+			put("mixin", UNDISCOVERED);
+			put("wilderforge", UNDISCOVERED);
 		}
 	};
 	protected static final ArrayList<Incompatability> incompatabilities = new ArrayList<Incompatability>();
@@ -215,15 +218,21 @@ public class Coremods {
 			jarField.setAccessible(true);
 			URL[] jarLocs = (URL[]) jarField.get(classLoader);
 			Wildermyth wildermyth;
+			ASM asm;
+			Mixin mixin;
 			WilderForge wilderforge;
 			try {
 				wildermyth = new Wildermyth();
+				asm = new ASM();
+				mixin = new Mixin();
 				wilderforge = new WilderForge();
 			}
 			catch(IOException e) {
 				throw new CoremodLinkageError(e);
 			}
 			addFoundCoremod(wildermyth);
+			addFoundCoremod(asm);
+			addFoundCoremod(mixin);
 			addFoundCoremod(wilderforge);
 			for(URL url : jarLocs) {
 				if(url.toString().contains("/mods/")) {
@@ -259,9 +268,9 @@ public class Coremods {
 			try {
 				parseDependencies(coremod.getModJson());
 			}
-			catch(IOException e) {
+			catch(Throwable t) {
 				loadStatuses.put(coremod.value(), ERRORED);
-				throw new CoremodLinkageError(e);
+				throw new CoremodLinkageError("Could not parse mod.json for " + coremod.getModId(), t);
 			}
 		}
 	}
