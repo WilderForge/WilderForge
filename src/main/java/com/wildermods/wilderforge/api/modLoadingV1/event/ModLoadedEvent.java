@@ -1,7 +1,7 @@
 package com.wildermods.wilderforge.api.modLoadingV1.event;
 
 import com.wildermods.wilderforge.api.eventV1.ModEvent;
-import com.wildermods.wilderforge.launch.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
 
 public final class ModLoadedEvent extends ModEvent {
 	

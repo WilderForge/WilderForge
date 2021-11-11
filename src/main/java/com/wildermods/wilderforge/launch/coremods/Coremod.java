@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.coremods;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.worldwalkergames.legacy.game.mods.IModAware;
 
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;

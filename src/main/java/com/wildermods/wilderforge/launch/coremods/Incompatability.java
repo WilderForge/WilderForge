@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.coremods;
 
 import java.io.IOException;
 
@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
+import com.wildermods.wilderforge.launch.InternalOnly;
 
 @InternalOnly
 public class Incompatability extends Coremod {

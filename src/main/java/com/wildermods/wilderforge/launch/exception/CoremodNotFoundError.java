@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.launch.exception;
 
-import com.wildermods.wilderforge.launch.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
 
 @SuppressWarnings("serial")
 public class CoremodNotFoundError extends CoremodLinkageError {

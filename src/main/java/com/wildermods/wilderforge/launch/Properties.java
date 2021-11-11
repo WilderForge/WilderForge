@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.io.IOError;
 
 @InternalOnly
-class Properties {
+public class Properties {
 
 	private static final File PROPERTIES = new File(new File(".").getAbsoluteFile().getParentFile().getParentFile().getAbsolutePath() + "/gradle.properties");
 	

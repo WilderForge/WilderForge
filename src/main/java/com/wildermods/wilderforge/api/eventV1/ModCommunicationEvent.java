@@ -1,7 +1,7 @@
 package com.wildermods.wilderforge.api.eventV1;
 
-import com.wildermods.wilderforge.launch.Coremod;
-import com.wildermods.wilderforge.launch.Coremods;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
 
 /**
  * An event used to communicate between mods. Can store any type of data.

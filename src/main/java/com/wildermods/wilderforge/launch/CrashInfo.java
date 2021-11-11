@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.throwables.MixinException;
 
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
+import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.Version;
 
 class CrashInfo {

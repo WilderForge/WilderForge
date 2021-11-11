@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.coremods;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,8 @@ import com.google.gson.JsonPrimitive;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.api.versionV1.Version;
+import com.wildermods.wilderforge.launch.HardCodedCoremod;
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 

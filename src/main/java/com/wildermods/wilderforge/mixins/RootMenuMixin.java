@@ -2,7 +2,8 @@ package com.wildermods.wilderforge.mixins;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.wildermods.wilderforge.launch.Coremods;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
+
 import static com.wildermods.wilderforge.launch.LoadStatus.*;
 
 import java.lang.reflect.Field;

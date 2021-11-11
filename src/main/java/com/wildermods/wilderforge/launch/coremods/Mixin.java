@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.coremods;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -12,6 +12,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.wildermods.wilderforge.api.versionV1.Version;
+import com.wildermods.wilderforge.launch.HardCodedCoremod;
+import com.wildermods.wilderforge.launch.InternalOnly;
 
 @Coremod("mixin")
 class Mixin extends HardCodedCoremod {

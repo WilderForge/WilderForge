@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.badlogic.gdx.utils.Array;
-import com.wildermods.wilderforge.launch.Coremod;
-import com.wildermods.wilderforge.launch.Coremods;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
 import com.worldwalkergames.legacy.server.context.ServerDataContext;

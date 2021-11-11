@@ -5,8 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.wildermods.wilderforge.api.overlandV1.OverlandMapGenerationEvent;
-import com.wildermods.wilderforge.launch.WilderForge;
-
+import com.wildermods.wilderforge.launch.coremods.WilderForge;
 import com.worldwalkergames.legacy.game.campaign.CampaignGenerator;
 import com.worldwalkergames.legacy.game.campaign.model.CampaignTemplate;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;

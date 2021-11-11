@@ -1,7 +1,7 @@
 package com.wildermods.wilderforge.launch.exception;
 
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
-import com.wildermods.wilderforge.launch.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
 
 /**
  * Thrown when a coremod dependency is outside of a declared version range.

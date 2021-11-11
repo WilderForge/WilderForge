@@ -5,9 +5,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.wildermods.wilderforge.launch.Coremods;
-
 import com.wildermods.wilderforge.launch.LoadStatus;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.ui.CoremodListPopup;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.game.common.ui.OptionButton;
 import com.worldwalkergames.legacy.ui.menu.IRootMenuNavigation;

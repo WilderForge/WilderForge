@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.eventV1;
 
-import com.wildermods.wilderforge.launch.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
 
 public abstract class ModEvent extends Event {
 

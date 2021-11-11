@@ -3,6 +3,7 @@ package com.wildermods.wilderforge.launch;
 import java.io.IOException;
 
 import com.google.gson.JsonObject;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 
 @InternalOnly

@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.coremods;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -30,6 +30,10 @@ import com.wildermods.wilderforge.api.modLoadingV1.event.ModLoadedEvent;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.api.versionV1.Versioned;
+import com.wildermods.wilderforge.launch.Dependency;
+import com.wildermods.wilderforge.launch.InternalOnly;
+import com.wildermods.wilderforge.launch.LoadStatus;
+import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 import com.wildermods.wilderforge.launch.exception.CoremodIncompatabilityError;
 import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
@@ -118,7 +122,8 @@ public class Coremods {
 		return getStatus(coremod.value());
 	}
 	
-	static void loadCoremods(ClassLoader classLoader) {
+	@InternalOnly
+	public static void loadCoremods(ClassLoader classLoader) {
 		LOGGER.info("Looking for coremod jsons...");
 		discoverCoremodJsons(classLoader);
 		LOGGER.info("Found " + dependencyGraph.vertexSet().size() + " declared coremods ");

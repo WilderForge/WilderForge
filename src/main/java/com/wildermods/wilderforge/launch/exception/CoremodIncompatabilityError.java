@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange;
 import com.wildermods.wilderforge.api.versionV1.MultiVersionRange.VersionRange;
-import com.wildermods.wilderforge.launch.Coremod;
-import com.wildermods.wilderforge.launch.Incompatability;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Incompatability;
 
 public class CoremodIncompatabilityError extends CoremodLinkageError {
 

@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.coremods;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,6 +14,10 @@ import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 import com.wildermods.wilderforge.api.versionV1.Version;
+import com.wildermods.wilderforge.launch.HardCodedCoremod;
+import com.wildermods.wilderforge.launch.InternalOnly;
+import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.Properties;
 import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
 
 @Coremod("wilderforge")

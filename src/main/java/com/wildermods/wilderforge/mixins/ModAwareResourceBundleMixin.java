@@ -14,12 +14,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.badlogic.gdx.files.FileHandle;
-
-import com.wildermods.wilderforge.launch.Coremod;
-import com.wildermods.wilderforge.launch.Coremods;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.resources.CoremodCompatibleResourceBundle;
 
 import com.worldwalkergames.legacy.server.context.ServerDataContext;

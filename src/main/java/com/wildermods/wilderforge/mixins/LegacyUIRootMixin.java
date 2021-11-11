@@ -9,8 +9,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.launch.LoadStage;
+import com.wildermods.wilderforge.launch.coremods.Wildermyth;
+
 import static com.wildermods.wilderforge.launch.LoadStage.POST_INIT;
-import com.wildermods.wilderforge.launch.Wildermyth;
+
 import com.wildermods.wilderforge.launch.ui.NoFeedbackPopup;
 
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;

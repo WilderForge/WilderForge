@@ -10,12 +10,12 @@ import java.util.Arrays;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.wildermods.wilderforge.launch.Coremod;
-import com.wildermods.wilderforge.launch.Coremods;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
-import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.coremods.WilderForge;
 import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 
 public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.api.modLoadingV1.Coremod {

@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.launch.exception;
 
-import com.wildermods.wilderforge.launch.Coremod;
+import com.wildermods.wilderforge.launch.coremods.Coremod;
 
 /**
  * Thrown whenwilderforge attempts to load a coremod, but the coremod has
