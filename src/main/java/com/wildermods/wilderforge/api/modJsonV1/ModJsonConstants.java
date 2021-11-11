@@ -13,6 +13,7 @@ public interface ModJsonConstants {
 	public final String REQUIRES = "requires";
 	public final String OPTIONAL = "optional";
 	public final String INCOMPATIBLE = "incompatible";
+	public final String LICENSE = "license";
 	
 	;
 	
