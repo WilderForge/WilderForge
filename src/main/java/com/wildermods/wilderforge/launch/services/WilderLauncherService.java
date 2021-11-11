@@ -23,7 +23,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.wildermods.wilderforge.launch.InternalOnly;
 
 import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.TransformingClassLoader;
+import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
@@ -60,9 +62,10 @@ public class WilderLauncherService implements ILaunchHandlerService {
 	@Override
 	public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
 		return () -> {
+			String modLauncherVersion = Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.MLIMPL_VERSION.get()).get();
 			Class<?> mainClass = launchClassLoader.getInstance().loadClass("com.wildermods.wilderforge.launch.Main");
 			final Method mainMethod = mainClass.getMethod("main", String[].class);
-			mainMethod.invoke(null, new Object[] {arguments});
+			mainMethod.invoke(null, new Object[] {ArrayUtils.add(arguments, "modLauncherVersion:" + modLauncherVersion)});
 			return null;
 		};
 	}

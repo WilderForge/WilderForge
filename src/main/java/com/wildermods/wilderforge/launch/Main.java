@@ -9,6 +9,7 @@ import static com.wildermods.wilderforge.launch.coremods.WilderForge.EVENT_BUS;
 
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.coremods.ModLauncher;
 import com.wildermods.wilderforge.launch.coremods.WilderForge;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.Version;
@@ -21,6 +22,11 @@ public final class Main {
 
 	public static void main(String[] args) throws IOException {
 		try {
+			for(String s : args) {
+				if(s.startsWith("modLauncherVersion:")) {
+					ModLauncher.VERSION = s.replace("modLauncherVersion:", "");
+				}
+			}
 			ClassLoader loader = checkClassloader();
 			
 			setupReflectionsHelper(loader);
