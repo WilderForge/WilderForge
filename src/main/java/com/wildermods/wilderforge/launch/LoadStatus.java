@@ -20,8 +20,9 @@ public enum LoadStatus {
 	 * Coremods that are referenced as incompatible or as a dependency but do not exist at
 	 * runtime (aka UNDISCOVERED) will remain in this state.
 	 * 
-	 * Implementation detail: this is also the state of the 'wildermyth' and 'wilderforge' 
-	 * coremods as soon as mod loading is attempted. They are never UNREFERENCED.
+	 * Implementation detail: this is also the state of the 'asm', 'mixin', 'modlauncher',
+	 * 'wildermyth', and 'wilderforge' coremods as soon as mod loading is attempted. 
+	 * They are never UNREFERENCED.
 	 */
 	UNDISCOVERED,
 	
