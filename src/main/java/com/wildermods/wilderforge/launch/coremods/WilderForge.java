@@ -13,6 +13,7 @@ import com.google.gson.JsonParser;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.HardCodedCoremod;
 import com.wildermods.wilderforge.launch.InternalOnly;
@@ -44,6 +45,7 @@ public final class WilderForge extends HardCodedCoremod {
 			version = new Version(Properties.getProperty("wilderForgeVersion"));
 		}
 		construct(getModJson().get(MODID).getAsString(), getModJson().get(NAME).getAsString(), version);
+		EVENT_BUS.register(CoremodInfo.class);
 	}
 
 	@Override

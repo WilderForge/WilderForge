@@ -8,8 +8,13 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 
+import com.badlogic.gdx.Files;
+import com.badlogic.gdx.Gdx;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
@@ -20,6 +25,8 @@ import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 
 public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.api.modLoadingV1.Coremod {
 
+	private static Files files;
+	
 	public final Coremod coremod;
 	
 	@InternalOnly
@@ -60,6 +67,17 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 	@Override
 	public String value() {
 		return modId;
+	}
+	
+	@SubscribeEvent(priority = EventPriority.LOWER - 1000)
+	public static void onPostInitialization(PostInitializationEvent e) {
+		files = Gdx.files;
+		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED, LoadStatus.NOT_LOADED, LoadStatus.DISCOVERED)) {
+			if(files == null) {
+				throw new AssertionError();
+			}
+			coremod.getCoremodInfo().folder = files.classpath("").child(coremod.value());
+		}
 	}
 	
 }
