@@ -1,9 +1,7 @@
 package com.wildermods.wilderforge.launch.ui;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.worldwalkergames.legacy.context.GameStrings;
@@ -39,9 +37,9 @@ public class NoFeedbackPopup extends PopUp {
 		frame = new DialogFrame(dependencies);
 		
 			String title = I18N.ui("wilderforge.ui.nofeedback.title");
-				Label titleLabel = new Label((CharSequence)title, (Skin)skin, "dialogTitle");  
-				frame.addInner((Actor)titleLabel).expandX().left().padBottom(10f);
-				Table description = new Table((Skin)skin);
+				Label titleLabel = new Label(title, skin, "dialogTitle");  
+				frame.addInner(titleLabel).expandX().left().padBottom(10f);
+				Table description = new Table(skin);
 				NiceLabel descriptionLabel = new NiceLabel(I18N.ui("wilderforge.ui.nofeedback.description"), skin, "dialogBody");
 				descriptionLabel.setWrap(true);
 				frame.addOuter(descriptionLabel);
