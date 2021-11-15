@@ -52,9 +52,10 @@ public class NoFeedbackPopup extends PopUp {
 		
 		frame.addInner(description);
 		frame.addInner(button).padTop(screenInfo.scale(15f)).expandX().fillX();
+
 		frame.pack();
 		
-		group.add(frame).setVerticalCenter(0f).setHorizontalCenter(0f);
+		group.add(frame).setVerticalCenter(0f).setHorizontalCenter(0f).setExplicitWidth(screenInfo.scale(600));
 	}
 	
 	@Override
