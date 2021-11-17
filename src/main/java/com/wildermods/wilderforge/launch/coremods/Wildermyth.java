@@ -7,10 +7,12 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.HardCodedCoremod;
 import com.wildermods.wilderforge.launch.InternalOnly;
@@ -47,8 +49,12 @@ public final class Wildermyth extends HardCodedCoremod {
 	@Override
 	public JsonObject getModJson() throws IOException {
 		JsonObject json = new JsonObject();
-		json.add("modid", new JsonPrimitive("wildermyth"));
-		json.add("version", new JsonPrimitive(getVersion().toString()));
+		json.add(MODID, new JsonPrimitive("wildermyth"));
+		json.add(NAME, new JsonPrimitive("Wildermyth"));
+		json.add(VERSION, new JsonPrimitive(getVersion().toString()));
+		JsonArray authors = new JsonArray();
+		authors.add(new JsonPrimitive("Worldwalker Games, LLC"));
+		json.add(AUTHORS, authors);
 		return json;
 	}
 	
