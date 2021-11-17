@@ -114,7 +114,7 @@ class CrashInfo {
 	}
 	
 	private String getDate() {
-		return ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+		return ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT);
 	}
 	
 	private StringBuilder appendSystemDetails(StringBuilder s) {
