@@ -12,9 +12,11 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
@@ -50,8 +52,16 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 		showInStoryDialog = true;
 		showInModConfig = true;
 		listInCredits = true;
-		JsonElement credits = json.get("credits");
-		customCreditLines = credits != null ? WilderForge.gson.fromJson(json.get("credits"), String[].class) : null;
+		JsonElement creditsEle = json.get(CREDITS);
+		customCreditLines = creditsEle != null ? WilderForge.gson.fromJson(creditsEle, String[].class) : null;
+		JsonElement authorsEle = json.get(AUTHORS);
+		String[] authors = WilderForge.gson.fromJson(authorsEle, String[].class);
+		if(authors != null && authors.length > 0) {
+			author = grammaticallyCorrectAuthorList(authors);
+		}
+		else {
+			author = "?";
+		}
 		Main.LOGGER.info(Arrays.toString(customCreditLines));
 		name = coremod.getName();
 		modLocation = ModLocation.core;
@@ -78,6 +88,27 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 			}
 			coremod.getCoremodInfo().folder = files.classpath("").child(coremod.value());
 		}
+	}
+	
+	private String grammaticallyCorrectAuthorList(String[] authors) {
+		if(authors.length == 1) {
+			return authors[0];
+		}
+		if(authors.length == 2) {
+			return authors[0] + " and " + authors[1];
+		}
+		if(authors.length > 2) {
+			StringBuilder ret = new StringBuilder();
+			int i = 0;
+			for(; i < authors.length - 1; i++) {
+				ret.append(authors[i]);
+				ret.append(", ");
+			}
+			ret.append(" and ");
+			ret.append(authors.length - 1);
+			return ret.toString();
+		}
+		throw new IllegalArgumentException(Arrays.toString(authors));
 	}
 	
 }
