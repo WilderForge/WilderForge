@@ -86,7 +86,7 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 			if(files == null) {
 				throw new AssertionError();
 			}
-			coremod.getCoremodInfo().folder = files.classpath("").child(coremod.value());
+			coremod.getCoremodInfo().folder = files.classpath("");
 		}
 	}
 	
