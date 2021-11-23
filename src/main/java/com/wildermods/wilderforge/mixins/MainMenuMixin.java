@@ -5,8 +5,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.wildermods.wilderforge.launch.LoadStatus;
-import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.ui.CoremodListPopup;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.game.common.ui.OptionButton;
@@ -34,7 +32,7 @@ public abstract class MainMenuMixin extends RootMenuPanel {
 		this.stack.padTop(30);
 		OptionButton.Factory buttonFactory = new OptionButton.Factory(dependencies, null, "mainMenuButton");
 		OptionButton<Object> button = buttonFactory.ui(null, "wilderforge.mainMenu.coremods");
-		button.clicked.add(this, () -> Coremods.getCoremodCountByStatus(LoadStatus.LOADED));
+		button.clicked.add(this, () -> dependencies.popUpManager.pushFront(new CoremodListPopup(dependencies), false));
 		this.stack.add(button).row();
 	}
 	

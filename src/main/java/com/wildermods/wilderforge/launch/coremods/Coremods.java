@@ -102,10 +102,12 @@ public class Coremods {
 		return getCoremod(coremod.value());
 	}
 	
-	public static Coremod getCoremod(String modid) {
+	public static Coremod getCoremod(String modid, boolean... ignore) {
 		Coremod coremod = coremods.get(modid);
 		if(coremod == null) {
-			new Error().printStackTrace();
+			if((ignore.length == 0)) {
+				new Error().printStackTrace();
+			}
 			coremod = new MissingCoremod(modid);
 		}
 		return coremod;
@@ -234,6 +236,7 @@ public class Coremods {
 				asm = new ASM();
 				mixin = new Mixin();
 				wilderforge = new WilderForge();
+				WilderForge.EVENT_BUS.register(wildermyth);
 			}
 			catch(IOException e) {
 				throw new CoremodLinkageError(e);

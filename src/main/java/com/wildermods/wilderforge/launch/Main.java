@@ -30,7 +30,7 @@ public final class Main {
 			ClassLoader loader = checkClassloader();
 			
 			setupReflectionsHelper(loader);
-			
+
 			loadCoremods(loader);
 			
 			LoadStage.setLoadStage(PRE_INIT);

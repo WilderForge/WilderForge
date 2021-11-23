@@ -18,6 +18,7 @@ import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.coremods.MissingCoremod;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
@@ -72,8 +73,8 @@ public class ServerDataContextMixin {
 	 * Lets Wildermyth load resources from coremods
 	 */
 	private void loadModInfoTail(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
-		Coremod coremod = Coremods.getCoremod(modId);
-		if(coremod != null) {
+		Coremod coremod = Coremods.getCoremod(modId, true);
+		if(!(coremod instanceof MissingCoremod)) {
 			LoadStatus loadStatus = Coremods.getStatus(coremod);
 			if(loadStatus == LoadStatus.LOADED) {
 				Main.LOGGER.info("Coremod " + coremod + " is loaded.");

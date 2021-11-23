@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FileUtils;
 
+import com.badlogic.gdx.Gdx;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -22,10 +23,18 @@ import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 @Coremod("wildermyth")
 public final class Wildermyth extends HardCodedCoremod {
 	
+	public static Wildermyth INSTANCE;
+	
 	private static LegacyViewDependencies legacyViewDependencies;
 	private static final File VERSION_FILE = new File("./version.txt");
 	
 	Wildermyth() throws IOException {
+		if(INSTANCE == null) {
+			INSTANCE = this;
+		}
+		else {
+			throw new IllegalStateException();
+		}
 		construct("wildermyth", "Wildermyth", getWildermythVersion(new File(".")));
 	}
 	
@@ -40,6 +49,7 @@ public final class Wildermyth extends HardCodedCoremod {
 		if(Wildermyth.legacyViewDependencies == null) {
 			Wildermyth.legacyViewDependencies = legacyViewDependencies;
 			WilderForge.EVENT_BUS.fire(e);
+			INSTANCE.coremodInfo.folder = Gdx.files.internal("");
 		}
 		else {
 			throw new IllegalStateException("Game already initialized!");
@@ -52,6 +62,7 @@ public final class Wildermyth extends HardCodedCoremod {
 		json.add(MODID, new JsonPrimitive("wildermyth"));
 		json.add(NAME, new JsonPrimitive("Wildermyth"));
 		json.add(VERSION, new JsonPrimitive(getVersion().toString()));
+		json.add(IMAGE, new JsonPrimitive("assets/ui/icon/wildermythIcon_256.png"));
 		JsonArray authors = new JsonArray();
 		authors.add(new JsonPrimitive("Worldwalker Games, LLC"));
 		json.add(AUTHORS, authors);

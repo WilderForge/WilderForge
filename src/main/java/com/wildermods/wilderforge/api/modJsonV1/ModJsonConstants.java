@@ -14,6 +14,7 @@ public interface ModJsonConstants {
 	public final String OPTIONAL = "optional";
 	public final String INCOMPATIBLE = "incompatible";
 	public final String LICENSE = "license";
+	public final String IMAGE = "image";
 	
 	;
 	
