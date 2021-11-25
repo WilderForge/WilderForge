@@ -13,16 +13,15 @@ import java.util.Arrays;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.badlogic.gdx.Files;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.coremods.MissingCoremod;
+
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
@@ -95,33 +94,6 @@ public abstract class ServerDataContextMixin {
 		else {
 			LOGGER.warn("No coremod of modid '" + modId + "' was found.");
 		}
-	}
-	
-	/*
-	 * Allows wildermyth to retrieve coremod files in the classpath
-	 */
-	@Inject(
-		at = @At(
-			value = "RETURN",
-			ordinal = 1 //2nd return value
-		),
-		method = "getBestFile"
-				+ "("
-					+ "Ljava/lang/String;"
-					+ "Lcom/badlogic/gdx/utils/Array;"
-				+ ")"
-				+ "Lcom/badlogic/gdx/files/FileHandle;",
-		locals = LocalCapture.CAPTURE_FAILHARD,
-		require = 1
-	)
-	public FileHandle getBestFile(String assetPath, Array ignoreMods, CallbackInfoReturnable<FileHandle> c, int i, GameSettings.ModEntry modEntry, FileHandle fileHandle) {
-		LOGGER.info(fileHandle);
-		ModInfo info = modEntry.info;
-		if(info instanceof CoremodInfo) {
-			CoremodInfo coreInfo = (CoremodInfo) info;
-			return coreInfo.folder.child(assetPath);
-		}
-		return null;
 	}
 	
 	@Inject(
