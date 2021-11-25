@@ -94,7 +94,7 @@ public class CoremodListPopup extends PopUp {
 		Table buttonTable = new Table(dependencies.skin);
 		Image modImage = new Image(new FancyImageDrawable("wilderforge/assets/ui/coremodlist/exampleModImage.png", null));
 		FileHandle imageFile = null;
-		if(coremodInfo.folder != null) {
+		if(coremodInfo.getFolder(false) != null) {
 			imageFile = coremodInfo.getFolder(false).child(coremod.value() + "/assets/modIcon.png");
 		}
 
