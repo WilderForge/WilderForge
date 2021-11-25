@@ -1,6 +1,10 @@
 package com.wildermods.wilderforge.mixins;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import static org.spongepowered.asm.mixin.injection.At.Shift.BY;
 
@@ -11,11 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.LoadStatus;
-import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.coremods.MissingCoremod;
@@ -26,8 +30,12 @@ import com.worldwalkergames.legacy.server.context.ServerDataContext;
 import com.worldwalkergames.legacy.server.context.ServerDataContext.LoadingProgressFrameCallback;
 
 @Mixin(value = ServerDataContext.class, remap = false)
-public class ServerDataContextMixin {
+public abstract class ServerDataContextMixin {
 
+	private static @Unique Logger LOGGER = LogManager.getLogger(ServerDataContext.class);
+	public @Shadow Files files;
+	protected @Shadow Array<GameSettings.ModEntry> activeMods;
+	
 	@Inject(
 		at = @At("RETURN"), method = "retrieveAllMods(ZZ)Lcom/badlogic/gdx/utils/Array;", require = 1, cancellable = true)
 	/*
@@ -77,15 +85,15 @@ public class ServerDataContextMixin {
 		if(!(coremod instanceof MissingCoremod)) {
 			LoadStatus loadStatus = Coremods.getStatus(coremod);
 			if(loadStatus == LoadStatus.LOADED) {
-				Main.LOGGER.info("Coremod " + coremod + " is loaded.");
+				LOGGER.info("Coremod " + coremod + " is loaded.");
 				c.setReturnValue(coremod.getCoremodInfo());
 			}
 			else {
-				Main.LOGGER.warn("Coremod " + coremod + " is not loaded. Its status is (" + loadStatus + ")");
+				LOGGER.warn("Coremod " + coremod + " is not loaded. Its status is (" + loadStatus + ")");
 			}
 		}
 		else {
-			Main.LOGGER.warn("No coremod of modid '" + modId + "' was found.");
+			LOGGER.warn("No coremod of modid '" + modId + "' was found.");
 		}
 	}
 	
@@ -107,7 +115,7 @@ public class ServerDataContextMixin {
 		require = 1
 	)
 	public FileHandle getBestFile(String assetPath, Array ignoreMods, CallbackInfoReturnable<FileHandle> c, int i, GameSettings.ModEntry modEntry, FileHandle fileHandle) {
-		Main.LOGGER.info(fileHandle);
+		LOGGER.info(fileHandle);
 		ModInfo info = modEntry.info;
 		if(info instanceof CoremodInfo) {
 			CoremodInfo coreInfo = (CoremodInfo) info;
@@ -132,7 +140,7 @@ public class ServerDataContextMixin {
 	 */
 	private synchronized void applyGameSettings(Array<ModEntry> requested, LoadingProgressFrameCallback progressFrameCallback, CallbackInfo c) {
 		if(requested != null) {
-			Main.LOGGER.info("Requesting: " + Arrays.toString(requested.items));
+			LOGGER.info("Requesting: " + Arrays.toString(requested.items));
 			for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
 				ModEntry entry = new ModEntry(coremod.getCoremodInfo());
 				if(!requested.contains(entry, false)) {
@@ -141,7 +149,7 @@ public class ServerDataContextMixin {
 			}
 		}
 		else {
-			Main.LOGGER.warn("Requesting NO MODS");
+			LOGGER.warn("Requesting NO MODS");
 		}
 	}
 	

@@ -4,14 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.function.Supplier;
 
 import org.apache.commons.io.FileUtils;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.wildermods.wilderforge.api.modLoadingV1.Coremod;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.versionV1.Version;
@@ -49,11 +51,18 @@ public final class Wildermyth extends HardCodedCoremod {
 		if(Wildermyth.legacyViewDependencies == null) {
 			Wildermyth.legacyViewDependencies = legacyViewDependencies;
 			WilderForge.EVENT_BUS.fire(e);
-			INSTANCE.coremodInfo.folder = Gdx.files.internal("");
 		}
 		else {
 			throw new IllegalStateException("Game already initialized!");
 		}
+	}
+	
+	@Override
+	public Supplier<FileHandle[]> vanillaFolderOverride() {
+		FileHandle[] ret = super.vanillaFolderOverride().get();
+		ret[0] = null;
+		ret[1] = CoremodInfo.files.internal("");
+		return () -> ret;
 	}
 
 	@Override

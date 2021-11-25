@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -27,7 +28,7 @@ import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 
 public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.api.modLoadingV1.Coremod {
 
-	private static Files files;
+	public static Files files;
 	
 	public final Coremod coremod;
 	
@@ -79,6 +80,15 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 		return modId;
 	}
 	
+	
+	public FileHandle getFolder() {
+		return getFolder(false);
+	}
+	
+	public FileHandle getFolder(boolean vanilla) {
+		return coremod.vanillaFolderOverride().get()[vanilla ? 0 : 1];
+	}
+	
 	@SubscribeEvent(priority = EventPriority.LOWER - 1000)
 	public static void onPostInitialization(PostInitializationEvent e) {
 		files = Gdx.files;
@@ -86,7 +96,7 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 			if(files == null) {
 				throw new AssertionError();
 			}
-			coremod.getCoremodInfo().folder = files.classpath("");
+			coremod.getCoremodInfo().folder = coremod.getCoremodInfo().getFolder(true);
 		}
 	}
 	

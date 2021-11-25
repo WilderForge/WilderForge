@@ -19,7 +19,6 @@ import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.LoadStatus;
 import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
-
 import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.DialogFrame;
@@ -94,13 +93,17 @@ public class CoremodListPopup extends PopUp {
 		modButton.setUserData(coremod);
 		Table buttonTable = new Table(dependencies.skin);
 		Image modImage = new Image(new FancyImageDrawable("wilderforge/assets/ui/coremodlist/exampleModImage.png", null));
-		FileHandle imageFile = coremodInfo.folder.child(coremod.value() + "/assets/modIcon.png");
+		FileHandle imageFile = null;
+		if(coremodInfo.folder != null) {
+			imageFile = coremodInfo.getFolder(false).child(coremod.value() + "/assets/modIcon.png");
+		}
+
 		JsonElement imgLoc = coremod.getModJson().get(IMAGE);
 		
 		if((imgLoc = coremod.getModJson().get(IMAGE)) != null) {
-			imageFile = coremodInfo.folder.child(imgLoc.getAsString());
+			imageFile = coremodInfo.getFolder(false).child(imgLoc.getAsString());
 		}
-		if(imageFile.exists()) {
+		if(imageFile != null && imageFile.exists()) {
 			modImage = new Image(new FancyImageDrawable(imageFile.path(), null));
 		}
 		else {

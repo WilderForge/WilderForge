@@ -5,7 +5,9 @@ import java.lang.annotation.Annotation;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.function.Supplier;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.google.gson.JsonObject;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.versionV1.Version;
@@ -63,6 +65,10 @@ public abstract class Coremod implements com.wildermods.wilderforge.api.modLoadi
 	
 	public final Version getVersion() {
 		return version;
+	}
+	
+	public Supplier<FileHandle[]> vanillaFolderOverride() {
+		return () -> new FileHandle[] {CoremodInfo.files.classpath(""), CoremodInfo.files.classpath("")};
 	}
 	
 	@Override
