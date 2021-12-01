@@ -60,6 +60,10 @@ labels:
         color: "ff7fd6"
         description: "This issue is actively being worked on or implemented"
     -
+        name: "Status - Patched"
+        color: "e6c719"
+        description: "This non-wilderforge issue has been patched by wilderforge"
+    -
         name: "Status - Postponed"
         color: "ffc6dc"
         description: "This issue or pull request is postponed for a later date"
@@ -76,3 +80,7 @@ labels:
         name: "Status - Unable to Reproduce"
         color: "ffffff"
         description: "Unable to reproduce this issue"
+    -
+        name: "Other - Vanilla"
+        color: "fef2c0"
+        description: "This is a Wildermyth issue or an issue caused by Wildermyth or it's dependencies"
