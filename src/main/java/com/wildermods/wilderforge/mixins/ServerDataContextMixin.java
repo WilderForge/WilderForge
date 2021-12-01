@@ -35,8 +35,9 @@ public abstract class ServerDataContextMixin {
 	public @Shadow Files files;
 	protected @Shadow Array<GameSettings.ModEntry> activeMods;
 	
+	
 	@Inject(
-		at = @At("RETURN"), method = "retrieveAllMods(ZZ)Lcom/badlogic/gdx/utils/Array;", require = 1, cancellable = true)
+		at = @At("RETURN"), method = "retrieveAllMods(ZZ)Lcom/badlogic/gdx/utils/Array;", require = 1)
 	/*
 	 * Lets Wildermyth's mod engine know about coremods
 	 */
@@ -45,7 +46,6 @@ public abstract class ServerDataContextMixin {
 		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
 			modInfos.add(coremod.getCoremodInfo());
 		}
-		c.setReturnValue(modInfos);
 	}
 	
 	@Inject(
