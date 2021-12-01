@@ -8,6 +8,7 @@
 	"mixins": [
 		"AggregatorMixin",
 		"BiomeMixin",
+		"ClientDataContextMixin",
 		"CampaignGeneratorMixin",
 		"FileConsumerMixin",
 		"LegacyDesktopMixin",
