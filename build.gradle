@@ -92,6 +92,8 @@ eclipse {
 				lib.sourcePath = decomp
 				lib = entries.find { it.path.contains 'gameEngine-1.0.jar'}
 				lib.sourcePath = decomp
+				lib = entries.find { it.path.contains 'fmod-jni.jar'}
+				lib.sourcePath = decomp
 			}
 		}
 	}
