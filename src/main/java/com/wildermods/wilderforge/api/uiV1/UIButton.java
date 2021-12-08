@@ -51,7 +51,7 @@ public class UIButton<T> extends NiceButton<T> {
 
 	@Override
 	protected final boolean tryClick() {
-		if(!WilderForge.EVENT_BUS.fire(new ButtonEvent.ButtonTryClickEvent(Wildermyth.getViewDependencies(), this)) && !this.isDisabled()) {
+		if(!WilderForge.EVENT_BUS.fire(new ButtonEvent.ButtonTryClickEvent(Wildermyth.getViewDependencies(), this)) && super.tryClick()) {
 			onClick();
 			return true;
 		}

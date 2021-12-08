@@ -17,6 +17,7 @@
 		"ModAwareResourceBundleMixin",
 		"NiceLwjgl3ApplicationMixin",
 		"OverlandTileMapLabMixin",
+		"PopUpAccessorMixin",
 		"RootMenuMixin",
 		"ServerDataContextMixin",
 		"TileMapGenerator"

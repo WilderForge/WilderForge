@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 
@@ -21,8 +22,10 @@ import org.apache.logging.log4j.Logger;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
+import com.wildermods.wilderforge.api.uiV1.elements.buttons.LinkButton;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.LoadStatus;
+import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.context.GameStrings;
@@ -30,6 +33,7 @@ import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.controller.NavTable;
 import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.PopUp;
+import com.worldwalkergames.legacy.ui.component.FancyLabel;
 import com.worldwalkergames.legacy.ui.menu.OptionsDialog.Style;
 import com.worldwalkergames.ui.FancyImageDrawable;
 import com.worldwalkergames.ui.NiceLabel;
@@ -138,35 +142,58 @@ public class CoremodListPopup extends PopUp {
 			selectedMod.setChecked(false);
 		}
 		selectedMod = modButton;
-		rightScrollPane.clear();
+
 		rightScrollPane.debugAll();
+		
 		Table table = new Table();
 		table.setDebug(true);
+		table.defaults().align(Align.topLeft).pad(3f).expandX();
 		if(modButton == null) {
 			
 			rightScrollPane.setWidth(Value.percentWidth(0.5f, masterTable).get());
 			rightScrollPane.setHeight(Value.percentHeight(1f, masterTable).get());
-			masterTable.getCell(rightScrollPane).fill();
 			
 			rightScrollPane.setActor(table);
+			rightScrollPane.setDebug(true);
+			
+			FancyLabel summary = new FancyLabel(I18N.ui("wilderforge.debug.loremipsum"), this.dependencies.skin, "characterSheet", "details");
+			
+			table.add(summary).grow();
+			
+			table.add().grow();
+			
+			rightScrollPane.layout();
 
 			frame.pack();
-			return;
 		}
 		else {
+			
+			Table topLabels = new Table();
+			topLabels.defaults().align(Align.topLeft).pad(3f).expandX();
+			topLabels.debugAll();
+			
+			Table imageAndData = new Table();
+			imageAndData.defaults().align(Align.topLeft).expandX().padRight(3f);
+			imageAndData.debugAll();
+			
+			Table modNameTable = new Table();
+			modNameTable.defaults().align(Align.topLeft).padRight(9f).expandX();
+			modNameTable.debugAll();
+			
+			Table modDataTable = new Table();
+			modDataTable.defaults().align(Align.topLeft);
+			
+			Table linkButtons = new Table();
+			linkButtons.defaults().align(Align.center).width(Value.percentWidth(0.5f, table)).expandX();
+			linkButtons.debugAll();
+			
 			Cell<Image> imageCell = null;
 			try {
-				imageCell = table.add(modButton.constructImage()).align(Align.topLeft);
+				imageCell = imageAndData.add(modButton.constructImage()).align(Align.topLeft);
 			}
 			catch(IOException e) {
 				LOGGER.catching(e);
 			}
-			
-			Table topLabels = new Table();
-			topLabels.defaults().align(Align.topLeft).pad(3f);
-			
-			Table modNameTable = new Table();
-			modNameTable.defaults().align(Align.topLeft).padRight(9f);
 			
 			NiceLabel modName = new NiceLabel(modButton.coremod.getName(), dependencies.skin, "characterSheetRightPanelBold");
 			NiceLabel version = new NiceLabel(I18N.ui("wilderforge.ui.coremods.version", modButton.coremod.getVersion().toString()), dependencies.skin, "characterSheetRightPanel");
@@ -177,33 +204,95 @@ public class CoremodListPopup extends PopUp {
 			authors.setEllipsis(true);
 			
 			
-			table.add(topLabels).align(Align.topLeft);
+			table.add(imageAndData).align(Align.left);
 			
 			modNameTable.add(modName);
 			modNameTable.add(version);
 			
-			topLabels.add(modNameTable);
-			topLabels.row();
-			topLabels.add(authors);
-			topLabels.row();
-			topLabels.add(modid);
+			modDataTable.add(modNameTable);
+			modDataTable.row();
+			modDataTable.add(authors);
+			modDataTable.row();
+			modDataTable.add(modid);
+			
+			imageAndData.add(modDataTable);
+			imageAndData.row();
 			
 			if(imageCell != null) {
-				imageCell.width(Value.percentHeight(1f, topLabels));
-				imageCell.height(Value.percentHeight(1f, topLabels));
-				topLabels.pack();
+				imageCell.width(Value.percentHeight(1f, imageAndData));
+				imageCell.height(Value.percentHeight(1f, imageAndData));
+				imageAndData.pack();
 			}
 			
-			rightScrollPane.setActor(table);
-			rightScrollPane.setWidth(Value.percentWidth(0.5f, frame).get());
-			rightScrollPane.setHeight(Value.percentHeight(0.5f, frame).get());
-			masterTable.getCell(rightScrollPane).grow();
-			LOGGER.info(table.getCells().size);
+			table.row();
 			
-			table.add().grow();
+			linkButtons.setDebug(true);
 			
-			frame.pack();
+			JsonObject json;
+			try {
+				json = modButton.coremod.getModJson();
+			} catch (IOException e) {
+				Main.LOGGER.catching(e);
+				json = null;
+			}
+			
+			if(json != null) {
+				
+				JsonElement sourceJson = json.get(SOURCE_URL);
+				JsonElement issuesJson = json.get(ISSUES_URL);
+				JsonElement websiteJson = json.get(WEBSITE);
+				JsonElement licenseJson = json.get(LICENSE_URL);
+				
+				String source = null;
+				String issues = null;
+				String website = null;
+				String license = null;
+				
+				if(sourceJson != null) {
+					source = sourceJson.getAsString();
+				}
+				if(issuesJson != null) {
+					issues = issuesJson.getAsString();
+				}
+				if(websiteJson != null) {
+					website = websiteJson.getAsString();
+				}
+				if(licenseJson != null) {
+					license = licenseJson.getAsString();
+				}
+				
+				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.source"), this, "gearLine", source));
+				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.issues"), this, "gearLine", issues));
+				linkButtons.row();
+				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.website"), this, "gearLine", website));
+				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.license"), this, "gearLine", license));
+			}
+			
+			table.add(linkButtons.align(Align.center)).growX();
+			
+			String summary = "";
+			
+			if(json != null) {
+				JsonElement summaryJson = json.get(DESCRIPTION);
+				if(summaryJson != null) {
+					summary = summaryJson.getAsString();
+				}
+			}
+			
+			FancyLabel summaryLabel = new FancyLabel(summary, this.dependencies.skin, "characterSheet", "details");
+			
+			table.row();
+			
+			table.add(summaryLabel).grow();
+
 		}
+		
+		rightScrollPane.setActor(table);
+		rightScrollPane.setWidth(Value.percentWidth(0.5f, frame).get());
+		rightScrollPane.setHeight(Value.percentHeight(0.5f, frame).get());
+		masterTable.getCell(rightScrollPane).align(Align.topLeft).grow();
+		
+		frame.pack();
 	}
 	
 	private float scale(float f) {
