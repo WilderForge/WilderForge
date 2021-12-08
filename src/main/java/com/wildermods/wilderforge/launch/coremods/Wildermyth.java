@@ -79,6 +79,7 @@ public final class Wildermyth extends HardCodedCoremod {
 		json.add(ISSUES_URL, new JsonPrimitive("https://discord.com/invite/wildermyth"));
 		json.add(WEBSITE, new JsonPrimitive("https://wildermyth.com/"));
 		json.add(LICENSE_URL, new JsonPrimitive("https://wildermyth.com/terms.php"));
+		json.add(DESCRIPTION, new JsonPrimitive("A procedural storytelling RPG where tactical combat and story decisions will alter your world and reshape your cast of characters."));
 		
 		return json;
 	}

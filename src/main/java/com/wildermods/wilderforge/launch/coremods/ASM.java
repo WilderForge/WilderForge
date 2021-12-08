@@ -31,6 +31,8 @@ class ASM extends HardCodedCoremod {
 		json.add(ISSUES_URL, new JsonPrimitive("https://gitlab.ow2.org/asm/asm/-/issues"));
 		json.add(LICENSE_URL, new JsonPrimitive("https://gitlab.ow2.org/asm/asm/-/blob/master/LICENSE.txt"));
 		
+		json.add(DESCRIPTION, new JsonPrimitive("ASM is an all purpose Java bytecode manipulation and analysis framework. It can be used to modify existing classes or to dynamically generate classes, directly in binary form.\n\nASM provides some common bytecode transformations and analysis algorithms from which custom complex transformations and code analysis tools can be built.\n\nASM offers similar functionality as other Java bytecode frameworks, but is focused on performance."));
+		
 		return json;
 	}
 	
