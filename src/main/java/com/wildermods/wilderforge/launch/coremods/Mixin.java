@@ -62,7 +62,12 @@ class Mixin extends HardCodedCoremod {
 		
 		json.add(CREDITS, credits);
 		
-		json.add(URL, new JsonPrimitive("https://github.com/SpongePowered/Mixin"));
+		json.add(LICENSE, new JsonPrimitive("MIT License"));
+		
+		json.add(WEBSITE, new JsonPrimitive("https://github.com/SpongePowered/Mixin"));
+		json.add(ISSUES_URL, new JsonPrimitive("https://github.com/SpongePowered/Mixin/issues"));
+		json.add(SOURCE_URL, new JsonPrimitive("https://github.com/SpongePowered/Mixin"));
+		json.add(LICENSE_URL, new JsonPrimitive("https://github.com/SpongePowered/Mixin/blob/master/LICENSE.txt"));
 		
 		return json;
 	}

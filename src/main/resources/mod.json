@@ -6,7 +6,9 @@
 		"Gamebuster19901"
 	],
 	"description": "The coremodding framework for Wildermyth.",
-	"url": "https://github.com/Gamebuster19901/WilderForge",
+	"source": "https://github.com/Gamebuster19901/WilderForge",
+	"issues": "https://github.com/Gamebuster19901/WilderForge/issues",
+	"website": "https://wildermods.com",
 	"credits":[
 		"",
 		"",

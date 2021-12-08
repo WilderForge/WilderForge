@@ -26,6 +26,11 @@ class ASM extends HardCodedCoremod {
 		JsonArray authors = new JsonArray();
 		authors.add(new JsonPrimitive("INRIA, France Telecom"));
 		json.add(AUTHORS, authors);
+		json.add(WEBSITE, new JsonPrimitive("https://asm.ow2.io/"));
+		json.add(SOURCE_URL, new JsonPrimitive("https://gitlab.ow2.org/asm/asm"));
+		json.add(ISSUES_URL, new JsonPrimitive("https://gitlab.ow2.org/asm/asm/-/issues"));
+		json.add(LICENSE_URL, new JsonPrimitive("https://gitlab.ow2.org/asm/asm/-/blob/master/LICENSE.txt"));
+		
 		return json;
 	}
 	

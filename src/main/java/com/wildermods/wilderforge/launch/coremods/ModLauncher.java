@@ -37,6 +37,12 @@ public class ModLauncher extends HardCodedCoremod {
 		
 		json.add(DESCRIPTION, new JsonPrimitive("Provides a java service which allows for class transformations at classload time."));
 		
+		json.add(SOURCE_URL, new JsonPrimitive("https://github.com/cpw/modlauncher"));
+		json.add(ISSUES_URL, new JsonPrimitive("https://github.com/cpw/modlauncher/issues"));
+		json.add(LICENSE_URL, new JsonPrimitive("https://github.com/cpw/modlauncher/blob/master/COPYING.LGPL"));
+		
+		json.add(LICENSE, new JsonPrimitive("LGPL v3"));
+		
 		return json;
 		
 	}

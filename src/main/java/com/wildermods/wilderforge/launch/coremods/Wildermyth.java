@@ -75,6 +75,11 @@ public final class Wildermyth extends HardCodedCoremod {
 		JsonArray authors = new JsonArray();
 		authors.add(new JsonPrimitive("Worldwalker Games, LLC"));
 		json.add(AUTHORS, authors);
+		
+		json.add(ISSUES_URL, new JsonPrimitive("https://discord.com/invite/wildermyth"));
+		json.add(WEBSITE, new JsonPrimitive("https://wildermyth.com/"));
+		json.add(LICENSE_URL, new JsonPrimitive("https://wildermyth.com/terms.php"));
+		
 		return json;
 	}
 	

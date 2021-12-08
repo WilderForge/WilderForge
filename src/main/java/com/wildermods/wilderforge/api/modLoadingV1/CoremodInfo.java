@@ -53,6 +53,10 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 		showInStoryDialog = true;
 		showInModConfig = true;
 		listInCredits = true;
+		JsonElement website = json.get(WEBSITE);
+		if(website != null) {
+			url = json.get(WEBSITE).getAsString();
+		}
 		JsonElement creditsEle = json.get(CREDITS);
 		customCreditLines = creditsEle != null ? WilderForge.gson.fromJson(creditsEle, String[].class) : null;
 		JsonElement authorsEle = json.get(AUTHORS);
