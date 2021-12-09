@@ -156,7 +156,7 @@ public class CoremodListPopup extends PopUp {
 			rightScrollPane.setActor(table);
 			rightScrollPane.setDebug(true);
 			
-			FancyLabel summary = new FancyLabel(I18N.ui("wilderforge.debug.loremipsum"), this.dependencies.skin, "characterSheet", "details");
+			FancyLabel summary = new FancyLabel("", this.dependencies.skin, "characterSheet", "details");
 			
 			table.add(summary).grow();
 			
