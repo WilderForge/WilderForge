@@ -11,6 +11,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.coremods.ModLauncher;
 import com.wildermods.wilderforge.launch.coremods.WilderForge;
+import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.Version;
 

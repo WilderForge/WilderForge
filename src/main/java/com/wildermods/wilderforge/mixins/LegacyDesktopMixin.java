@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.codedisaster.steamworks.SteamUtils;
 
 import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.logging.GraphicalInfo;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
 
@@ -43,6 +44,11 @@ public class LegacyDesktopMixin {
 		for(ILogConsumer consumer : aggregator.consumers) {
 			System.out.println(consumer.getClass());
 		}
+	}
+	
+	@Inject(at = @At(value = "HEAD"), method = "create()V")
+	public void create(CallbackInfo c) {
+		GraphicalInfo.INSTANCE = new GraphicalInfo((LegacyDesktop)(Object)this);
 	}
 	
 	@Inject(at = @At(value = "HEAD"), method = "fatalError")

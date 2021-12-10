@@ -1,4 +1,8 @@
-package com.wildermods.wilderforge.launch;
+package com.wildermods.wilderforge.launch.logging;
+
+import java.awt.GraphicsEnvironment;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -18,15 +22,21 @@ import org.spongepowered.asm.mixin.throwables.MixinException;
 
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
+import com.badlogic.gdx.Gdx;
+import com.wildermods.wilderforge.launch.LoadStage;
+import com.wildermods.wilderforge.launch.LoadStatus;
+import com.wildermods.wilderforge.launch.Main;
 import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.Version;
 
-class CrashInfo {
+public final class CrashInfo {
 
 	File crashFolder = new File("./crashes");
 	
-	CrashInfo(Throwable t) {
+	public CrashInfo(Throwable t) {
+        System.out.println(Gdx.gl.glGetString(7938));
+        System.out.println(Gdx.gl.glGetString(35724));
 		StringBuilder s = new StringBuilder("---- WilderForge Crash Report----");
 		s.append('\n');
 		s.append(getWittyMessage(t)).append('\n');
@@ -84,10 +94,10 @@ class CrashInfo {
 				}));
 			}
 			else if (StackOverflowError.class.isAssignableFrom(tType)){
-				return "In order to understand recursion, one must first understand recursion.";
+				return "//In order to understand recursion, one must first understand recursion.";
 			}
 			else if(MixinException.class.isAssignableFrom(tType)) {
-				return "Check your mixins.";
+				return "//Check your mixins.";
 			}
 		}
 		
@@ -132,10 +142,36 @@ class CrashInfo {
 		s.append("\tCurrent heap size: ").append(humanReadableByteCount(heapSize)).append('\n');
 		s.append("\tHeap used: ").append(humanReadableByteCount(heapSize - freeHeapSize)).append('\n');
 		s.append("\tFree heap: ").append(humanReadableByteCount(freeHeapSize)).append('\n');
+		appendGraphicalDetails(s);
 		s.append("Java Version: ").append(System.getProperty("java.runtime.name")).append(" ").append(System.getProperty("java.runtime.version")).append(" \n");
 		s.append("\tVendor: ").append(System.getProperty("java.vm.vendor")).append('\n');
 		s.append("Uptime: ").append(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime())).append('\n');
 		return s;
+	}
+	
+	private void appendGraphicalDetails(StringBuilder s) {
+		s.append("Graphical information:\n");
+		if(GraphicalInfo.INSTANCE != null) {
+			GraphicalInfo.INSTANCE.appendGraphicalDetails(s);
+		}
+		else {
+			s.append("\t\tTotal monitors (OpenGL):\n");
+			s.append("\t\t\tOpenGL context not fully intialized, no opengl information available\n");
+		}
+		try {
+			GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			s.append("\t\tTotal monitors (Java): " + g.getScreenDevices().length).append('\n');
+			for(int i = 0; i < g.getScreenDevices().length; i++) {
+				GraphicsDevice monitor = g.getScreenDevices()[i];
+				DisplayMode displayMode = monitor.getDisplayMode();
+				s.append("\t\t\tMonitor " + i + "\n");
+				s.append("\t\t\t\tName: " + monitor.getIDstring()).append('\n');
+				s.append("\t\t\t\tResolution: " + displayMode.getWidth() + "x" + displayMode.getHeight() + "@" + displayMode.getRefreshRate() + "hz").append('\n');
+			}
+		}
+		catch(Throwable t) {
+			s.append("\t\tCould not Java monitor information due to a ").append(t.getClass().getCanonicalName()).append('\n');
+		}
 	}
 	
 	private StringBuilder appendCoremodDetails(StringBuilder s) {
