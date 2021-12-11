@@ -91,9 +91,6 @@ public class CoremodListPopup extends PopUp {
 			masterTable.setDebug(true);
 		}
 		
-		
-		masterTable.setWidth(dependencies.screenInfo.width);
-		
 		RuntimeSkin skin = dependencies.skin;
 		style = skin.get(Style.class);
 		
@@ -126,13 +123,9 @@ public class CoremodListPopup extends PopUp {
 		}
 		
 		leftScrollPane.setActor(modList);
-		masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame));
-		masterTable.add(rightScrollPane).width(Value.percentWidth(0.5f, frame));
-		frame.addInner(masterTable);
 		
-		clickModButton(null);
-			
-		frame.pack();
+		clickModButton(null); //I don't know why, but this has to be called twice or the right panel will not be the correct size.
+		clickModButton(null); //I'm done trying to debug this
 		
 		group.add(frame).setVerticalCenter(0).setHorizontalCenter(0);
 	}
@@ -148,23 +141,18 @@ public class CoremodListPopup extends PopUp {
 		Table table = new Table();
 		table.setDebug(true);
 		table.defaults().align(Align.topLeft).pad(3f).expandX();
+
 		if(modButton == null) {
+
+			masterTable.clear();
+			masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame));
+			masterTable.add(rightScrollPane).width(Value.percentWidth(0.5f, frame)).height(leftScrollPane.getHeight());
 			
-			rightScrollPane.setWidth(Value.percentWidth(0.5f, masterTable).get());
-			rightScrollPane.setHeight(Value.percentHeight(1f, masterTable).get());
+			masterTable.getCell(rightScrollPane).align(Align.topLeft).grow();
 			
 			rightScrollPane.setActor(table);
 			rightScrollPane.setDebug(true);
 			
-			FancyLabel summary = new FancyLabel("", this.dependencies.skin, "characterSheet", "details");
-			
-			table.add(summary).grow();
-			
-			table.add().grow();
-			
-			rightScrollPane.layout();
-
-			frame.pack();
 		}
 		else {
 			
@@ -283,14 +271,19 @@ public class CoremodListPopup extends PopUp {
 			
 			table.row();
 			
-			table.add(summaryLabel).grow();
+			table.add(summaryLabel).expand();
 
 		}
 		
 		rightScrollPane.setActor(table);
-		rightScrollPane.setWidth(Value.percentWidth(0.5f, frame).get());
-		rightScrollPane.setHeight(Value.percentHeight(0.5f, frame).get());
+
+		masterTable.clear();
+		masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame));
+		masterTable.add(rightScrollPane).width(Value.percentWidth(0.5f, frame)).height(leftScrollPane.getHeight());
+		
 		masterTable.getCell(rightScrollPane).align(Align.topLeft).grow();
+		
+		frame.addInner(masterTable);
 		
 		frame.pack();
 	}
