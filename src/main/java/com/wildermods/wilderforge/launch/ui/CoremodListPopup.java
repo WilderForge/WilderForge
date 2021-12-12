@@ -88,7 +88,6 @@ public class CoremodListPopup extends PopUp {
 		if(frame != null) {
 			group.removeActor(frame);
 			masterTable.clear();
-			masterTable.setDebug(true);
 		}
 		
 		RuntimeSkin skin = dependencies.skin;
@@ -97,7 +96,6 @@ public class CoremodListPopup extends PopUp {
 		frame = new DialogFrame(dependencies);
 		frame.preferredWidth = Float.valueOf(style.f("dialogWidth"));
 		frame.preferredWidth = Float.valueOf(style.f("dialogHeight"));
-		frame.setDebug(true);
 		
 		float padLeft = style.f("padLeft");
 		float padRight = style.f("padRight");
@@ -135,11 +133,8 @@ public class CoremodListPopup extends PopUp {
 			selectedMod.setChecked(false);
 		}
 		selectedMod = modButton;
-
-		rightScrollPane.debugAll();
 		
 		Table table = new Table();
-		table.setDebug(true);
 		table.defaults().align(Align.topLeft).pad(3f).expandX();
 
 		if(modButton == null) {
@@ -151,29 +146,24 @@ public class CoremodListPopup extends PopUp {
 			masterTable.getCell(rightScrollPane).align(Align.topLeft).grow();
 			
 			rightScrollPane.setActor(table);
-			rightScrollPane.setDebug(true);
 			
 		}
 		else {
 			
 			Table topLabels = new Table();
 			topLabels.defaults().align(Align.topLeft).pad(3f).expandX();
-			topLabels.debugAll();
 			
 			Table imageAndData = new Table();
 			imageAndData.defaults().align(Align.topLeft).expandX().padRight(3f);
-			imageAndData.debugAll();
 			
 			Table modNameTable = new Table();
 			modNameTable.defaults().align(Align.topLeft).padRight(9f).expandX();
-			modNameTable.debugAll();
 			
 			Table modDataTable = new Table();
 			modDataTable.defaults().align(Align.topLeft);
 			
 			Table linkButtons = new Table();
 			linkButtons.defaults().align(Align.center).width(Value.percentWidth(0.5f, table)).expandX();
-			linkButtons.debugAll();
 			
 			Cell<Image> imageCell = null;
 			try {
@@ -213,8 +203,6 @@ public class CoremodListPopup extends PopUp {
 			}
 			
 			table.row();
-			
-			linkButtons.setDebug(true);
 			
 			JsonObject json;
 			try {
