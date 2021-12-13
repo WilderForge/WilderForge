@@ -34,16 +34,6 @@ class Mixin extends HardCodedCoremod {
 		json.add(AUTHORS, authors);
 		json.add(DESCRIPTION, new JsonPrimitive("A bytecode weaving framework for Java using ASM"));
 		
-		JsonArray incompatabilities = new JsonArray();
-		
-		JsonObject modLauncher = new JsonObject();
-		modLauncher.add(MODID, new JsonPrimitive("modlauncher"));
-		modLauncher.add(VERSION, new JsonPrimitive("[0.*,8.*)[9.*]")); //Only mod launcher 8 is compatible
-		
-		incompatabilities.add(modLauncher);
-		
-		json.add(INCOMPATIBLE, incompatabilities);
-		
 		JsonArray requires = new JsonArray();
 		
 		JsonObject asm = new JsonObject();

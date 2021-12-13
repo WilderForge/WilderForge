@@ -52,7 +52,6 @@ public class Coremods {
 	protected static final @SuppressWarnings("serial") HashMap<String, LoadStatus> loadStatuses = new HashMap<String, LoadStatus>(){
 		{
 			put("wildermyth", UNDISCOVERED);
-			put("modlauncher", UNDISCOVERED);
 			put("asm", UNDISCOVERED);
 			put("mixin", UNDISCOVERED);
 			put("wilderforge", UNDISCOVERED);
@@ -226,13 +225,11 @@ public class Coremods {
 			jarField.setAccessible(true);
 			URL[] jarLocs = (URL[]) jarField.get(classLoader);
 			Wildermyth wildermyth;
-			ModLauncher modlauncher;
 			ASM asm;
 			Mixin mixin;
 			WilderForge wilderforge;
 			try {
 				wildermyth = new Wildermyth();
-				modlauncher = new ModLauncher();
 				asm = new ASM();
 				mixin = new Mixin();
 				wilderforge = new WilderForge();
@@ -242,7 +239,6 @@ public class Coremods {
 				throw new CoremodLinkageError(e);
 			}
 			addFoundCoremod(wildermyth);
-			addFoundCoremod(modlauncher);
 			addFoundCoremod(asm);
 			addFoundCoremod(mixin);
 			addFoundCoremod(wilderforge);
