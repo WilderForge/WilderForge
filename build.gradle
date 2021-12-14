@@ -42,7 +42,11 @@ dependencies {
 	shadow group: 'org.ow2.asm', name: 'asm-tree', version: asmVersion
 	shadow group: 'org.ow2.asm', name: 'asm-util', version: asmVersion
 	
-	
+	/*
+	*
+	* CVE-2021-44228 DO NOT REMOVE
+	*
+	*/
 	shadow group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
 	shadow group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
 	shadow group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.15.0'
