@@ -21,9 +21,8 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 
 import com.wildermods.wilderforge.api.versionV1.Version;
-import com.wildermods.wilderforge.launch.exception.CoremodFormatError;
-import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
 import com.wildermods.wilderforge.launch.patch.LegacyPatch;
+import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 
 import net.fabricmc.loader.impl.FormattedException;
 import net.fabricmc.loader.impl.game.GameProvider;
@@ -31,6 +30,7 @@ import net.fabricmc.loader.impl.game.GameProviderHelper;
 import net.fabricmc.loader.impl.game.patch.GameTransformer;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.metadata.BuiltinModMetadata;
+import net.fabricmc.loader.impl.metadata.ContactInformationImpl;
 import net.fabricmc.loader.impl.util.Arguments;
 import net.fabricmc.loader.impl.util.SystemProperties;
 
@@ -68,9 +68,11 @@ public class WildermythGameProvider implements GameProvider {
 			}
 		}
 		catch(IOException e) {
-			throw new CoremodLinkageError(e);
+			LinkageError linkageError = new LinkageError();
+			linkageError.initCause(e);
+			throw linkageError;
 		}
-		throw new CoremodFormatError("No version.txt detected for wildermyth!");
+		throw new LinkageError("No version.txt detected for wildermyth!");
 	}
 
 	@Override
@@ -80,9 +82,19 @@ public class WildermythGameProvider implements GameProvider {
 
 	@Override
 	public Collection<BuiltinMod> getBuiltinMods() {
-		BuiltinModMetadata.Builder metadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion()).setName(getGameName());
 		
-		return Collections.singletonList(new BuiltinMod(gameJar, metadata.build()));
+		HashMap<String, String> contactInformation = new HashMap<>();
+		contactInformation.put(HOMEPAGE, "https://wildermyth.com/");
+		contactInformation.put(ISSUES_URL, "https://discord.gg/wildermyth");
+		
+		BuiltinModMetadata.Builder wildermythMetaData = 
+				new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
+				.setName(getGameName())
+				.addAuthor("Worldwalker Games, LLC.", contactInformation)
+				.setContact(new ContactInformationImpl(contactInformation))
+				.setDescription("A procedural storytelling RPG where tactical combat and story decisions will alter your world and reshape your cast of characters.");
+		
+		return Collections.singletonList(new BuiltinMod(gameJar, wildermythMetaData.build()));
 	}
 
 	@Override

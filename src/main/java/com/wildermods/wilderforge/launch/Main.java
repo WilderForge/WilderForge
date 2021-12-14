@@ -4,38 +4,28 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.wildermods.wilderforge.launch.LoadStage.*;
-import static com.wildermods.wilderforge.launch.coremods.WilderForge.EVENT_BUS;
-
-import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
-import com.wildermods.wilderforge.launch.coremods.Coremods;
-import com.wildermods.wilderforge.launch.coremods.ModLauncher;
-import com.wildermods.wilderforge.launch.coremods.WilderForge;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.worldwalkergames.legacy.LegacyDesktop;
-import com.worldwalkergames.legacy.Version;
 
 @InternalOnly
 public final class Main {
+	
+	//TODO: Remove this class?
+	
 	public static final Logger LOGGER = LogManager.getLogger(Main.class);
 	@InternalOnly
 	public static ReflectionsHelper reflectionsHelper;
 
 	public static void main(String[] args) throws IOException {
 		try {
-			for(String s : args) {
-				if(s.startsWith("modLauncherVersion:")) {
-					ModLauncher.VERSION = s.replace("modLauncherVersion:", "");
-				}
-			}
 			ClassLoader loader = checkClassloader();
 			
 			setupReflectionsHelper(loader);
 
-			loadCoremods(loader);
+//			loadCoremods(loader);
 			
-			LoadStage.setLoadStage(PRE_INIT);
-			EVENT_BUS.fire(new PreInitializationEvent());
+//			LoadStage.setLoadStage(PRE_INIT);
+//			EVENT_BUS.fire(new PreInitializationEvent());
 			launchGame(args);
 		}
 		catch(Throwable t) {
@@ -60,14 +50,14 @@ public final class Main {
 		reflectionsHelper = new ReflectionsHelper(classLoader);
 	}
 	
-	private static final void loadCoremods(ClassLoader classLoader) {
+/*	private static final void loadCoremods(ClassLoader classLoader) {
 		Coremods.loadCoremods(classLoader);
 		WilderForge wf = (WilderForge) Coremods.getCoremod("wilderforge");
 		Version.PATCHLINE = wf.getVersionString();
-	}
+	}*/
 	
 	private static final void launchGame(String[] args) {
-		LoadStage.setLoadStage(INIT);
+//		LoadStage.setLoadStage(INIT);
 		LegacyDesktop.main(args);
 	}
 	

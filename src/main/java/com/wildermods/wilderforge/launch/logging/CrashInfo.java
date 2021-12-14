@@ -22,11 +22,8 @@ import org.spongepowered.asm.mixin.throwables.MixinException;
 
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
-import com.badlogic.gdx.Gdx;
-import com.wildermods.wilderforge.launch.LoadStage;
-import com.wildermods.wilderforge.launch.LoadStatus;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.Main;
-import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.Version;
 
@@ -35,15 +32,12 @@ public final class CrashInfo {
 	File crashFolder = new File("./crashes");
 	
 	public CrashInfo(Throwable t) {
-        System.out.println(Gdx.gl.glGetString(7938));
-        System.out.println(Gdx.gl.glGetString(35724));
 		StringBuilder s = new StringBuilder("---- WilderForge Crash Report----");
 		s.append('\n');
 		s.append(getWittyMessage(t)).append('\n');
 		s.append('\n');
 		s.append("Time: ").append(getDate()).append('\n');
 		s.append("Description: ").append(t.getMessage()).append('\n');
-		s.append("Stage: ").append(LoadStage.getLoadStage()).append('\n');
 		s.append('\n');
 		s.append(ExceptionUtils.getStackTrace(t));
 		s.append("---- Additonal Information----").append('\n');
@@ -176,9 +170,9 @@ public final class CrashInfo {
 	
 	private StringBuilder appendCoremodDetails(StringBuilder s) {
 		s.append("-- Coremod Details --").append('\n');
-		s.append("Coremods Detected: " + Coremods.getCoremodCountByStatus(LoadStatus.values())).append(":\n\n");
-		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.values())) {
-			s.append('\t').append(Coremods.getStatus(coremod)).append(' ').append(coremod.getVersionString()).append('\n');
+		s.append("Coremods Detected: " + Coremods.getCoremodCount()).append(":\n\n");
+		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
+			//s.append('\t').append(Coremods.getStatus(coremod)).append(' ').append(coremod.getVersionString()).append('\n');
 		}
 		return s;
 	}

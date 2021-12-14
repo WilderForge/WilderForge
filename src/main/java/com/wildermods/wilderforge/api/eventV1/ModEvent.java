@@ -1,22 +1,22 @@
 package com.wildermods.wilderforge.api.eventV1;
 
-import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 
 public abstract class ModEvent extends Event {
 
-	protected final Coremod coremod;
+	protected final CoremodInfo coremod;
 	
-	public ModEvent(Coremod coremod, boolean cancellable) {
+	public ModEvent(CoremodInfo coremod, boolean cancellable) {
 		super(cancellable);
 		this.coremod = coremod;
 	}
 
-	public Coremod getCoremod() {
+	public CoremodInfo getCoremod() {
 		return coremod;
 	}
 	
 	public final String getModId() {
-		return coremod.value();
+		return coremod.modId;
 	}
 	
 }

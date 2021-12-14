@@ -2,8 +2,6 @@ package com.wildermods.wilderforge.api.uiV1;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.wildermods.wilderforge.launch.coremods.WilderForge;
-import com.wildermods.wilderforge.launch.coremods.Wildermyth;
 import com.worldwalkergames.ui.NiceButton;
 
 public class UIButton<T> extends NiceButton<T> {
@@ -51,16 +49,16 @@ public class UIButton<T> extends NiceButton<T> {
 
 	@Override
 	protected final boolean tryClick() {
-		if(!WilderForge.EVENT_BUS.fire(new ButtonEvent.ButtonTryClickEvent(Wildermyth.getViewDependencies(), this)) && super.tryClick()) {
+//		if(!WilderForge.EVENT_BUS.fire(new ButtonEvent.ButtonTryClickEvent(Wildermyth.getViewDependencies(), this)) && super.tryClick()) {
 			onClick();
 			return true;
-		}
-		return false;
+//		}
+//		return false;
 	}
 	
 	private final void onClick() {
 		clickImpl();
-		WilderForge.EVENT_BUS.fire(new ButtonEvent.ButtonClickEvent(Wildermyth.getViewDependencies(), this));
+//		WilderForge.EVENT_BUS.fire(new ButtonEvent.ButtonClickEvent(Wildermyth.getViewDependencies(), this));
 	}
 	
 	protected void clickImpl() {

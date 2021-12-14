@@ -24,7 +24,7 @@ public class LegacyPatch extends GamePatch {
 			throw new LinkageError ("Could not load main class " + entrypoint + "!");
 		}
 		
-		MethodNode mainMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("([Ljava/lang/String;)V") && isPublicStatic(method.access));
+		MethodNode mainMethod = findMethod(mainClass, (method) -> method.name.equals("<clinit>") && method.desc.equals("()V"));
 		
 		if(mainMethod == null) {
 			throw new NoSuchMethodError("Could not find main method in " + entrypoint +  "!");
