@@ -113,7 +113,7 @@ jar {
 		attributes(
 			'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
 			'MixinConfigs': 'mixins.json',
-			'Main-Class': 'cpw.mods.modlauncher.Launcher',
+			'Main-Class': 'net.fabricmc.loader.impl.launch.knot.KnotClient',
 			'Specification-Version': 8.0,
 			'Multi-Release': 'true'
 		)
