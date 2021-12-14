@@ -20,7 +20,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 
-import com.wildermods.wilderforge.api.versionV1.Version;
 import com.wildermods.wilderforge.launch.patch.LegacyPatch;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 
@@ -33,6 +32,7 @@ import net.fabricmc.loader.impl.metadata.BuiltinModMetadata;
 import net.fabricmc.loader.impl.metadata.ContactInformationImpl;
 import net.fabricmc.loader.impl.util.Arguments;
 import net.fabricmc.loader.impl.util.SystemProperties;
+import net.fabricmc.loader.impl.util.version.StringVersion;
 
 public class WildermythGameProvider implements GameProvider {
 
@@ -44,7 +44,6 @@ public class WildermythGameProvider implements GameProvider {
 	private Path launchDir;
 	private Path libDir;
 	private Path gameJar;
-	private Version gameVersion;
 	private final List<Path> miscGameLibraries = new ArrayList<>();
 	
 	private static final GameTransformer TRANSFORMER = new GameTransformer(new LegacyPatch());
@@ -61,18 +60,7 @@ public class WildermythGameProvider implements GameProvider {
 
 	@Override
 	public String getRawGameVersion() {
-		File versionFile = new File("./version.txt");
-		try {
-			if(versionFile.exists()) {
-				return Version.getVersion(FileUtils.readFileToString(versionFile).split(" ")[0]).toString();
-			}
-		}
-		catch(IOException e) {
-			LinkageError linkageError = new LinkageError();
-			linkageError.initCause(e);
-			throw linkageError;
-		}
-		throw new LinkageError("No version.txt detected for wildermyth!");
+		return getGameVersion().getFriendlyString();
 	}
 
 	@Override
@@ -165,8 +153,6 @@ public class WildermythGameProvider implements GameProvider {
 				}
 			}
 		}
-		
-		gameVersion = getGameVersion();
 		
 		processArgumentMap(arguments);
 		
@@ -284,17 +270,17 @@ public class WildermythGameProvider implements GameProvider {
 		return Paths.get(arguments.getOrDefault("gameDir", "."));
 	}
 	
-	private Version getGameVersion() {
+	private StringVersion getGameVersion() {
 		File versionFile = new File("./version.txt");
 		try {
 			if(versionFile.exists()) {
-				return Version.getVersion(FileUtils.readFileToString(versionFile).split(" ")[0]);
+				return new StringVersion(FileUtils.readFileToString(versionFile).split(" ")[0]);
 			}
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			throw new Error("Could not detect wildermyth version");
 		}
-		return Version.MISSING;
+		throw new Error("Could not detect wildermyth version. Missing versions.txt?");
 	}
 
 }
