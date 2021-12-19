@@ -131,7 +131,6 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 			return ResourceBundle.getBundle(path.replace(".properties", ""), locale);
 		}
 		catch (MissingResourceException e) {
-			System.out.println("No interface.properties in " + modId);
 			return null;
 		}
 	}
