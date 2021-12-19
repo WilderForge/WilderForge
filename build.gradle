@@ -27,7 +27,7 @@ dependencies {
 	shadow group: 'org.jetbrains', name: 'intellij-fernflower', version: '1.2.1.16'
 	shadow group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
 	shadow group: 'net.fabricmc', name: 'access-widener', version: '2.1.0'
-	shadow group: 'net.fabricmc', name: 'fabric-loader', version: '0.12.11'
+	implementation group: 'net.fabricmc', name: 'fabric-loader', version: '0.12.12'
 	shadow group: 'net.fabricmc', name: 'tiny-mappings-parser', version:'0.3.0+'
 	shadow group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.5'
 	shadow group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
