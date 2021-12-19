@@ -10,6 +10,7 @@
 		"BiomeMixin",
 		"ClientDataContextMixin",
 		"CampaignGeneratorMixin",
+		"FancyImageDrawableAccessor",
 		"FileConsumerMixin",
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
