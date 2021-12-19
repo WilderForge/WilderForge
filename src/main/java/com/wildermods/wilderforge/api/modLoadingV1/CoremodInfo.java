@@ -46,8 +46,18 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 		
 		CustomValue HOMEPAGEV = metadata.getCustomValue(HOMEPAGE);
 		
-		if(HOMEPAGEV != null) {
-			url = metadata.getCustomValue(HOMEPAGE).getAsString();
+		if(modId.equals("java")) {
+			author = System.getProperty("java.vendor");
+			if(author == null) {
+				author = "Unknown vendor";
+			}
+			url = "java.vendor.url";
+		}
+		else {
+			author = grammaticallyCorrectAuthorList((Person[]) metadata.getAuthors().toArray(new Person[]{}));
+			if(HOMEPAGEV != null) {
+				url = metadata.getCustomValue(HOMEPAGE).getAsString();
+			}
 		}
 		
 		CustomValue creditArrayV = metadata.getCustomValue(CREDITS);
@@ -62,10 +72,6 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 				customCreditLines[i] = creditArray.get(i).getAsString();
 			}
 		}
-		
-		
-		
-		author = grammaticallyCorrectAuthorList((Person[]) metadata.getAuthors().toArray(new Person[]{}));
 		
 		Main.LOGGER.info(Arrays.toString(customCreditLines));
 		name = metadata.getName();
