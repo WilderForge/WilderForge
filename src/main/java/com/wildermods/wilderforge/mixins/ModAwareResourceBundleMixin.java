@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.badlogic.gdx.files.FileHandle;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.resources.CoremodCompatibleResourceBundle;
 
@@ -40,7 +40,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			+ ")V",
 		require = 1)
 	public void constructor(ServerDataContext parentObj, String assetPath, FileHandle bundleForDependencies, boolean fromAllMods, Locale locale, CallbackInfo c) {
-		Main.LOGGER.debug("ASSET PATH: " + assetPath);
+		WilderForge.LOGGER.debug("ASSET PATH: " + assetPath);
 		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 			addResources(coremod, assetPath, locale);
 		}
@@ -67,7 +67,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			this.contentByMod.put(coremod.modId, coremodValues);
 		}
 		else {
-			Main.LOGGER.info("Coremod " + coremod + " has no resources");
+			WilderForge.LOGGER.info("Coremod " + coremod + " has no resources");
 		}
 	}
 	

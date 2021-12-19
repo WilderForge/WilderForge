@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.wildermods.wilderforge.api.overlandV1.OverlandMapGenerationEvent;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.worldwalkergames.legacy.game.campaign.CampaignGenerator;
 import com.worldwalkergames.legacy.game.campaign.model.CampaignTemplate;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
@@ -28,7 +29,7 @@ public class CampaignGeneratorMixin {
 	public OverlandTileMapGenerator create(OverlandTileMapGenerator generator, CampaignTemplate campaignTemplate, GameSettings settings, NewGameRequest request) {
 		OverlandGenContext context = ((TileMapGenerator)generator).getContext();
 		OverlandMapGenerationEvent generationEvent = new OverlandMapGenerationEvent(generator, context, campaignTemplate, settings, request);
-//		WilderForge.EVENT_BUS.fire(generationEvent);
+		WilderForge.EVENT_BUS.fire(generationEvent);
 		return generationEvent.getGenerator();
 	}
 	

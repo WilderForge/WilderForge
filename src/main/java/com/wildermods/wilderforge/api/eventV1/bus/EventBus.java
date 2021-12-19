@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
-import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.WilderForge;
 
 public class EventBus {
 	private static final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
@@ -112,7 +112,7 @@ public class EventBus {
 			throw new NullPointerException();
 		}
 		else if(o instanceof Class) {
-			for(Method m : Main.getReflectionsHelper().getAllMethodsAnnotatedWith(SubscribeEvent.class)) {
+			for(Method m : WilderForge.getReflectionsHelper().getAllMethodsAnnotatedWith(SubscribeEvent.class)) {
 				if(Modifier.isStatic(m.getModifiers())) {
 					EventListener listener = new StaticEventListener(m);
 					if(!LISTENERS.containsKey(listener.subscribedTo)) {
@@ -124,7 +124,7 @@ public class EventBus {
 			}
 		}
 		else {
-			for(Method m : Main.getReflectionsHelper().getAllMethodsAnnotatedWith(SubscribeEvent.class)) {
+			for(Method m : WilderForge.getReflectionsHelper().getAllMethodsAnnotatedWith(SubscribeEvent.class)) {
 				if(Modifier.isStatic(m.getModifiers())) {
 					continue;
 				}

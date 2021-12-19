@@ -21,7 +21,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.WilderForge;
 
 public class CoremodInfo extends ModInfo implements ModContainer {
 
@@ -73,7 +73,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 			}
 		}
 		
-		Main.LOGGER.info(Arrays.toString(customCreditLines));
+		WilderForge.LOGGER.info(Arrays.toString(customCreditLines));
 		name = metadata.getName();
 		modLocation = ModLocation.core;
 		this.coremod = coremod;

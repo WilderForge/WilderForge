@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.throwables.MixinException;
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
-import com.wildermods.wilderforge.launch.Main;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.Version;
 
@@ -59,7 +59,7 @@ public final class CrashInfo {
 			s.append("IN ADDITION TO THE ABOVE ERROR, WILDERFORGE COULD NOT CREATE CRASH REPORT FILE:");
 			s.append(ExceptionUtils.getStackTrace(t2));
 		}
-		Main.LOGGER.fatal(s);
+		WilderForge.LOGGER.fatal(s);
 	}
 	
 	@SuppressWarnings("unchecked")

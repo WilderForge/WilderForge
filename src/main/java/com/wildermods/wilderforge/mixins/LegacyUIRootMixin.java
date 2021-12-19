@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.ui.NoFeedbackPopup;
 
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
@@ -27,8 +28,7 @@ public class LegacyUIRootMixin {
 	 * Fires the PostInitializationEvent and sets LegacyViewDependencies
 	 */
 	public void before(CallbackInfo c) {
-//		LoadStage.setLoadStage(POST_INIT);
-//		Wildermyth.init(new PostInitializationEvent(), dependencies);
+		WilderForge.init(dependencies);
 	}
 	
 	/*
