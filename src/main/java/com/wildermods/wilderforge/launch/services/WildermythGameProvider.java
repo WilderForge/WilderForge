@@ -71,15 +71,15 @@ public class WildermythGameProvider implements GameProvider {
 	@Override
 	public Collection<BuiltinMod> getBuiltinMods() {
 		
-		HashMap<String, String> contactInformation = new HashMap<>();
-		contactInformation.put(HOMEPAGE, "https://wildermyth.com/");
-		contactInformation.put(ISSUES_URL, "https://discord.gg/wildermyth");
+		HashMap<String, String> wildermythContactInformation = new HashMap<>();
+		wildermythContactInformation.put(HOMEPAGE, "https://wildermyth.com/");
+		wildermythContactInformation.put(ISSUES_URL, "https://discord.gg/wildermyth");
 		
 		BuiltinModMetadata.Builder wildermythMetaData = 
 				new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion())
 				.setName(getGameName())
-				.addAuthor("Worldwalker Games, LLC.", contactInformation)
-				.setContact(new ContactInformationImpl(contactInformation))
+				.addAuthor("Worldwalker Games, LLC.", wildermythContactInformation)
+				.setContact(new ContactInformationImpl(wildermythContactInformation))
 				.setDescription("A procedural storytelling RPG where tactical combat and story decisions will alter your world and reshape your cast of characters.");
 		
 		return Collections.singletonList(new BuiltinMod(gameJar, wildermythMetaData.build()));
@@ -120,26 +120,28 @@ public class WildermythGameProvider implements GameProvider {
 		arguments.parse(args);
 		
 		Map<Path, ZipFile> zipFiles = new HashMap<>();
+		List<Path> lookupPaths = new ArrayList<>();
 		
 		try {
 			String gameJarProperty = System.getProperty(SystemProperties.GAME_JAR_PATH);
-			GameProviderHelper.FindResult result;
+			GameProviderHelper.FindResult result = null;
+			if(gameJarProperty == null) {
+				gameJarProperty = "./wildermyth.jar";
+			}
 			if(gameJarProperty != null) {
 				Path path = Paths.get(gameJarProperty);
 				if (!Files.exists(path)) {
-					throw new RuntimeException("Game jar configured through "+SystemProperties.GAME_JAR_PATH+" system property doesn't exist");
+					throw new RuntimeException("Game jar configured through " + SystemProperties.GAME_JAR_PATH + " system property doesn't exist");
 				}
-				result = GameProviderHelper.findFirstClass(Collections.singletonList(path), zipFiles, ENTRYPOINTS);
-			}
-			else {
-				result = GameProviderHelper.findFirstClass(launcher.getClassPath(), zipFiles, ENTRYPOINTS);
+				lookupPaths.add(path);
+				result = GameProviderHelper.findFirst(Collections.singletonList(path), zipFiles, true, ENTRYPOINTS);
 			}
 			
 			if(result == null) {
 				return false;
 			}
 			
-			entrypoint = result.className;
+			entrypoint = result.name;
 			gameJar = result.path;
 			
 		}
@@ -177,6 +179,9 @@ public class WildermythGameProvider implements GameProvider {
 			if(dep.getName().endsWith(".jar")) {
 				if(dep.getName().equals("wildermyth.jar")) {
 					System.out.println("Skipping wildermyth.jar");
+				}
+				else if (dep.getName().contains("wilderforge-")) {
+					System.out.println("Skipping " + dep.getName());
 				}
 				else if (dep.getName().endsWith(".jar")) {
 					miscGameLibraries.add(dep.toPath());
