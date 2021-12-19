@@ -2,6 +2,7 @@ package com.wildermods.wilderforge.launch.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -22,6 +23,7 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.uiV1.TextureFilterDrawable;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
 import com.wildermods.wilderforge.api.uiV1.elements.buttons.LinkButton;
 import com.wildermods.wilderforge.launch.InternalOnly;
@@ -33,7 +35,6 @@ import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.PopUp;
 import com.worldwalkergames.legacy.ui.component.FancyLabel;
 import com.worldwalkergames.legacy.ui.menu.OptionsDialog.Style;
-import com.worldwalkergames.ui.FancyImageDrawable;
 import com.worldwalkergames.ui.NiceLabel;
 
 @InternalOnly
@@ -277,7 +278,7 @@ public class CoremodListPopup extends PopUp {
 		
 		private Image constructImage() throws IOException {
 			CoremodInfo coremodInfo = coremod;
-			Image modImage = new Image(new FancyImageDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null));
+			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null, TextureFilter.Nearest));
 			FileHandle imageFile = null;
 			if(coremodInfo.getFolder() != null) {
 				if(coremodInfo.modId.equals("wildermyth")) {
@@ -294,7 +295,7 @@ public class CoremodListPopup extends PopUp {
 				imageFile = coremodInfo.getFolder().child(imgLoc.getAsString());
 			}
 			if(imageFile != null && imageFile.exists()) {
-				modImage = new Image(new FancyImageDrawable(imageFile.path(), null));
+				modImage = new Image(new TextureFilterDrawable(imageFile.path(), null, TextureFilter.Nearest));
 			}
 			else {
 				LOGGER.info("Could not find " + imageFile.path() + " " + imageFile.type());
