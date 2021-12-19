@@ -2,11 +2,13 @@ package com.wildermods.wilderforge.mixins;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 
-import java.lang.reflect.Field;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 
-import org.apache.commons.lang3.StringUtils;
+import java.lang.reflect.Field;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -42,8 +44,9 @@ public class RootMenuMixin {
 	 * Setup the custom patchline
 	 */
 	public Label overwritePatchLine(CharSequence text, LabelStyle style) {
+		ModContainer wilderforge = FabricLoader.getInstance().getModContainer("wilderforge").get();
 		if(style == getVersionStyle()) {
-			text = StringUtils.capitalize(Coremods.getCoremod("wilderforge").getMetadata().getVersion().getFriendlyString()) + " (" + Coremods.getCoremodCount() + ") coremods loaded)";
+			text = WilderForge.getViewDependencies().getString("wilderforge.mainMenu.patchline", wilderforge.getMetadata().getName(), wilderforge.getMetadata().getVersion().getFriendlyString(), Coremods.getCoremodCount() + "");
 		}
 		return new Label(text, style);
 	}
