@@ -23,25 +23,24 @@ archivesBaseName = "wilderforge"
 
 dependencies {
 
-	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.9'
-	shadow group: 'org.jetbrains', name: 'intellij-fernflower', version: '1.2.1.16'
-	shadow group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
-	shadow group: 'net.fabricmc', name: 'access-widener', version: '2.1.0'
-	implementation group: 'net.fabricmc', name: 'fabric-loader', version: '0.12.12'
-	shadow group: 'net.fabricmc', name: 'tiny-mappings-parser', version:'0.3.0+'
-	shadow group: 'net.fabricmc', name: 'fabric-loader', version: '0.12.12'
+	compileOnly group: 'org.apache.commons', name: 'commons-text', version: '1.9'
+	compileOnly group: 'org.jetbrains', name: 'intellij-fernflower', version: '1.2.1.16'
+	compileOnly group: 'net.fabricmc', name: 'access-widener', version: '2.1.0'
+	compileOnly group: 'net.fabricmc', name: 'fabric-loader', version: '0.12.12'
+	compileOnly group: 'net.fabricmc', name: 'tiny-mappings-parser', version:'0.3.0+'
+	compileOnly group: 'net.fabricmc', name: 'fabric-loader', version: '0.12.12'
 	shadow group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.5'
 	shadow group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
 
 	//mixin requirements:
-	shadow 'org.spongepowered:mixin:' + mixinVersion
-	shadow 'com.google.guava:guava:21.0'
-	shadow group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
-	shadow group: 'org.ow2.asm', name: 'asm', version: asmVersion
-	shadow group: 'org.ow2.asm', name: 'asm-analysis', version: asmVersion
-	shadow group: 'org.ow2.asm', name: 'asm-commons', version: asmVersion
-	shadow group: 'org.ow2.asm', name: 'asm-tree', version: asmVersion
-	shadow group: 'org.ow2.asm', name: 'asm-util', version: asmVersion
+	compileOnly 'org.spongepowered:mixin:' + mixinVersion
+	compileOnly 'com.google.guava:guava:21.0'
+	compileOnly group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
+	compileOnly group: 'org.ow2.asm', name: 'asm', version: asmVersion
+	compileOnly group: 'org.ow2.asm', name: 'asm-analysis', version: asmVersion
+	compileOnly group: 'org.ow2.asm', name: 'asm-commons', version: asmVersion
+	compileOnly group: 'org.ow2.asm', name: 'asm-tree', version: asmVersion
+	compileOnly group: 'org.ow2.asm', name: 'asm-util', version: asmVersion
 	
 	/*
 	*
@@ -58,10 +57,10 @@ dependencies {
 	***********/
 	
 	//Wildermyth, Scratchpad
-	implementation fileTree(dir: './bin/', include: ['*.jar'])
+	compileOnly fileTree(dir: './bin/', include: ['*.jar'])
 	
 	//All dependencies of Wildermyth itself
-	implementation fileTree(dir: './bin/lib/', include: ['*.jar'])
+	compileOnly fileTree(dir: './bin/lib/', include: ['*.jar'])
 }
 
 test {
