@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.MessageFormatMessageFactory;
 import org.apache.logging.log4j.Level;
 import static org.apache.logging.log4j.Level.*;
 
@@ -38,7 +37,7 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 		if((ret = LOGGERS.get(name)) != null) {
 			return ret;
 		}
-		ret = LogManager.getLogger(name, new MessageFormatMessageFactory());
+		ret = LogManager.getLogger(name);
 		LOGGERS.putIfAbsent(name, ret);
 		return ret;
 	}

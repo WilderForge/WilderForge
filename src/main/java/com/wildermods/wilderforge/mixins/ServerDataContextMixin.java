@@ -16,11 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.utils.Array;
-
-import com.wildermods.wilderforge.launch.LoadStatus;
-import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
-import com.wildermods.wilderforge.launch.coremods.MissingCoremod;
 
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
@@ -43,9 +41,7 @@ public abstract class ServerDataContextMixin {
 	 */
 	private void retrieveAllMods(boolean excludeBuiltInMods, boolean excludeSteamWorkshopMods, CallbackInfoReturnable<Array<ModInfo>> c) {
 		Array<ModInfo> modInfos = c.getReturnValue();
-		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
-			modInfos.add(coremod.getCoremodInfo());
-		}
+		modInfos.addAll(Coremods.getAllCoremods());
 	}
 	
 	@Inject(
@@ -80,16 +76,12 @@ public abstract class ServerDataContextMixin {
 	 * Lets Wildermyth load resources from coremods
 	 */
 	private void loadModInfoTail(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
-		Coremod coremod = Coremods.getCoremod(modId, true);
+		System.out.println("Attempting to load coremod " + modId);
+		CoremodInfo coremod = Coremods.getCoremod(modId);
+		System.out.println("Coremod " + modId + " is " + coremod);
 		if(!(coremod instanceof MissingCoremod)) {
-			LoadStatus loadStatus = Coremods.getStatus(coremod);
-			if(loadStatus == LoadStatus.LOADED) {
 				LOGGER.info("Coremod " + coremod + " is loaded.");
-				c.setReturnValue(coremod.getCoremodInfo());
-			}
-			else {
-				LOGGER.warn("Coremod " + coremod + " is not loaded. Its status is (" + loadStatus + ")");
-			}
+				c.setReturnValue(coremod);
 		}
 		else {
 			LOGGER.warn("No coremod of modid '" + modId + "' was found.");
@@ -113,8 +105,8 @@ public abstract class ServerDataContextMixin {
 	private synchronized void applyGameSettings(Array<ModEntry> requested, LoadingProgressFrameCallback progressFrameCallback, CallbackInfo c) {
 		if(requested != null) {
 			LOGGER.info("Requesting: " + Arrays.toString(requested.items));
-			for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
-				ModEntry entry = new ModEntry(coremod.getCoremodInfo());
+			for(CoremodInfo coremod : Coremods.getAllCoremods()) {
+				ModEntry entry = new ModEntry(coremod);
 				if(!requested.contains(entry, false)) {
 					requested.add(entry);
 				}

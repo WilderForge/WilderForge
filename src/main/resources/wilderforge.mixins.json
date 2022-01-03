@@ -1,0 +1,26 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.wildermods.wilderforge.mixins",
+	"target": "@env(DEFAULT)",
+	"compatibilityLevel": "JAVA_8",
+	"mixinPriority": 1,
+	"mixins": [
+		"AggregatorMixin",
+		"BiomeMixin",
+		"ClientDataContextMixin",
+		"CampaignGeneratorMixin",
+		"FancyImageDrawableAccessor",
+		"FileConsumerMixin",
+		"LegacyDesktopMixin",
+		"LegacyUIRootMixin",
+		"MainMenuMixin",
+		"ModAwareResourceBundleMixin",
+		"NiceLwjgl3ApplicationMixin",
+		"OverlandTileMapLabMixin",
+		"PopUpAccessorMixin",
+		"RootMenuMixin",
+		"ServerDataContextMixin",
+		"TileMapGenerator"
+	]
+}

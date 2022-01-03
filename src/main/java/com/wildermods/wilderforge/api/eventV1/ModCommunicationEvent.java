@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.eventV1;
 
-import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 
 /**
@@ -24,7 +24,7 @@ public final class ModCommunicationEvent<T extends Object> extends ModEvent {
 	 * @param from the mod sending the event
 	 * @param data the data to be sent
 	 */
-	public ModCommunicationEvent(Coremod from, T data) {
+	public ModCommunicationEvent(CoremodInfo from, T data) {
 		super(from, false);
 		this.data = data;
 	}

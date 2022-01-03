@@ -1,6 +1,8 @@
 package com.wildermods.wilderforge.launch.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,22 +13,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.fabricmc.loader.api.metadata.CustomValue;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.uiV1.TextureFilterDrawable;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
 import com.wildermods.wilderforge.api.uiV1.elements.buttons.LinkButton;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.LoadStatus;
-import com.wildermods.wilderforge.launch.Main;
-import com.wildermods.wilderforge.launch.coremods.Coremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
@@ -35,7 +35,6 @@ import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.PopUp;
 import com.worldwalkergames.legacy.ui.component.FancyLabel;
 import com.worldwalkergames.legacy.ui.menu.OptionsDialog.Style;
-import com.worldwalkergames.ui.FancyImageDrawable;
 import com.worldwalkergames.ui.NiceLabel;
 
 @InternalOnly
@@ -109,9 +108,9 @@ public class CoremodListPopup extends PopUp {
 		modList.defaults().left();
 		modList.align(Align.left);
 		
-		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.values())) {
+		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 			try {
-				UIButton<Coremod> modButton = new ModButton(this, coremod);
+				UIButton<CoremodInfo> modButton = new ModButton(this, coremod);
 				modList.add(modButton).left();
 				modList.row();
 			}
@@ -173,10 +172,12 @@ public class CoremodListPopup extends PopUp {
 				LOGGER.catching(e);
 			}
 			
-			NiceLabel modName = new NiceLabel(modButton.coremod.getName(), dependencies.skin, "characterSheetRightPanelBold");
-			NiceLabel version = new NiceLabel(I18N.ui("wilderforge.ui.coremods.version", modButton.coremod.getVersion().toString()), dependencies.skin, "characterSheetRightPanel");
-			NiceLabel authors = new NiceLabel(I18N.ui("wilderforge.ui.coremods.author", modButton.coremod.getCoremodInfo().author), dependencies.skin, "characterSheetRightPanel");
-			NiceLabel modid = new NiceLabel(I18N.ui("wilderforge.ui.coremods.modid", modButton.coremod.value()), dependencies.skin, "characterSheetRightPanel");
+			ModMetadata metadata = modButton.coremod.getMetadata();
+			
+			NiceLabel modName = new NiceLabel(modButton.coremod.name, dependencies.skin, "characterSheetRightPanelBold");
+			NiceLabel version = new NiceLabel(I18N.ui("wilderforge.ui.coremods.version", metadata.getVersion().getFriendlyString()), dependencies.skin, "characterSheetRightPanel");
+			NiceLabel authors = new NiceLabel(I18N.ui("wilderforge.ui.coremods.author", modButton.coremod.author), dependencies.skin, "characterSheetRightPanel");
+			NiceLabel modid = new NiceLabel(I18N.ui("wilderforge.ui.coremods.modid", modButton.coremod.modId), dependencies.skin, "characterSheetRightPanel");
 			
 			modName.setEllipsis(true);
 			authors.setEllipsis(true);
@@ -203,57 +204,27 @@ public class CoremodListPopup extends PopUp {
 			}
 			
 			table.row();
+				
+			String sources = metadata.getContact().get(SOURCE_URL).orElse(null);
+			String issues = metadata.getContact().get(ISSUES_URL).orElse(null);
+			String website = metadata.getContact().get(HOMEPAGE).orElse(null);
+			CustomValue licenseCV = metadata.getCustomValue(LICENSE_URL);
 			
-			JsonObject json;
-			try {
-				json = modButton.coremod.getModJson();
-			} catch (IOException e) {
-				Main.LOGGER.catching(e);
-				json = null;
+			String license = null;
+			
+			if(licenseCV != null) {
+				license = licenseCV.getAsString();
 			}
 			
-			if(json != null) {
-				
-				JsonElement sourceJson = json.get(SOURCE_URL);
-				JsonElement issuesJson = json.get(ISSUES_URL);
-				JsonElement websiteJson = json.get(WEBSITE);
-				JsonElement licenseJson = json.get(LICENSE_URL);
-				
-				String source = null;
-				String issues = null;
-				String website = null;
-				String license = null;
-				
-				if(sourceJson != null) {
-					source = sourceJson.getAsString();
-				}
-				if(issuesJson != null) {
-					issues = issuesJson.getAsString();
-				}
-				if(websiteJson != null) {
-					website = websiteJson.getAsString();
-				}
-				if(licenseJson != null) {
-					license = licenseJson.getAsString();
-				}
-				
-				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.source"), this, "gearLine", source));
-				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.issues"), this, "gearLine", issues));
-				linkButtons.row();
-				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.website"), this, "gearLine", website));
-				linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.license"), this, "gearLine", license));
-			}
+			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.source"), this, "gearLine", sources));
+			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.issues"), this, "gearLine", issues));
+			linkButtons.row();
+			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.website"), this, "gearLine", website));
+			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.license"), this, "gearLine", license));
 			
 			table.add(linkButtons.align(Align.center)).growX();
 			
-			String summary = "";
-			
-			if(json != null) {
-				JsonElement summaryJson = json.get(DESCRIPTION);
-				if(summaryJson != null) {
-					summary = summaryJson.getAsString();
-				}
-			}
+			String summary = metadata.getDescription();
 			
 			FancyLabel summaryLabel = new FancyLabel(summary, this.dependencies.skin, "characterSheet", "details");
 			
@@ -280,13 +251,13 @@ public class CoremodListPopup extends PopUp {
 		return dependencies.screenInfo.scale(f);
 	}
 	
-	private static class ModButton extends UIButton<Coremod> {
+	private static class ModButton extends UIButton<CoremodInfo> {
 		
 		private CoremodListPopup screen;
-		private Coremod coremod;
+		private CoremodInfo coremod;
 		private Image modImage;
 		
-		private ModButton(CoremodListPopup screen, Coremod coremod) throws IOException {
+		private ModButton(CoremodListPopup screen, CoremodInfo coremod) throws IOException {
 			super("", screen.dependencies.skin, "gearLine");
 			this.setUserData(coremod);
 			this.screen = screen;
@@ -296,7 +267,7 @@ public class CoremodListPopup extends PopUp {
 			Table buttonTable = new Table(screen.dependencies.skin);
 			buttonTable.add(modImage).height(screen.scale(50f)).padLeft(-screen.scale(4f)).padRight(screen.scale(6f)).width(screen.scale(50f));
 			
-			NiceLabel nameLabel = new NiceLabel(coremod.getName(), screen.dependencies.skin, "darkInteractive");
+			NiceLabel nameLabel = new NiceLabel(coremod.name, screen.dependencies.skin, "darkInteractive");
 			nameLabel.setEllipsis(true);
 			buttonTable.add(nameLabel).left().minWidth(screen.scale(325f));
 			buttonTable.row();
@@ -306,20 +277,25 @@ public class CoremodListPopup extends PopUp {
 		}
 		
 		private Image constructImage() throws IOException {
-			CoremodInfo coremodInfo = coremod.getCoremodInfo();
-			Image modImage = new Image(new FancyImageDrawable("wilderforge/assets/ui/coremodlist/exampleModImage.png", null));
+			CoremodInfo coremodInfo = coremod;
+			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null, TextureFilter.Nearest));
 			FileHandle imageFile = null;
-			if(coremodInfo.getFolder(false) != null) {
-				imageFile = coremodInfo.getFolder(false).child(coremod.value() + "/assets/modIcon.png");
+			if(coremodInfo.getFolder() != null) {
+				if(coremodInfo.modId.equals("wildermyth")) {
+					imageFile = Gdx.files.internal("assets/ui/icon/wildermythIcon_256.png");
+				}
+				else {
+					imageFile = coremodInfo.getFolder().child("assets/" + coremod.modId + "/icon.png");
+				}
 			}
 
-			JsonElement imgLoc = coremod.getModJson().get(IMAGE);
+			CustomValue imgLoc = coremod.getMetadata().getCustomValue(IMAGE);
 			
-			if((imgLoc = coremod.getModJson().get(IMAGE)) != null) {
-				imageFile = coremodInfo.getFolder(false).child(imgLoc.getAsString());
+			if(imgLoc  != null) {
+				imageFile = coremodInfo.getFolder().child(imgLoc.getAsString());
 			}
 			if(imageFile != null && imageFile.exists()) {
-				modImage = new Image(new FancyImageDrawable(imageFile.path(), null));
+				modImage = new Image(new TextureFilterDrawable(imageFile.path(), null, TextureFilter.Nearest));
 			}
 			else {
 				LOGGER.info("Could not find " + imageFile.path() + " " + imageFile.type());
@@ -339,8 +315,8 @@ public class CoremodListPopup extends PopUp {
 	
 	private static interface Filter {
 		
-		public default boolean showCoremod(Coremod coremod) {
-			return Coremods.getStatus(coremod) == LoadStatus.LOADED;
+		public default boolean showCoremod(CoremodInfo coremod) {
+			return true;
 		}
 		
 	}

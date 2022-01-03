@@ -4,118 +4,102 @@ import com.worldwalkergames.legacy.game.mods.ModInfo;
 import com.worldwalkergames.legacy.server.context.ServerDataContext;
 import com.worldwalkergames.legacy.server.context.ServerDataContext.ModLocation;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.CustomValue;
+import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.Person;
+
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
-import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
-import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.LoadStatus;
-import com.wildermods.wilderforge.launch.Main;
-import com.wildermods.wilderforge.launch.coremods.Coremod;
-import com.wildermods.wilderforge.launch.coremods.Coremods;
-import com.wildermods.wilderforge.launch.coremods.WilderForge;
-import com.wildermods.wilderforge.launch.exception.CoremodLinkageError;
+import com.wildermods.wilderforge.launch.WilderForge;
 
-public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.api.modLoadingV1.Coremod {
+public class CoremodInfo extends ModInfo implements ModContainer {
 
-	public static Files files;
+	public static Files files = Gdx.files;
 	
-	public final Coremod coremod;
+	public final ModContainer coremod;
 	
 	@InternalOnly
-	public CoremodInfo(Coremod coremod) {
-		JsonObject json;
-		try {
-			json = coremod.getModJson();
-		} catch (IOException e) {
-			throw new CoremodLinkageError(e);
-		}
-		this.coremod = coremod;
-		super.modId = coremod.value();
-		if(Coremods.getStatus(coremod) == LoadStatus.LOADED) {
-			modLocation = ServerDataContext.ModLocation.core;
-		}
-		else {
-			modLocation = ServerDataContext.ModLocation.missing;
-		}
+	public CoremodInfo(ModContainer coremod) {
+
+		ModMetadata metadata = coremod.getMetadata();
+		
+		modId = metadata.getId();
+		modLocation = ServerDataContext.ModLocation.core;
 		modSteamWorkshopId = null;
 		alwaysOn = true;
 		showInStoryDialog = true;
 		showInModConfig = true;
 		listInCredits = true;
-		JsonElement website = json.get(WEBSITE);
-		if(website != null) {
-			url = json.get(WEBSITE).getAsString();
-		}
-		JsonElement creditsEle = json.get(CREDITS);
-		customCreditLines = creditsEle != null ? WilderForge.gson.fromJson(creditsEle, String[].class) : null;
-		JsonElement authorsEle = json.get(AUTHORS);
-		String[] authors = WilderForge.gson.fromJson(authorsEle, String[].class);
-		if(authors != null && authors.length > 0) {
-			author = grammaticallyCorrectAuthorList(authors);
+		
+		this.folder = getFolder();
+		
+		CustomValue HOMEPAGEV = metadata.getCustomValue(HOMEPAGE);
+		
+		if(modId.equals("java")) {
+			author = System.getProperty("java.vendor");
+			if(author == null) {
+				author = "Unknown vendor";
+			}
+			url = "java.vendor.url";
 		}
 		else {
-			author = "?";
+			author = grammaticallyCorrectAuthorList((Person[]) metadata.getAuthors().toArray(new Person[]{}));
+			if(HOMEPAGEV != null) {
+				url = metadata.getCustomValue(HOMEPAGE).getAsString();
+			}
 		}
-		Main.LOGGER.info(Arrays.toString(customCreditLines));
-		name = coremod.getName();
+		
+		CustomValue creditArrayV = metadata.getCustomValue(CREDITS);
+		CvArray creditArray = null;
+		if(creditArrayV != null) {
+			creditArray = creditArrayV.getAsArray();
+		}
+		customCreditLines = null;
+		if(creditArray != null) {
+			customCreditLines = new String[creditArray.size()];
+			for(int i = 0; i < creditArray.size(); i++) {
+				customCreditLines[i] = creditArray.get(i).getAsString();
+			}
+		}
+		
+		WilderForge.LOGGER.info(Arrays.toString(customCreditLines));
+		name = metadata.getName();
 		modLocation = ModLocation.core;
-	}
-
-
-	@Override
-	public Class<? extends Annotation> annotationType() {
-		return com.wildermods.wilderforge.api.modLoadingV1.Coremod.class;
-	}
-
-
-	@Override
-	public String value() {
-		return modId;
+		this.coremod = coremod;
 	}
 	
+	protected CoremodInfo() {this.coremod = null;};
 	
 	public FileHandle getFolder() {
-		return getFolder(false);
+		return files.classpath("");
 	}
 	
-	public FileHandle getFolder(boolean vanilla) {
-		return coremod.vanillaFolderOverride().get()[vanilla ? 0 : 1];
-	}
-	
-	@SubscribeEvent(priority = EventPriority.LOWER - 1000)
-	public static void onPostInitialization(PostInitializationEvent e) {
-		files = Gdx.files;
-		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED, LoadStatus.NOT_LOADED, LoadStatus.DISCOVERED)) {
-			if(files == null) {
-				throw new AssertionError();
-			}
-			coremod.getCoremodInfo().folder = coremod.getCoremodInfo().getFolder(true);
+	private String grammaticallyCorrectAuthorList(Person[] authors) {
+		if(authors.length == 0) {
+			return "?";
 		}
-	}
-	
-	private String grammaticallyCorrectAuthorList(String[] authors) {
 		if(authors.length == 1) {
-			return authors[0];
+			return authors[0].getName();
 		}
 		if(authors.length == 2) {
-			return authors[0] + " and " + authors[1];
+			return authors[0].getName() + " and " + authors[1].getName();
 		}
 		if(authors.length > 2) {
 			StringBuilder ret = new StringBuilder();
 			int i = 0;
 			for(; i < authors.length - 1; i++) {
-				ret.append(authors[i]);
+				ret.append(authors[i].getName());
 				ret.append(", ");
 			}
 			ret.append(" and ");
@@ -123,6 +107,32 @@ public class CoremodInfo extends ModInfo implements com.wildermods.wilderforge.a
 			return ret.toString();
 		}
 		throw new IllegalArgumentException(Arrays.toString(authors));
+	}
+
+
+	@Override
+	public ModMetadata getMetadata() {
+		return coremod.getMetadata();
+	}
+
+
+	@Override
+	public Path getRootPath() {
+		return coremod.getRootPath();
+	}
+	
+	@Override
+	public String toString() {
+		return modId;
+	}
+	
+	public ResourceBundle getResourceBundle(String path, Locale locale) {
+		try {
+			return ResourceBundle.getBundle(path.replace(".properties", ""), locale);
+		}
+		catch (MissingResourceException e) {
+			return null;
+		}
 	}
 	
 }

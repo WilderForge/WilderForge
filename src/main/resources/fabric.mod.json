@@ -1,0 +1,94 @@
+{
+	"schemaVersion": 1,
+	"id":"wilderforge",
+	"version":"${WILDERFORGE_VERSION}",
+	
+	"name":"WilderForge",
+	"description": "The coremodding framework for Wildermyth.",
+	"authors": [
+		"Gamebuster19901"
+	],
+	
+	"contact": {
+		"sources": "https://github.com/Gamebuster19901/WilderForge",
+		"issues": "https://github.com/Gamebuster19901/WilderForge/issues",
+		"homepage": "https://wildermods.com"
+	},
+	
+	"credits":[
+		"",
+		"",
+		"[title]Programming[]",
+		"Gamebuster19901",
+		"",
+		"",
+		"",
+		"[title]Special Thanks[]",
+		"This project would not be possible without your hard work!",
+		"",
+		"The Sponge Project",
+		"The Fabric Project",
+		"Player",
+		"LlamaLad7",
+		"Mumfrey",
+		"",
+		"",
+		"",
+		"[title]Libraries used[]",
+		"",
+		"",
+		"[title]Apache Commons[] Apache Software Foundation",
+		"",
+		"[title]ASM and ASM Util[]   INRIA, France Telecom",
+		"",
+		"[title]Enigma[]   The Fabric Project",
+		"Jeff Martin",
+		"",
+		"[title]Fabric Loader[]   The Fabric Project",
+		"",
+		"[title]Gradle[]   Gralde, Inc.",
+		"",
+		"[title]Gradle Java Plugin[]   Gradle, Inc.",
+		"",
+		"[title]Gradle Eclipse Plugin[]   Gradle, Inc.",
+		"",
+		"[title]Gradle Shadow Plugin[]   John Engelman",
+		"",
+		"[title]Gson[]   Google Inc.",
+		"",
+		"[title]Guava[]   Google Inc.",
+		"",
+		"[title]JGraphT[]   The JGraphT Project",
+		"",
+		"[title]Log4J[]   Apache Software Foundation",
+		"",
+		"[title]Reflections8[]   ronmamo",
+		"Andreas Schörk, et al.",
+		"",
+		"[title]Spongepowered Mixin[]   Mumfrey",
+		"The Sponge Project",
+		"",
+		"[title]Wildermyth[]   Worldwalker Games, LLC",
+		"",
+		"Legal Disclaimer:",
+		"Reference to any specific product, person, or corporation in these credits does not mean that the",
+		"referencee endorses, supports, or is affiliated with WilderForge. Unless otherwise stated, It simply",
+		"means that Wilderforge was developed using the referenced product, or that Wilderforge uses code",
+		"created by the referenced corporation or individual."
+	],
+	"mixins": [
+		"wilderforge.mixins.json"
+	],
+	"depends":{
+		"wildermyth": ">=1.0.0"
+	},
+	"breaks":{
+		"wildermyth": [
+			"<1.0",
+			"git"
+		]
+	},
+	"custom": {
+		
+	}
+}

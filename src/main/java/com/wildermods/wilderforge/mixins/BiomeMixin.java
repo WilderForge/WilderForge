@@ -123,14 +123,13 @@ public class BiomeMixin implements WFBiome {
 		}
 	}
 	
-	@Unique
+	
 	private static void setDefaultTraits(WFBiome biome, float weight) {
 		biome.setTrait(WEIGHT, weight);
 		biome.setTrait(PASSABLE, true);
 		biome.setTrait(IS_WATER, false);
 	}
 	
-	@Unique
 	public Biome setTraits(boolean passable, float weight, boolean isWater) {
 		setTrait(WEIGHT, weight);
 		setTrait(PASSABLE, passable);
@@ -138,28 +137,23 @@ public class BiomeMixin implements WFBiome {
 		return (Biome)(Object)this;
 	}
 
-	@Unique
 	@Override
 	public boolean isPassable() {
 		return getTrait("passable");
 	}
 	
-	@Unique
 	@Override
 	public void setPassable(boolean passable) {
 		this.passable = passable;
 		setTrait("passable", passable);
 	}
 
-	@Unique
-	@Override
 	public boolean hasTrait(String name) {
 		return traits.containsKey(name);
 	}
 	
 
 	@Unique
-	@Override
 	public boolean hasTrait(String name, Object value) {
 		Trait<?> trait = traits.get(name);
 		if(trait != null) {
@@ -169,8 +163,6 @@ public class BiomeMixin implements WFBiome {
 	}
 
 	@Unique
-	@Override
-	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> T getTrait(String name) {
 		if(hasTrait(name)) {
@@ -192,14 +184,12 @@ public class BiomeMixin implements WFBiome {
 	}
 
 	@Unique
-	@Override
 	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> Trait<T> getRawTrait(String name) {
 		return (Trait<T>) traits.get(name);
 	}
 
-	@Unique
 	@Override
 	public boolean isWater() {
 		return hasTrait("water", true);

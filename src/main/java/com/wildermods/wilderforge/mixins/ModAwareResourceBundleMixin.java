@@ -14,10 +14,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.LoadStatus;
-import com.wildermods.wilderforge.launch.Main;
-import com.wildermods.wilderforge.launch.coremods.Coremod;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.resources.CoremodCompatibleResourceBundle;
 
@@ -41,8 +40,8 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			+ ")V",
 		require = 1)
 	public void constructor(ServerDataContext parentObj, String assetPath, FileHandle bundleForDependencies, boolean fromAllMods, Locale locale, CallbackInfo c) {
-		Main.LOGGER.debug("ASSET PATH: " + assetPath);
-		for(Coremod coremod : Coremods.getCoremodsByStatus(LoadStatus.LOADED)) {
+		WilderForge.LOGGER.debug("ASSET PATH: " + assetPath);
+		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 			addResources(coremod, assetPath, locale);
 		}
 	}
@@ -50,22 +49,25 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 	@Unique
 	@Override
 	@InternalOnly
-	public void addResources(Coremod coremod, String assetPath, Locale locale) {
-		Main.LOGGER.info("Loading resources for coremod " + coremod);
-		ResourceBundle resources = coremod.getResourceBundle(assetPath, locale);
+	public void addResources(CoremodInfo coremod, String assetPath, Locale locale) {
+		String newAssetPath = "assets/" + coremod.modId + "/" + assetPath.replace("assets/", "");
+		System.out.println("Loading resources for coremod " + coremod + " in " + newAssetPath);
+		ResourceBundle resources = coremod.getResourceBundle(newAssetPath, locale);
 		HashMap<String, Object> coremodValues = new HashMap<String, Object>();
+		
 		if(resources != null) {
 			Iterator<String> keys = resources.getKeys().asIterator();
 			while(keys.hasNext()) {
 				String key = keys.next();
+				System.out.println(key);
 				Object value = resources.getObject(key);
 				lookup.put(key, value);
 				coremodValues.put(key, value);
 			}
-			this.contentByMod.put(coremod.getModId(), coremodValues);
+			this.contentByMod.put(coremod.modId, coremodValues);
 		}
 		else {
-			Main.LOGGER.info("Coremod " + coremod + " has no resources");
+			WilderForge.LOGGER.info("Coremod " + coremod + " has no resources");
 		}
 	}
 	
