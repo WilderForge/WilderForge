@@ -63,10 +63,6 @@ dependencies {
 	compileOnly fileTree(dir: './bin/lib/', include: ['*.jar'])
 }
 
-test {
-	testLogging.showStandardStreams = true
-}
-
 shadowJar {
 	mergeServiceFiles()
 	configurations = [project.configurations.shadow]
