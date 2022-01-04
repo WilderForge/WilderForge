@@ -1,21 +1,18 @@
-package com.wildermods.wilderforge.mixins;
-
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
+package com.wildermods.wilderforge.api.mechanicsV1;
 
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
+
+import com.wildermods.wilderforge.mixins.GameKernelAccessor;
 import com.worldwalkergames.legacy.game.mechanics.PlotWorker;
 
-@Mixin(value = PlotWorker.class)
-public abstract class PlotWorkerMixin {
+public interface PlotWorkerKernelRetriever {
 	
-	private static @Final @Unique Field KERNEL_FIELD = getKernelField();
+	public static Field KERNEL_FIELD = getKernelField();
 	
 	//TODO: Use shadow classes when mixin 0.9 is released instead of using reflection
-	public GameKernelAccessor getKernelWF() {
+	public default GameKernelAccessor getKernelWF() {
 		try {
 			return (GameKernelAccessor) KERNEL_FIELD.get(this);
 		} catch (ReflectionException e) {
@@ -23,7 +20,7 @@ public abstract class PlotWorkerMixin {
 		}
 	}
 
-	private static final Field getKernelField() {
+	public static Field getKernelField() {
 		try {
 			return ClassReflection.getDeclaredField(PlotWorker.class, "kernel");
 		} catch (ReflectionException e) {
