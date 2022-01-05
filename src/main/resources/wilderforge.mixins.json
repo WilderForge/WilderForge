@@ -8,7 +8,6 @@
 	"mixins": [
 		"AggregatorMixin",
 		"BiomeMixin",
-		"ClientDataContextMixin",
 		"CampaignGeneratorMixin",
 		"FancyImageDrawableAccessor",
 		"FileConsumerMixin",

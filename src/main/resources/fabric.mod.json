@@ -79,7 +79,8 @@
 	"mixins": [
 		"wilderforge.mixins.json",
 		"wilderforge.mixins.plot.json",
-		"wilderforge.mixins.plot.incursion.json"
+		"wilderforge.mixins.plot.incursion.json",
+		"wilderforge.mixins.vanillafixes.json"
 	],
 	"depends":{
 		"wildermyth": ">=1.0.0"
