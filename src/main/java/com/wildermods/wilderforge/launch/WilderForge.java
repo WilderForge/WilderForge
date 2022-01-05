@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
+import com.wildermods.wilderforge.api.mechanicsV1.PlotEvent;
 import com.wildermods.wilderforge.api.overlandV1.event.plot.IncursionEvent;
 import com.wildermods.wilderforge.mixins.incursion.PlotIncursionAccessor;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
@@ -49,6 +50,11 @@ public final class WilderForge {
 	public static void onIncursionPost(IncursionEvent.Create.Post e) {
 		PlotIncursionAccessor incursion = e.getIncursion();
 		System.out.println("Wow, an incursion of type " + incursion.getThreat().flavor + " was created! It's strength is " + incursion.getThreat().getStrength(true) + " and it's size is " + incursion.getThreat().getIncursionSize());
+	}
+	
+	@SubscribeEvent
+	public static void onPlotFinish(PlotEvent.Finish e) {
+		System.out.println(e.getPlot().getClass() + " finished due to \"" + e.getReason());
 	}
 	
 	public static LegacyViewDependencies getViewDependencies() {
