@@ -112,7 +112,7 @@ public class EventBus {
 			throw new NullPointerException();
 		}
 		else if(o instanceof Class) {
-			for(Method m : WilderForge.getReflectionsHelper().getAllMethodsAnnotatedWith(SubscribeEvent.class)) {
+			for(Method m : WilderForge.getReflectionsHelper().getAllMethodsInAnnotatedWith((Class<?>)o, SubscribeEvent.class)) {
 				if(Modifier.isStatic(m.getModifiers())) {
 					EventListener listener = new StaticEventListener(m);
 					if(!LISTENERS.containsKey(listener.subscribedTo)) {
@@ -124,7 +124,7 @@ public class EventBus {
 			}
 		}
 		else {
-			for(Method m : WilderForge.getReflectionsHelper().getAllMethodsAnnotatedWith(SubscribeEvent.class)) {
+			for(Method m : WilderForge.getReflectionsHelper().getAllMethodsInAnnotatedWith((Class<?>)o, SubscribeEvent.class)) {
 				if(Modifier.isStatic(m.getModifiers())) {
 					continue;
 				}
