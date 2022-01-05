@@ -78,8 +78,14 @@ public class ReflectionsHelper {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> Class<? extends T>[] getSubTypesOf(Class<T> clazz) {
-		return (Class<? extends T>[]) reflections.getSubTypesOf(clazz).toArray();
+	public <T> Set<Class<?>> getTypeAndSubTypesOf(Object o) {
+		return (Set<Class<?>>)(Object)getTypeAndSubTypesOf(o.getClass());
+	}
+	
+	public <T> Set<Class<? extends T>> getTypeAndSubTypesOf(Class<T> clazz) {
+		Set<Class<? extends T>> classes = reflections.getSubTypesOf(clazz);
+		classes.add(clazz);
+		return classes;
 	}
 	
 }
