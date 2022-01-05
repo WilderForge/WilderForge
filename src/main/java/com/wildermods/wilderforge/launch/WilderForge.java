@@ -31,6 +31,7 @@ public final class WilderForge {
 		else {
 			throw new IllegalStateException();
 		}
+		EVENT_BUS.register(EventDelegator.class);
 	}
 	
 	public static LegacyViewDependencies getViewDependencies() {

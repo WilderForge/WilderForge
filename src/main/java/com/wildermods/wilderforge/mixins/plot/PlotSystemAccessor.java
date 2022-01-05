@@ -3,7 +3,6 @@ package com.wildermods.wilderforge.mixins.plot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-import com.wildermods.wilderforge.api.mechanicsV1.PlotWorkerKernelRetriever;
 import com.worldwalkergames.legacy.game.action.IReadOnlyRoleMap;
 import com.worldwalkergames.legacy.game.campaign.model.Objective;
 import com.worldwalkergames.legacy.game.campaign.system.MissionCallbackData;
@@ -12,7 +11,7 @@ import com.worldwalkergames.legacy.game.mechanics.PlotSystem;
 import com.worldwalkergames.legacy.game.mission.model.MissionTemplate;
 
 @Mixin(PlotSystem.class)
-public interface PlotSystemAccessor extends PlotWorkerKernelRetriever {
+public interface PlotSystemAccessor extends PlotWorkerKerneled {
 	
 	public @Invoker boolean invokeShouldTransferToMission(MissionTemplate missionTemplate);
 	public @Invoker boolean invokeShouldTransferBackFromMission(MissionCallbackData callbackData);
