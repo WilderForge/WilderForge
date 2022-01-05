@@ -25,6 +25,7 @@ public abstract class PlotIncursionMixin implements PlotIncursionAccessor {
 	)
 	public void buildThreadFromSourcePre(CallbackInfoReturnable<Boolean> c) {
 		if(WilderForge.EVENT_BUS.fire(new IncursionEvent.Create.Pre(this))) {
+			this.getKernelWF().getChangeWriter().deleteEntity(this.getThreat().getParentEntity());
 			this.getState().kill("Incursion cancelled.");
 			c.setReturnValue(false);
 		}
