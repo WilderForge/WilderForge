@@ -14,6 +14,7 @@ public interface PlotWorkerKernelRetriever {
 	//TODO: Use shadow classes when mixin 0.9 is released instead of using reflection
 	public default GameKernelAccessor getKernelWF() {
 		try {
+			System.out.println(this.getClass());
 			return (GameKernelAccessor) KERNEL_FIELD.get(this);
 		} catch (ReflectionException e) {
 			throw new AssertionError();
@@ -22,7 +23,9 @@ public interface PlotWorkerKernelRetriever {
 
 	public static Field getKernelField() {
 		try {
-			return ClassReflection.getDeclaredField(PlotWorker.class, "kernel");
+			Field field = ClassReflection.getDeclaredField(PlotWorker.class, "kernel");
+			field.setAccessible(true);
+			return field;
 		} catch (ReflectionException e) {
 			throw new AssertionError(e);
 		}
