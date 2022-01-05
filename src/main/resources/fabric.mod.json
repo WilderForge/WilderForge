@@ -88,7 +88,8 @@
 		"wildermyth": [
 			"<1.0",
 			"git"
-		]
+		],
+		"minecraft":["*"]
 	},
 	"custom": {
 		
