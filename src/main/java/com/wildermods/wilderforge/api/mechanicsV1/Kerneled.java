@@ -1,8 +1,6 @@
 package com.wildermods.wilderforge.api.mechanicsV1;
 
-import com.badlogic.gdx.utils.reflect.ClassReflection;
-import com.badlogic.gdx.utils.reflect.Field;
-import com.badlogic.gdx.utils.reflect.ReflectionException;
+import java.lang.reflect.Field;
 
 import com.wildermods.wilderforge.mixins.GameKernelAccessor;
 
@@ -13,19 +11,26 @@ public interface Kerneled {
 		try {
 			System.out.println(this.getClass());
 			return (GameKernelAccessor) getKernelField().get(this);
-		} catch (ReflectionException e) {
+		} catch (NoSuchFieldException | IllegalAccessException e) {
 			throw new AssertionError();
 		}
 	}
 
-	public default Field getKernelField() {
-		try {
-			Field field = ClassReflection.getDeclaredField(getClass(), "kernel");
-			field.setAccessible(true);
-			return field;
-		} catch (ReflectionException e) {
-			throw new AssertionError(e);
+	public default Field getKernelField() throws NoSuchFieldException {
+		Field kernelField = null;
+		Class<?> c = getClass();
+		while(c.getSuperclass() != null && kernelField == null) {
+			try { 
+				kernelField = c.getDeclaredField("kernel");
+				kernelField.setAccessible(true);
+			}
+			catch(NoSuchFieldException e) {}
+			c = c.getSuperclass();
 		}
+		if(kernelField == null) {
+			throw new NoSuchFieldException("No field named kernel in " + getClass().getName() + " or it's superclasses!");
+		}
+		return kernelField;
 	}
 	
 }
