@@ -5,25 +5,22 @@ import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 import com.wildermods.wilderforge.mixins.GameKernelAccessor;
-import com.worldwalkergames.legacy.game.mechanics.PlotWorker;
 
-public interface PlotWorkerKernelRetriever {
-	
-	public static Field KERNEL_FIELD = getKernelField();
+public interface Kerneled {
 	
 	//TODO: Use shadow classes when mixin 0.9 is released instead of using reflection
 	public default GameKernelAccessor getKernelWF() {
 		try {
 			System.out.println(this.getClass());
-			return (GameKernelAccessor) KERNEL_FIELD.get(this);
+			return (GameKernelAccessor) getKernelField().get(this);
 		} catch (ReflectionException e) {
 			throw new AssertionError();
 		}
 	}
 
-	public static Field getKernelField() {
+	public default Field getKernelField() {
 		try {
-			Field field = ClassReflection.getDeclaredField(PlotWorker.class, "kernel");
+			Field field = ClassReflection.getDeclaredField(getClass(), "kernel");
 			field.setAccessible(true);
 			return field;
 		} catch (ReflectionException e) {

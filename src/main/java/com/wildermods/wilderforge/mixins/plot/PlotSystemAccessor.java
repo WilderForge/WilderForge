@@ -11,7 +11,7 @@ import com.worldwalkergames.legacy.game.mechanics.PlotSystem;
 import com.worldwalkergames.legacy.game.mission.model.MissionTemplate;
 
 @Mixin(PlotSystem.class)
-public interface PlotSystemAccessor extends PlotWorkerKerneled {
+public interface PlotSystemAccessor extends PlotWorkerAccessor {
 	
 	public @Invoker boolean invokeShouldTransferToMission(MissionTemplate missionTemplate);
 	public @Invoker boolean invokeShouldTransferBackFromMission(MissionCallbackData callbackData);

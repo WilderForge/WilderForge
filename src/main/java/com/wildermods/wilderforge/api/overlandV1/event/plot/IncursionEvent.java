@@ -1,7 +1,6 @@
 package com.wildermods.wilderforge.api.overlandV1.event.plot;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
-import com.wildermods.wilderforge.mixins.GameKernelAccessor;
 import com.wildermods.wilderforge.mixins.incursion.PlotIncursionAccessor;
 import com.worldwalkergames.legacy.game.mechanics.PlotC_incursion;
 
@@ -13,40 +12,33 @@ public abstract class IncursionEvent extends Event {
 	
 	public static abstract class Create extends IncursionEvent {
 		
-		protected final GameKernelAccessor gameKernel;
+		protected final PlotIncursionAccessor incursion;
 		
-		public Create(GameKernelAccessor gameKernel) {
-			super(true);
-			this.gameKernel = gameKernel;
+		public Create(PlotIncursionAccessor incursion, boolean cancellable) {
+			super(cancellable);
+			this.incursion = incursion;
 		}
 		
-		public static class Pre extends Create {
+		public final PlotIncursionAccessor getIncursion() {
+			return incursion;
+		}
+		
+		public final PlotC_incursion getIncursionAsPlot() {
+			return (PlotC_incursion)incursion;
+		}
+		
+		public static final class Pre extends Create {
 			
-			public Pre(GameKernelAccessor gameKernel) {
-				super(gameKernel);
-			}
-			
-			public GameKernelAccessor getGameKernel() {
-				return gameKernel;
+			public Pre(PlotIncursionAccessor incursion) {
+				super(incursion, true);
 			}
 			
 		}
 		
-		public static class Post extends Create {
-			
-			private final PlotIncursionAccessor incursion;
+		public static final class Post extends Create {
 			
 			public Post(PlotIncursionAccessor incursion) {
-				super(incursion.getKernelWF());
-				this.incursion = incursion;
-			}
-			
-			public PlotIncursionAccessor getIncursion() {
-				return incursion;
-			}
-			
-			public PlotC_incursion getIncursionAsPlot() {
-				return (PlotC_incursion)incursion;
+				super(incursion, false);
 			}
 			
 		}
