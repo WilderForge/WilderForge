@@ -1,27 +1,34 @@
 package com.wildermods.wilderforge.api.mechanicsV1;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.mixins.plot.PlotWorkerAccessor;
 import com.worldwalkergames.legacy.game.campaign.model.PlotState;
 
 public abstract class PlotEvent extends Event {
 	
-	private final PlotState plot;
+	private final PlotWorkerAccessor plotWorker;
+	private final PlotState plotState;
 	
-	public PlotEvent(PlotState plot, boolean cancellable) {
+	public PlotEvent(PlotWorkerAccessor plotWorker, PlotState plotState, boolean cancellable) {
 		super(cancellable);
-		this.plot = plot;
+		this.plotWorker = plotWorker;
+		this.plotState = plotState;
 	}
 	
-	public PlotState getPlot() {
-		return plot;
+	public PlotWorkerAccessor getPlotWorker() {
+		return plotWorker;
+	}
+	
+	public PlotState getPlotState() {
+		return plotState;
 	}
 
 	public static class Finish extends PlotEvent {
 		
 		public final String reason;
 		
-		public Finish(PlotState plot, String reason) {
-			super(plot, false);
+		public Finish(PlotWorkerAccessor plotWorker, PlotState plotState, String reason) {
+			super(plotWorker, plotState, false);
 			this.reason = reason;
 		}
 		

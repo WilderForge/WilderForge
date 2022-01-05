@@ -6,8 +6,8 @@
 	"compatibilityLevel": "JAVA_8",
 	"mixinPriority": 1,
 	"mixins": [
-		"PlotStateMixin",
 		"PlotSystemAccessor",
-		"PlotWorkerAccessor"
+		"PlotWorkerAccessor",
+		"PlotWorkerMixin"
 	]
 }

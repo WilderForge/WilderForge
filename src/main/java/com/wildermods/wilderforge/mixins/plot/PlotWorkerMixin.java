@@ -7,17 +7,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.wildermods.wilderforge.api.mechanicsV1.PlotEvent;
 import com.wildermods.wilderforge.launch.WilderForge;
-import com.worldwalkergames.legacy.game.campaign.model.PlotState;
+import com.worldwalkergames.legacy.game.mechanics.PlotWorker;
 
-@Mixin(PlotState.class)
-public abstract class PlotStateMixin {
+@Mixin(PlotWorker.class)
+public abstract class PlotWorkerMixin implements PlotWorkerAccessor {
 
 	@Inject(
 		at = @At("TAIL"),
-		method = "kill"
+		method = "kill",
+		require = 1
 	)
 	public void onKill(String reason, CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new PlotEvent.Finish((PlotState)(Object)this, reason));
+		WilderForge.EVENT_BUS.fire(new PlotEvent.Finish(this, this.getState(), reason));
 	}
 	
 }

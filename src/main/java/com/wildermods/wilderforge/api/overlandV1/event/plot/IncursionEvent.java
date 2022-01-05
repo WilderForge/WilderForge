@@ -9,7 +9,7 @@ public abstract class IncursionEvent extends PlotEvent {
 	protected final PlotIncursionAccessor incursion;
 	
 	public IncursionEvent(PlotIncursionAccessor incursion, boolean cancellable) {
-		super(incursion.getState(), cancellable);
+		super(incursion, incursion.getState(), cancellable);
 		this.incursion = incursion;
 	}
 	
@@ -45,6 +45,12 @@ public abstract class IncursionEvent extends PlotEvent {
 		
 	}
 	
+	public static class Remove extends IncursionEvent {
 
-
+		public Remove(PlotIncursionAccessor incursion, String reason) {
+			super(incursion, false);
+		}
+		
+	}
+	
 }
