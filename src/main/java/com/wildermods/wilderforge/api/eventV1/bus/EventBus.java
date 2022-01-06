@@ -120,11 +120,14 @@ public class EventBus {
 				for(Method m : reflectionHelper.getAllMethodsInAnnotatedWith(c, SubscribeEvent.class)) {
 					if(Modifier.isStatic(m.getModifiers())) {
 						EventListener listener = new StaticEventListener(m);
-						if(!LISTENERS.containsKey(listener.subscribedTo)) {
-							LISTENERS.put(listener.subscribedTo, new TreeSet<IEventListener<? extends Event>>());
+						Set<Class> subclasses = WilderForge.getReflectionsHelper().getTypeAndSubTypesOf(listener.subscribedTo);
+						for(Class eventType : subclasses) {
+							if(!LISTENERS.containsKey(eventType)) {
+								LISTENERS.put(eventType, new TreeSet<IEventListener<? extends Event>>());
+							}
+							Set<IEventListener<? extends Event>> staticListeners = LISTENERS.get(eventType);
+							staticListeners.add(listener);
 						}
-						Set<IEventListener<? extends Event>> staticListeners = LISTENERS.get(listener.subscribedTo);
-						staticListeners.add(listener);
 					}
 				}
 			}
@@ -140,11 +143,14 @@ public class EventBus {
 						throw new EventTargetError("Abstract methods cannot subscribe to events. " + m.getClass().getCanonicalName() + "." + m.getName());
 					}
 					ObjectEventListener listener = new ObjectEventListener(o, m);
-					if(!LISTENERS.containsKey(listener.subscribedTo)) {
-						LISTENERS.put(listener.subscribedTo, new TreeSet<IEventListener<? extends Event>>());
+					Set<Class> subclasses = WilderForge.getReflectionsHelper().getTypeAndSubTypesOf(listener.subscribedTo);
+					for(Class eventType : subclasses) {
+						if(!LISTENERS.containsKey(eventType)) {
+							LISTENERS.put(eventType, new TreeSet<IEventListener<? extends Event>>());
+						}
+						Set<IEventListener<? extends Event>> objectListeners = LISTENERS.get(eventType);
+						objectListeners.add(listener);
 					}
-					Set<IEventListener<? extends Event>> objectListeners = LISTENERS.get(listener.subscribedTo);
-					objectListeners.add(listener);
 				}
 			}
 		}
