@@ -78,6 +78,7 @@
 	],
 	"mixins": [
 		"wilderforge.mixins.json",
+		"wilderforge.mixins.overland.party.json",
 		"wilderforge.mixins.plot.json",
 		"wilderforge.mixins.plot.incursion.json",
 		"wilderforge.mixins.vanillafixes.json"
