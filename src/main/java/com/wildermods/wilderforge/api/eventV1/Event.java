@@ -27,4 +27,8 @@ public abstract class Event {
 		}
 	}
 	
+	public boolean canBeCancelled() {
+		return cancellable;
+	}
+	
 }
