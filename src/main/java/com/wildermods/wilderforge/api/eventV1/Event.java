@@ -1,5 +1,7 @@
 package com.wildermods.wilderforge.api.eventV1;
 
+import java.util.concurrent.CancellationException;
+
 public abstract class Event {
 
 	private final boolean cancellable;
@@ -13,12 +15,15 @@ public abstract class Event {
 		return cancelled && cancellable;
 	}
 	
-	public void setCancelled(boolean cancelled) {
+	public void setCancelled(boolean cancelled) throws CancellationException {
 		if(cancellable) {
 			this.cancelled = cancelled;
 		}
 		else {
-			throw new UnsupportedOperationException("Event " + this.getClass().getName() + " is not cancellable");
+			CancellationException c = new CancellationException();
+			UnsupportedOperationException u = new UnsupportedOperationException("Event " + this.getClass().getCanonicalName() + " is not cancellable");
+			c.initCause(u);
+			throw c;
 		}
 	}
 	
