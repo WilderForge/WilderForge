@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -14,6 +15,7 @@ import com.worldwalkergames.legacy.game.action.IReadOnlyRoleMap;
 import com.worldwalkergames.legacy.game.action.RoleMap;
 import com.worldwalkergames.legacy.game.action.ability.AbilityMatcher;
 import com.worldwalkergames.legacy.game.campaign.CalamityDeck;
+import com.worldwalkergames.legacy.game.campaign.model.Party;
 import com.worldwalkergames.legacy.game.generation.HistoryGenerator;
 import com.worldwalkergames.legacy.game.mechanics.CampaignMissionProcessor;
 import com.worldwalkergames.legacy.game.mechanics.ChangeWriter;
@@ -76,5 +78,7 @@ public interface GameKernelAccessor {
 	public @Accessor("autoSaveRequested") void setAutoSaveRequested(boolean autoSave);
 	public @Accessor("dailiesRoles") void setDailyRoles(RoleMap dailyRoles);
 	public @Accessor("isUpdatingPlots") void setUpdatingPlots(boolean updatePlots);
+	
+	public @Invoker void invokeDisbandParty(Party party);
 	
 }

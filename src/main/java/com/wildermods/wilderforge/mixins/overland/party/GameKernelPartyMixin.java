@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.badlogic.gdx.utils.Array;
 import com.wildermods.wilderforge.api.overlandV1.party.PartyCreateEvent;
+import com.wildermods.wilderforge.api.overlandV1.party.PartyDisbandEvent;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.worldwalkergames.legacy.game.campaign.event.PartyProposal;
 import com.worldwalkergames.legacy.game.campaign.model.Party;
@@ -46,4 +47,17 @@ public class GameKernelPartyMixin {
 	public void createPartyPost(PartyProposal proposal, boolean removeJobs, Array<Party.TravelGroup> oldTravelGroups, CallbackInfo c) {
 		WilderForge.EVENT_BUS.fire(new PartyCreateEvent.Post(proposal, removeJobs, oldTravelGroups));
 	}
+	
+	@Inject (
+		at = @At("HEAD"),
+		method = "disbandParty",
+		cancellable = true,
+		require = 1
+	)
+	public void disbandParty(Party party, CallbackInfo c) {
+		if(WilderForge.EVENT_BUS.fire(new PartyDisbandEvent(party))) {
+			c.cancel();
+		}
+	}
+	
 }
