@@ -16,6 +16,7 @@ import com.worldwalkergames.legacy.game.action.RoleMap;
 import com.worldwalkergames.legacy.game.action.ability.AbilityMatcher;
 import com.worldwalkergames.legacy.game.campaign.CalamityDeck;
 import com.worldwalkergames.legacy.game.campaign.model.Party;
+import com.worldwalkergames.legacy.game.campaign.model.RecruitChoice.Proposal;
 import com.worldwalkergames.legacy.game.generation.HistoryGenerator;
 import com.worldwalkergames.legacy.game.mechanics.CampaignMissionProcessor;
 import com.worldwalkergames.legacy.game.mechanics.ChangeWriter;
@@ -80,5 +81,6 @@ public interface GameKernelAccessor {
 	public @Accessor("isUpdatingPlots") void setUpdatingPlots(boolean updatePlots);
 	
 	public @Invoker void invokeDisbandParty(Party party);
+	public @Invoker void invokeProposeRecruit(Proposal proposal);
 	
 }

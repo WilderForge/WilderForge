@@ -17,6 +17,7 @@
 		"MainMenuMixin",
 		"ModAwareResourceBundleMixin",
 		"NiceLwjgl3ApplicationMixin",
+		"ObservantChangeWriterAccessor",
 		"OverlandTileMapLabMixin",
 		"PopUpAccessorMixin",
 		"RootMenuMixin",
