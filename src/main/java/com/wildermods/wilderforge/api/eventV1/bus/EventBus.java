@@ -276,7 +276,8 @@ public class EventBus {
 		@Override
 		public void fire(Event event) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 			if(getObject() == null) {
-				System.out.println("Event fired on garbage collected object. Hopefully this weakreference will be removed!");
+				System.out.println(event.getClass().getSimpleName() + " fired on garbage collected object. Hopefully this weakreference will be removed!");
+				return;
 			}
 			method.invoke(getObject(), event);
 		}
