@@ -8,12 +8,16 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.ModOrigin;
 import net.fabricmc.loader.api.metadata.Person;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.badlogic.gdx.Files;
@@ -117,6 +121,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 
 
 	@Override
+	@Deprecated
 	public Path getRootPath() {
 		return coremod.getRootPath();
 	}
@@ -133,6 +138,32 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 		catch (MissingResourceException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public List<Path> getRootPaths() {
+		return coremod.getRootPaths();
+	}
+
+	@Override
+	public ModOrigin getOrigin() {
+		return coremod.getOrigin();
+	}
+
+	@Override
+	public Optional<ModContainer> getContainingMod() {
+		return coremod.getContainingMod();
+	}
+
+	@Override
+	public Collection<ModContainer> getContainedMods() {
+		return coremod.getContainedMods();
+	}
+
+	@Override
+	@Deprecated
+	public Path getPath(String file) {
+		return coremod.getPath(file);
 	}
 	
 }
