@@ -26,6 +26,9 @@ public class GameKernelPartyMixin {
 		cancellable = true,
 		require = 1
 	)
+	/**
+	 * This needs to be done outside of PartyLogic.class so that jobs are not affected if the event is cancelled.
+	 */
 	public void createPartyPre(PartyProposal proposal, boolean removeJobs, Array<Party.TravelGroup> oldTravelGroups, CallbackInfo c) {
 		PartyCreateEvent e = new PartyCreateEvent.Pre(proposal, removeJobs, oldTravelGroups);
 		if (WilderForge.EVENT_BUS.fire(e)) {
