@@ -9,9 +9,10 @@ import com.wildermods.wilderforge.launch.ui.CoremodListPopup;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.game.common.ui.OptionButton;
 import com.worldwalkergames.legacy.ui.menu.IRootMenuNavigation;
+import com.worldwalkergames.legacy.ui.menu.MainMenu;
 import com.worldwalkergames.legacy.ui.menu.RootMenuPanel;
 
-@Mixin(targets = "com.worldwalkergames.legacy.ui.menu.MainMenu", remap = false)
+@Mixin(value = MainMenu.class, remap = false)
 public abstract class MainMenuMixin extends RootMenuPanel {
 	
 	@Inject(
