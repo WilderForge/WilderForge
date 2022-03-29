@@ -15,9 +15,6 @@ import com.badlogic.gdx.utils.Scaling;
 
 import java.io.IOException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 
@@ -28,6 +25,7 @@ import com.wildermods.wilderforge.api.uiV1.UIButton;
 import com.wildermods.wilderforge.api.uiV1.elements.buttons.LinkButton;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.controller.NavTable;
@@ -39,7 +37,7 @@ import com.worldwalkergames.ui.NiceLabel;
 
 @InternalOnly
 public class CoremodListPopup extends PopUp {
-	private static final Logger LOGGER = LogManager.getLogger(CoremodListPopup.class);
+	private static final Logger LOGGER = new Logger(CoremodListPopup.class);
 	private Filter filter = new Filter() {};
 	private DialogFrame frame;
 	private Style style;

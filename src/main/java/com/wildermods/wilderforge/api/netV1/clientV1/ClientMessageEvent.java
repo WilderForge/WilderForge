@@ -1,15 +1,13 @@
 package com.wildermods.wilderforge.api.netV1.clientV1;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.mixins.net.client.ClientAPIAccessor;
 import com.worldwalkergames.communication.messages.Message;
 
 public abstract class ClientMessageEvent extends Event {
 
-	public static final Logger LOGGER = LogManager.getLogger(ClientMessageEvent.class);
+	public static final Logger LOGGER = new Logger(ClientMessageEvent.class);
 	
 	protected final ClientAPIAccessor client;
 	protected Message message;

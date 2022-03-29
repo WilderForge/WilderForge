@@ -2,11 +2,9 @@ package com.wildermods.wilderforge.api.uiV1.elements.buttons;
 
 import java.net.URL;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.mixins.PopUpAccessorMixin;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
@@ -14,7 +12,7 @@ import com.worldwalkergames.util.OSUtil;
 
 public class LinkButton extends UIButton<URL> {
 
-	public static final Logger LOGGER = LogManager.getLogger(LinkButton.class);
+	public static final Logger LOGGER = new Logger(LinkButton.class);
 	
 	private final String url;
 	

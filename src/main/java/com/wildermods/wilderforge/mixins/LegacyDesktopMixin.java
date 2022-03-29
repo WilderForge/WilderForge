@@ -1,6 +1,5 @@
 package com.wildermods.wilderforge.mixins;
 
-import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,6 +11,7 @@ import com.codedisaster.steamworks.SteamUtils;
 
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.GraphicalInfo;
+import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
 
@@ -39,7 +39,7 @@ public class LegacyDesktopMixin {
 		}
 		catch(LinkageError e) {
 			WilderForge.LOGGER.warn("Could not redirect steam error output. Is there a steam context?");
-			WilderForge.LOGGER.catching(Level.WARN, e);
+			WilderForge.LOGGER.catching(LogLevel.WARN, e);
 		}
 		for(ILogConsumer consumer : aggregator.consumers) {
 			System.out.println(consumer.getClass());

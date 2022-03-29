@@ -2,10 +2,7 @@ package com.wildermods.wilderforge.launch.logging;
 
 import java.util.LinkedHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import static org.apache.logging.log4j.Level.*;
+import static com.wildermods.wilderforge.launch.logging.LogLevel.*;
 
 import com.badlogic.gdx.ApplicationLogger;
 import com.codedisaster.steamworks.SteamAPIWarningMessageHook;
@@ -37,28 +34,9 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 		if((ret = LOGGERS.get(name)) != null) {
 			return ret;
 		}
-		ret = LogManager.getLogger(name);
+		ret = new Logger(name);
 		LOGGERS.putIfAbsent(name, ret);
 		return ret;
-	}
-	
-	private final Level getLevel(int level) {
-		switch (level) {
-		case 0:
-			return TRACE;
-		case 1:
-			return DEBUG;
-		case 2:
-			return INFO;
-		case 3:
-			return WARN;
-		case 4:
-			return ERROR;
-		case 5:
-			return FATAL;
-		default:
-			return INFO;
-		}
 	}
 
 	@Override

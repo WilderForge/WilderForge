@@ -1,7 +1,5 @@
 package com.wildermods.wilderforge.mixins;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,7 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
-
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings.ModEntry;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
@@ -29,7 +27,7 @@ import com.worldwalkergames.legacy.server.context.ServerDataContext.LoadingProgr
 @Mixin(value = ServerDataContext.class, remap = false)
 public abstract class ServerDataContextMixin {
 
-	private static @Unique Logger LOGGER = LogManager.getLogger(ServerDataContext.class);
+	private static @Unique Logger LOGGER = new Logger(ServerDataContext.class);
 	public @Shadow Files files;
 	protected @Shadow Array<GameSettings.ModEntry> activeMods;
 	
