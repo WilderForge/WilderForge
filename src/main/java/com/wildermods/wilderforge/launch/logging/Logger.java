@@ -51,8 +51,9 @@ public class Logger implements ILogger {
 		if(shouldLog(level)) {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "] " );
+			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "] Catching " );
 			t.printStackTrace(pw);
+			System.out.println(sw.toString());
 		}
 	}
 	
@@ -64,8 +65,9 @@ public class Logger implements ILogger {
 		if(shouldLog(level)) {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "/" + tag + "] ");
+			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "/" + tag + "] Catching ");
 			t.printStackTrace(pw);
+			System.out.println(sw.toString());
 		}
 	}
 

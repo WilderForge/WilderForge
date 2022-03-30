@@ -25,7 +25,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.WilderForge;
 
 public class CoremodInfo extends ModInfo implements ModContainer {
 
