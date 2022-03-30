@@ -77,7 +77,6 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 			}
 		}
 		
-		WilderForge.LOGGER.info(Arrays.toString(customCreditLines));
 		name = metadata.getName();
 		modLocation = ModLocation.core;
 		this.coremod = coremod;
