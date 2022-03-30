@@ -9,7 +9,6 @@ public interface Kerneled {
 	//TODO: Use shadow classes when mixin 0.9 is released instead of using reflection
 	public default GameKernelAccessor getKernelWF() {
 		try {
-			System.out.println(this.getClass());
 			return (GameKernelAccessor) getKernelField().get(this);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
 			throw new AssertionError();

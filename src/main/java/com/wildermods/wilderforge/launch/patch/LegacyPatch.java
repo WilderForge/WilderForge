@@ -8,10 +8,14 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import com.wildermods.wilderforge.launch.logging.Logger;
+
 import net.fabricmc.loader.impl.game.patch.GamePatch;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 
 public class LegacyPatch extends GamePatch {
+	
+	private static final Logger LOGGER = new Logger(LegacyPatch.class.getSimpleName());
 
 	@Override
 	public void process(FabricLauncher launcher, Function<String, ClassReader> classSource,
@@ -30,8 +34,8 @@ public class LegacyPatch extends GamePatch {
 			throw new NoSuchMethodError("Could not find main method in " + entrypoint +  "!");
 		}
 		
-		System.out.println("entrypoint is " + entrypoint);
-		System.out.println("Main method is " + mainMethod.name + mainMethod.desc);
+		LOGGER.log("entrypoint is " + entrypoint);
+		LOGGER.log("Main method is " + mainMethod.name + mainMethod.desc);
 		
 		gameEntryPoint = entrypoint;
 		
@@ -53,7 +57,7 @@ public class LegacyPatch extends GamePatch {
 			return true;
 		}
 		else {
-			System.out.println(method.name + method.desc + " is not the main method");
+			LOGGER.fatal(method.name + method.desc + " is not the main method");
 			return false;
 		}
 	}

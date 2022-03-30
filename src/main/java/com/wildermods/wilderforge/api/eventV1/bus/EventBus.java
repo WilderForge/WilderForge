@@ -14,8 +14,10 @@ import java.util.TreeSet;
 import com.wildermods.wilderforge.api.eventV1.Event;
 import com.wildermods.wilderforge.launch.ReflectionsHelper;
 import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.launch.logging.Logger;
 
 public class EventBus {
+	private static final Logger LOGGER = new Logger(EventBus.class);
 	private static final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
 	private static final HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> LISTENERS = new HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>>();
 	
@@ -276,7 +278,7 @@ public class EventBus {
 		@Override
 		public void fire(Event event) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 			if(getObject() == null) {
-				System.out.println(event.getClass().getSimpleName() + " fired on garbage collected object. Hopefully this weakreference will be removed!");
+				LOGGER.warn(event.getClass().getSimpleName() + " fired on garbage collected object. Hopefully this weakreference will be removed!");
 				return;
 			}
 			method.invoke(getObject(), event);

@@ -16,6 +16,7 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.utils.Array;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
@@ -27,6 +28,7 @@ import com.worldwalkergames.legacy.server.context.ServerDataContext.LoadingProgr
 @Mixin(value = ServerDataContext.class, remap = false)
 public abstract class ServerDataContextMixin {
 
+	private static final String vanillaLoader = "VanillaLoader";
 	private static @Unique Logger LOGGER = new Logger(ServerDataContext.class);
 	public @Shadow Files files;
 	protected @Shadow Array<GameSettings.ModEntry> activeMods;
@@ -74,15 +76,15 @@ public abstract class ServerDataContextMixin {
 	 * Lets Wildermyth load resources from coremods
 	 */
 	private void loadModInfoTail(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
-		System.out.println("Attempting to load coremod " + modId);
+		WilderForge.LOGGER.info("Attempting to load coremod " + modId, vanillaLoader);
 		CoremodInfo coremod = Coremods.getCoremod(modId);
-		System.out.println("Coremod " + modId + " is " + coremod);
 		if(!(coremod instanceof MissingCoremod)) {
-				LOGGER.info("Coremod " + coremod + " is loaded.");
-				c.setReturnValue(coremod);
+			WilderForge.LOGGER.info("Coremod " + modId + " is " + coremod + " " + coremod.getMetadata().getVersion(), vanillaLoader);
+			WilderForge.LOGGER.info("Coremod " + coremod + " is loaded.", vanillaLoader);
+			c.setReturnValue(coremod);
 		}
 		else {
-			LOGGER.warn("No coremod of modid '" + modId + "' was found.");
+			WilderForge.LOGGER.warn("No coremod of modid '" + modId + "' was found.", vanillaLoader);
 		}
 	}
 	
@@ -102,7 +104,7 @@ public abstract class ServerDataContextMixin {
 	 */
 	private synchronized void applyGameSettings(Array<ModEntry> requested, LoadingProgressFrameCallback progressFrameCallback, CallbackInfo c) {
 		if(requested != null) {
-			LOGGER.info("Requesting: " + Arrays.toString(requested.items));
+			WilderForge.LOGGER.info("Requesting: " + Arrays.toString(requested.items), vanillaLoader);
 			for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 				ModEntry entry = new ModEntry(coremod);
 				if(!requested.contains(entry, false)) {
@@ -111,7 +113,7 @@ public abstract class ServerDataContextMixin {
 			}
 		}
 		else {
-			LOGGER.warn("Requesting NO MODS");
+			WilderForge.LOGGER.warn("Requesting NO MODS", vanillaLoader);
 		}
 	}
 	

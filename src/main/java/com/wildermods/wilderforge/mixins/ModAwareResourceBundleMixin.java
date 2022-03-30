@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.badlogic.gdx.files.FileHandle;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.InternalOnly;
-import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.resources.CoremodCompatibleResourceBundle;
 
 import com.worldwalkergames.legacy.server.context.ServerDataContext;
@@ -26,6 +26,8 @@ import com.worldwalkergames.legacy.server.context.ServerDataContext.ModAwareReso
 @Mixin(value = ModAwareResourceBundle.class, remap = false)
 public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBundle {
 
+	private static final Logger LOGGER = new Logger(ModAwareResourceBundle.class);
+	
 	private @Shadow Map<String, Object> lookup; 
 	public @Shadow HashMap<String, HashMap<String, Object>> contentByMod;
 	
@@ -40,7 +42,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			+ ")V",
 		require = 1)
 	public void constructor(ServerDataContext parentObj, String assetPath, FileHandle bundleForDependencies, boolean fromAllMods, Locale locale, CallbackInfo c) {
-		WilderForge.LOGGER.debug("ASSET PATH: " + assetPath);
+		LOGGER.debug("ASSET PATH: " + assetPath);
 		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 			addResources(coremod, assetPath, locale);
 		}
@@ -51,7 +53,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 	@InternalOnly
 	public void addResources(CoremodInfo coremod, String assetPath, Locale locale) {
 		String newAssetPath = "assets/" + coremod.modId + "/" + assetPath.replace("assets/", "");
-		System.out.println("Loading resources for coremod " + coremod + " in " + newAssetPath);
+		LOGGER.info("Loading resources for coremod " + coremod + " in " + newAssetPath);
 		ResourceBundle resources = coremod.getResourceBundle(newAssetPath, locale);
 		HashMap<String, Object> coremodValues = new HashMap<String, Object>();
 		
@@ -59,7 +61,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			Iterator<String> keys = resources.getKeys().asIterator();
 			while(keys.hasNext()) {
 				String key = keys.next();
-				System.out.println(key);
+				LOGGER.debug(key);
 				Object value = resources.getObject(key);
 				lookup.put(key, value);
 				coremodValues.put(key, value);
@@ -67,7 +69,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			this.contentByMod.put(coremod.modId, coremodValues);
 		}
 		else {
-			WilderForge.LOGGER.info("Coremod " + coremod + " has no resources");
+			LOGGER.warn("Coremod " + coremod + " has no resources in " + assetPath);
 		}
 	}
 	

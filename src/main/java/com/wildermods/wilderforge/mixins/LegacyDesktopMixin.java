@@ -42,7 +42,7 @@ public class LegacyDesktopMixin {
 			WilderForge.LOGGER.catching(LogLevel.WARN, e);
 		}
 		for(ILogConsumer consumer : aggregator.consumers) {
-			System.out.println(consumer.getClass());
+			WilderForge.LOGGER.debug(consumer.getClass());
 		}
 	}
 	

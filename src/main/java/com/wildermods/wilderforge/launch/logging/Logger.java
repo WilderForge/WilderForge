@@ -31,7 +31,18 @@ public class Logger implements ILogger {
 	@Override
 	public void log(LogLevel level, String s) {
 		if(shouldLog(level)) {
-			System.out.println("[" + level + "] [" + name + "] " + s);
+			System.out.println("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "] " + s);
+		}
+	}
+	
+	public void log(LogLevel level, String s, String tag) {
+		if(tag != null) {
+			if(shouldLog(level)) {
+				System.out.println("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "/" + tag + "] " + s);
+			}
+		}
+		else {
+			log(level, s);
 		}
 	}
 
@@ -40,7 +51,20 @@ public class Logger implements ILogger {
 		if(shouldLog(level)) {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			pw.append("[" + level + "] [" + name + "] " );
+			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "] " );
+			t.printStackTrace(pw);
+		}
+	}
+	
+	public void catching(LogLevel level, Throwable t, String tag) {
+		if(tag == null) {
+			catching(level, t);
+			return;
+		}
+		if(shouldLog(level)) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "/" + tag + "] ");
 			t.printStackTrace(pw);
 		}
 	}
@@ -54,10 +78,10 @@ public class Logger implements ILogger {
 	public void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean isReplayedBuiltin) {
 		LogLevel l = LogLevel.getLevel(level);
 		if(exc == null) {
-			log(l, msg);
+			log(l, msg, category.name);
 		}
 		else {
-			catching(l, exc);
+			catching(l, exc, category.name);
 		}
 		
 	}
