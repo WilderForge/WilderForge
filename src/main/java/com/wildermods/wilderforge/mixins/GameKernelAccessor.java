@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.worldwalkergames.engine.EID;
 import com.worldwalkergames.engine.EntitiesCollection;
 import com.worldwalkergames.legacy.game.action.ActionOutcomeSummary;
@@ -82,5 +83,8 @@ public interface GameKernelAccessor {
 	
 	public @Invoker void invokeDisbandParty(Party party);
 	public @Invoker void invokeProposeRecruit(Proposal proposal);
+	
+	public @Invoker @InternalOnly void invokeStartCampaignTime();
+	public @Invoker @InternalOnly void invokeStopCampaignTime();
 	
 }
