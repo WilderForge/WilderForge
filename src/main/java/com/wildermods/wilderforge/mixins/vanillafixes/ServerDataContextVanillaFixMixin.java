@@ -28,11 +28,16 @@ public abstract class ServerDataContextVanillaFixMixin extends ResourceBundle {
 	public void fixIllegalAccessError(CallbackInfoReturnable<Enumeration<String>> c) {
 		ResourceBundle parent = this.parent;
 		HashSet<String> keys = new HashSet<String>();
-		keys.addAll(lookup.keySet());
+
 		
-		if(parent.getKeys() != null) {
+		if(lookup != null && lookup.keySet() != null) {
+			keys.addAll(lookup.keySet());
+		}
+		
+		if(parent != null && parent.getKeys() != null) {
 			keys.addAll(Collections.list(parent.getKeys()));
 		}
+		
 		c.setReturnValue(Collections.enumeration(keys));
 	}
 }
