@@ -9,7 +9,7 @@ import com.worldwalkergames.legacy.context.ClientDataContext;
 import com.worldwalkergames.legacy.game.model.player.PlayerAccount;
 
 @Mixin(remap = false, value = ClientDataContext.class)
-public abstract class ClientDataContextMixin {
+public abstract class ClientDataContextVanillaFixMixin {
 	
 	@Inject(
 		at = @At("HEAD"),
