@@ -60,7 +60,7 @@ public final class WilderForge {
 		if(WilderForge.server == null) {
 			throw new IllegalStateException("Server already killed?!");
 		}
-		server = null;
+		WilderForge.server = null;
 	}
 	
 	@SubscribeEvent(priority = EventPriority.LOW)
