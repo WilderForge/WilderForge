@@ -20,6 +20,8 @@ import java.util.Random;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.asm.mixin.throwables.MixinException;
 
+import com.wildermods.wilderloader.CrashLogService;
+
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
@@ -27,17 +29,18 @@ import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.legacy.Version;
 
-public final class CrashInfo {
+public final class CrashInfo implements CrashLogService {
 
 	File crashFolder = new File("./crashes");
 	
-	public CrashInfo(Throwable t) {
+	@Override
+	public void logCrash(Throwable t) {
 		StringBuilder s = new StringBuilder("---- WilderForge Crash Report----");
 		s.append('\n');
 		s.append(getWittyMessage(t)).append('\n');
 		s.append('\n');
 		s.append("Time: ").append(getDate()).append('\n');
-		s.append("Description: ").append(t.getMessage()).append('\n');
+		s.append("Description: ").append(getLowestDescription(t)).append('\n');
 		s.append('\n');
 		s.append(ExceptionUtils.getStackTrace(t));
 		s.append("---- Additonal Information----").append('\n');
@@ -56,7 +59,7 @@ public final class CrashInfo {
 			fw.close();
 		}
 		catch(Throwable t2) {
-			s.append("IN ADDITION TO THE ABOVE ERROR, WILDERFORGE COULD NOT CREATE CRASH REPORT FILE:");
+			s.append("IN ADDITION TO THE ABOVE ERROR, WILDERLOADER COULD NOT CREATE CRASH REPORT FILE:");
 			s.append(ExceptionUtils.getStackTrace(t2));
 		}
 		WilderForge.LOGGER.fatal(s);
@@ -103,7 +106,7 @@ public final class CrashInfo {
 			"Why do I hurt? Why is there pain?",
 			"Tell me where I'm going, Is it heaven or hell?",
 			"Who did this to me?",
-			"It appears I have a minor case of very serious brain damage.",
+			"It appears I have a very minor case of serious brain damage.",
 			"Get mad!",
 			"He's dead, Jim.",
 			"Don't hate computers, hate lousy programmers.",
@@ -111,7 +114,8 @@ public final class CrashInfo {
 			"Have you tried turning off an on again?",
 			"I'll just put this over here... with the rest of the fire.",
 			"For Thine is - Life is - For thine is the",
-			"I never asked to be created."
+			"I never asked to be created.",
+			"Sunlight on a broken column"
 		}));
 		
 		return "//" + messages.get(new Random().nextInt(messages.size()));
@@ -164,7 +168,7 @@ public final class CrashInfo {
 			}
 		}
 		catch(Throwable t) {
-			s.append("\t\tCould not Java monitor information due to a ").append(t.getClass().getCanonicalName()).append('\n');
+			s.append("\t\tCould not obtain Java monitor information due to a ").append(t.getClass().getCanonicalName()).append('\n');
 		}
 	}
 	
@@ -172,9 +176,24 @@ public final class CrashInfo {
 		s.append("-- Coremod Details --").append('\n');
 		s.append("Coremods Detected: " + Coremods.getCoremodCount()).append(":\n\n");
 		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
-			//s.append('\t').append(Coremods.getStatus(coremod)).append(' ').append(coremod.getVersionString()).append('\n');
+			s.append('\t').append(coremod.modId).append(' ').append(coremod.getMetadata().getVersion()).append('\n');
 		}
 		return s;
+	}
+	
+	private String getLowestDescription(Throwable t) {
+		String description = null;
+		do {
+			if(t.getMessage() != null) {
+				description = t.getMessage();
+			}
+			t = t.getCause();
+		}
+		while(t.getCause() != null);
+		if(t.getMessage() != null) {
+			description = t.getMessage();
+		}
+		return description;
 	}
 	
 }

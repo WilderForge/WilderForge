@@ -32,8 +32,9 @@ public class GraphicalInfo {
 
 		try {
 			s.append("\tMonitors:").append('\n');
-			s.append("\t\tTotal monitors (OpenGL):").append('\n');
+			s.append("\t\tTotal monitors (OpenGL) ");
 			Monitor[] monitors = Gdx.graphics.getMonitors();
+			s.append(monitors.length).append(':').append('\n');
 			for(int i = 0; i < monitors.length; i++) {
 				Monitor monitor = monitors[i];
 				s.append("\t\t\tMonitor " + i + ":\n");
