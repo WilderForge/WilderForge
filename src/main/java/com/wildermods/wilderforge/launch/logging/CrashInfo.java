@@ -6,9 +6,11 @@ import java.awt.GraphicsDevice;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -49,11 +51,7 @@ public final class CrashInfo implements CrashLogService {
 		appendCoremodDetails(s).append("\n\n");
 
 		try {
-			if(!crashFolder.exists()) {
-				crashFolder.mkdirs();
-			}
-			File crashFile = new File(crashFolder.getAbsolutePath() + "/crash " + getDate() + " .txt");
-			crashFile.createNewFile();
+			File crashFile = getCrashFile();
 			FileWriter fw = new FileWriter(crashFile);
 			fw.write(s.toString());
 			fw.close();
@@ -194,6 +192,21 @@ public final class CrashInfo implements CrashLogService {
 			description = t.getMessage();
 		}
 		return description;
+	}
+	
+	private File getCrashFile() {
+		File file = new File("./crashes/" + DateTimeFormatter.ISO_DATE.format(LocalDateTime.now()) + " (1).crash.log");
+		for(int i = 2; file.exists(); i++) {
+			file = new File("./crashes/" + DateTimeFormatter.ISO_DATE.format(LocalDateTime.now()) + " (" + i + ").crash.log");
+		}
+		try {
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+		} catch (IOException e) {
+			System.err.println(file.getAbsolutePath());
+			throw new AssertionError(e);
+		}
+		return file;
 	}
 	
 }
