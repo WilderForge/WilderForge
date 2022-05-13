@@ -7,10 +7,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At;
 
+import com.wildermods.wilderforge.api.mechanicsV1.AbilityBarPauseFix;
 import com.wildermods.wilderforge.api.mechanicsV1.Kerneled;
 import com.wildermods.wilderforge.api.mechanicsV1.PauseEvent;
 import com.wildermods.wilderforge.api.mechanicsV1.UnpauseEvent;
+import com.wildermods.wilderforge.api.uiV1.UI;
 import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.mixins.ui.CampaignScreenAccessor;
 import com.worldwalkergames.legacy.game.mechanics.ChangeWriter;
 import com.worldwalkergames.legacy.game.mechanics.GameAPI;
 import com.worldwalkergames.legacy.game.mission.model.Participant;
@@ -51,8 +54,15 @@ public abstract class GameAPIMechanicsMixin implements Kerneled {
 	
 	@Unique
 	public void stopCampaignTime(Participant requester) {
-		if(!WilderForge.EVENT_BUS.fire(new PauseEvent(requester))) {
+		PauseEvent e = new PauseEvent(requester);
+		if(!WilderForge.EVENT_BUS.fire(e)) {
 			stopCampaignTimeWF();
+		}
+		else if(e.doesShowAbilityBarIfCancelled()) {
+			CampaignScreenAccessor campaignScreen = UI.getCampaignScreenAccessor();
+			if(campaignScreen != null) {
+				((AbilityBarPauseFix)UI.convert(campaignScreen.getCampaignHud()).getAbilityBar()).setPauseEvent(e);
+			}
 		}
 	}
 	

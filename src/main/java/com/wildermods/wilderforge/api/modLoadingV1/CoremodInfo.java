@@ -11,6 +11,8 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.ModOrigin;
 import net.fabricmc.loader.api.metadata.Person;
 
+import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
+
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +25,6 @@ import java.util.ResourceBundle;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
 
 public class CoremodInfo extends ModInfo implements ModContainer {

@@ -13,12 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
+import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
+
 import java.io.IOException;
 
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 
-import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.uiV1.TextureFilterDrawable;
 import com.wildermods.wilderforge.api.uiV1.UIButton;

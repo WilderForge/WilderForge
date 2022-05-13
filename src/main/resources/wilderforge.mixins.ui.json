@@ -1,12 +1,13 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "com.wildermods.wilderforge.mixins.mechanics",
+	"package": "com.wildermods.wilderforge.mixins.ui",
 	"target": "@env(DEFAULT)",
 	"compatibilityLevel": "JAVA_8",
 	"mixinPriority": 1,
 	"mixins": [
-		"AbilityBarPauseMixin",
-		"GameAPIMechanicsMixin"
+		"CampaignHudAccessor",
+		"CampaignScreenAccessor",
+		"MainScreenAccessor"
 	]
 }

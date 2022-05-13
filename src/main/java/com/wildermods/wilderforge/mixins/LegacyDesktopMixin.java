@@ -3,32 +3,51 @@ package com.wildermods.wilderforge.mixins;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.codedisaster.steamworks.SteamUtils;
-
+import com.wildermods.wilderforge.api.mechanicsV1.LegacyDesktopWF;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.GraphicalInfo;
 import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
-
 import com.worldwalkergames.legacy.LegacyDesktop;
+import com.worldwalkergames.legacy.ui.MainScreen;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.ALogger.ILogConsumer;
 import com.worldwalkergames.logging.FilteringConsumer;
 
 @Mixin(value = LegacyDesktop.class, remap = false)
-public class LegacyDesktopMixin {
+public abstract class LegacyDesktopMixin implements LegacyDesktopWF{
 	
 	private static @Shadow @Final ALogger LOGGER;
 
+	@Inject(
+		at = @At(
+			value = "RETURN"
+		),
+		method = "<init>()V"
+	)
+	public void onConstructed(CallbackInfo c) {
+		WilderForge.init((LegacyDesktop)(Object)this);
+	}
+	
+	
+	public abstract @Accessor("ui") MainScreen getMainScreen();
+	
 	/**
 	 * Set steam's logger to be WilderForge's logger
 	 */
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/LinkedList;add(Ljava/lang/Object;)Z"), method = "initializeLogging()V")
+	@Inject(
+		at = @At(
+			value = "INVOKE_ASSIGN",
+			target = "Ljava/util/LinkedList;add(Ljava/lang/Object;)Z"),
+		method = "initializeLogging()V"
+	)
 	private static void initializeLogging(CallbackInfo c) {
 		ALogger.Aggregator aggregator = ALogger.getDefaultAggregator();
 		aggregator.consumers.clear();

@@ -3,12 +3,14 @@ package com.wildermods.wilderforge.launch;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
+import com.wildermods.wilderforge.api.mechanicsV1.LegacyDesktopWF;
 import com.wildermods.wilderforge.api.mechanicsV1.PauseEvent;
 import com.wildermods.wilderforge.api.netV1.clientV1.ClientMessageEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerDeathEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerInstantiationEvent;
 import com.wildermods.wilderforge.launch.logging.Logger;
+import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.server.LegacyServer;
 
@@ -21,6 +23,9 @@ public final class WilderForge {
 	private static final ReflectionsHelper reflectionsHelper = new ReflectionsHelper(WilderForge.class.getClassLoader());
 	
 	@InternalOnly
+	private static LegacyDesktop legacyDesktop;
+	
+	@InternalOnly
 	private static LegacyViewDependencies dependencies;
 	
 	@InternalOnly
@@ -31,6 +36,10 @@ public final class WilderForge {
 	@InternalOnly
 	public static ReflectionsHelper getReflectionsHelper() {
 		return reflectionsHelper;
+	}
+	
+	public static void init(LegacyDesktop legacyDesktop) {
+		WilderForge.legacyDesktop = legacyDesktop;
 	}
 
 	@InternalOnly
@@ -63,6 +72,7 @@ public final class WilderForge {
 		WilderForge.server = null;
 	}
 	
+	@InternalOnly
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void onServerEvent(ServerEvent e) {
 		if(e instanceof ServerInstantiationEvent) {
@@ -76,6 +86,7 @@ public final class WilderForge {
 	@SubscribeEvent
 	public static void onPause(PauseEvent e) {
 		e.setCancelled(true);
+		e.showAbilityBarIfCancelled(true);
 		LOGGER.info("Cancelled pausing!");
 		LOGGER.info("The server is: " +    server);
 	}
@@ -86,6 +97,10 @@ public final class WilderForge {
 			e.getClient().setWaiting(false);
 			e.setHandled();
 		}
+	}
+	
+	public static LegacyDesktopWF getLegacyDesktop() {
+		return (LegacyDesktopWF) legacyDesktop;
 	}
 	
 	public static LegacyViewDependencies getViewDependencies() {

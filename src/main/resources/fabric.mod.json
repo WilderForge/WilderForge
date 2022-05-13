@@ -86,6 +86,7 @@
 		"wilderforge.mixins.overland.party.json",
 		"wilderforge.mixins.plot.json",
 		"wilderforge.mixins.plot.incursion.json",
+		"wilderforge.mixins.ui.json",
 		"wilderforge.mixins.vanillafixes.json"
 	],
 	"depends":{
