@@ -5,6 +5,7 @@ plugins {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven {
 		url "https://repo.spongepowered.org/maven/"
@@ -22,6 +23,8 @@ group = "com.wildermods"
 archivesBaseName = "wilderforge"
 
 dependencies {
+
+	compileOnly group: 'com.llamalad7', name: 'MixinExtras', version: '0.0.6'
 
 	compileOnly group: 'org.apache.commons', name: 'commons-text', version: '1.9'
 	compileOnly group: 'org.jetbrains', name: 'intellij-fernflower', version: '1.2.1.16'
@@ -73,6 +76,7 @@ processResources {
 	}
 }
 
+import java.nio.file.Paths
 
 eclipse {
 	classpath {
@@ -80,15 +84,15 @@ eclipse {
 			whenMerged {
 				def decomp = fileReference(file('bin/decomp'))
 				def lib = entries.find { it.path.contains 'wildermyth.jar'}
-				lib.sourcePath = decomp
+				lib.sourcePath = fileReference(file(Paths.get(decomp.getPath(), "/wildermyth.jar")))
 				lib = entries.find { it.path.contains 'scratchpad.jar'}
-				lib.sourcePath = decomp
+				lib.sourcePath = fileReference(file(Paths.get(decomp.getPath(), "/scratchpad.jar")))
 				lib = entries.find { it.path.contains 'server-1.0.jar'}
-				lib.sourcePath = decomp
+				lib.sourcePath = fileReference(file(Paths.get(decomp.getPath(), "/server-1.0.jar")))
 				lib = entries.find { it.path.contains 'gameEngine-1.0.jar'}
-				lib.sourcePath = decomp
+				lib.sourcePath = fileReference(file(Paths.get(decomp.getPath(), "/gameEngine-1.0.jar")))
 				lib = entries.find { it.path.contains 'fmod-jni.jar'}
-				lib.sourcePath = decomp
+				lib.sourcePath = fileReference(file(Paths.get(decomp.getPath(), "/fmod-jni.jar")))
 			}
 		}
 	}
