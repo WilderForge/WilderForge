@@ -1,6 +1,6 @@
-package com.wildermods.wilderforge.api.modJsonV1;
+package com.wildermods.wilderforge.api.modLoadingV1;
 
-public interface ModJsonConstants {
+public interface ModConstants {
 
 	public final String FORMAT = "format";
 	public final String MODID = "modid";
