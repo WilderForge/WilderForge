@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
+import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
 
 public class CoremodInfo extends ModInfo implements ModContainer {

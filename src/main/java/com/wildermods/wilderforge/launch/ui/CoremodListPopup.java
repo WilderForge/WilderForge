@@ -18,7 +18,7 @@ import java.io.IOException;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 
-import static com.wildermods.wilderforge.api.modJsonV1.ModJsonConstants.*;
+import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.uiV1.TextureFilterDrawable;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
