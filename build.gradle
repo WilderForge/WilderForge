@@ -15,8 +15,8 @@ repositories {
 	}
 }
 
-sourceCompatibility = '9'
-targetCompatibility = '9'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 version = wilderForgeVersion
 group = "com.wildermods"
