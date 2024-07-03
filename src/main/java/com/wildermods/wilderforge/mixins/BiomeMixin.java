@@ -91,7 +91,7 @@ public class BiomeMixin implements WFBiome {
 			else if (vBiome == hills) {
 				setDefaultTraits(biome, 0.6f);
 			}
-			else if (vBiome == none || vBiome == mountains || vBiome == ocean || vBiome == lake) {
+			else if (vBiome == none || vBiome == mountains || vBiome == ocean || vBiome == lake || vBiome == netherflare) {
 				setDefaultTraits(biome, 0f);
 			}
 			else {
