@@ -3,7 +3,6 @@ package com.wildermods.wilderforge.launch;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
-import com.wildermods.wilderforge.api.mechanicsV1.PauseEvent;
 import com.wildermods.wilderforge.api.netV1.clientV1.ClientMessageEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerDeathEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerEvent;
@@ -71,13 +70,6 @@ public final class WilderForge {
 		else if (e instanceof ServerDeathEvent) {
 			killServer(e.getServer());
 		}
-	}
-	
-	@SubscribeEvent
-	public static void onPause(PauseEvent e) {
-		e.setCancelled(true);
-		LOGGER.info("Cancelled pausing!");
-		LOGGER.info("The server is: " +    server);
 	}
 	
 	@SubscribeEvent(priority = EventPriority.LOW)
