@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -16,14 +17,18 @@ import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
 
 import com.worldwalkergames.legacy.LegacyDesktop;
+import com.worldwalkergames.legacy.ui.MainScreen;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.ALogger.ILogConsumer;
 import com.worldwalkergames.logging.FilteringConsumer;
+
+import javassist.bytecode.Opcode;
 
 @Mixin(value = LegacyDesktop.class, remap = false)
 public class LegacyDesktopMixin {
 	
 	private static @Shadow @Final ALogger LOGGER;
+	private @Shadow MainScreen ui;
 
 	/**
 	 * Set steam's logger to be WilderForge's logger
@@ -47,7 +52,7 @@ public class LegacyDesktopMixin {
 	}
 	
 	@Inject(at = @At(value = "HEAD"), method = "create()V")
-	public void create(CallbackInfo c) {
+	public void assignGraphicInfo(CallbackInfo c) {
 		GraphicalInfo.INSTANCE = new GraphicalInfo((LegacyDesktop)(Object)this);
 	}
 	
@@ -55,6 +60,22 @@ public class LegacyDesktopMixin {
 	public void fatalError(Throwable t, CallbackInfo c) throws Throwable {
 		dispose();
 		throw t;
+	}
+	
+	/**
+	 * sets the {@link WilderForge.mainScreen} Field
+	 */
+	@Inject(
+		at = @At(
+			value = "FIELD",
+			shift = Shift.AFTER,
+			opcode = Opcode.PUTFIELD,
+			target = "ui"
+		),
+		method = "create()V"
+	)
+	public void assignWFMainScreen(CallbackInfo c) {
+		WilderForge.setMainScreen(ui); //set to the main screen instance
 	}
 	
 	@Shadow

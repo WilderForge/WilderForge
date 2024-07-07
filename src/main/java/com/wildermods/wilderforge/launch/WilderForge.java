@@ -8,8 +8,11 @@ import com.wildermods.wilderforge.api.serverV1.ServerDeathEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerInstantiationEvent;
 import com.wildermods.wilderforge.launch.logging.Logger;
+
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
+import com.worldwalkergames.legacy.control.ClientControl;
 import com.worldwalkergames.legacy.server.LegacyServer;
+import com.worldwalkergames.legacy.ui.MainScreen;
 
 public final class WilderForge {
 	
@@ -23,7 +26,14 @@ public final class WilderForge {
 	private static LegacyViewDependencies dependencies;
 	
 	@InternalOnly
+	@Deprecated(forRemoval = true)
 	private static LegacyServer server;
+	
+	@InternalOnly
+	private static MainScreen mainScreen;
+	
+	@InternalOnly
+	private static ClientControl clientControl;
 	
 	public static final EventBus EVENT_BUS = new EventBus();
 	
@@ -45,6 +55,22 @@ public final class WilderForge {
 	}
 	
 	@InternalOnly
+	public static void setMainScreen(MainScreen ui) {
+		if(mainScreen != null) {
+			throw new IllegalStateException("Main Screen is already set!");
+		}
+		if(ui == null) {
+			throw new IllegalArgumentException("Main Screen instance cannot be null.", new NullPointerException());
+		}
+		mainScreen = ui;
+		clientControl = (ClientControl) ((ClientContexted)(Object)ui).getControl();
+	}
+	
+	public static ClientControl getClientControl() {
+		return clientControl;
+	}
+	
+	@InternalOnly
 	private static void initServer(LegacyServer server) {
 		if(WilderForge.server == null) {
 			WilderForge.server = server;
@@ -56,8 +82,8 @@ public final class WilderForge {
 	
 	@InternalOnly
 	private static void killServer(LegacyServer server) {
-		if(WilderForge.server == null) {
-			throw new IllegalStateException("Server already killed?!");
+		if(WilderForge.server != server) {
+			throw new IllegalStateException("Server mismatch?!");
 		}
 		WilderForge.server = null;
 	}
@@ -82,10 +108,6 @@ public final class WilderForge {
 	
 	public static LegacyViewDependencies getViewDependencies() {
 		return dependencies;
-	}
-	
-	public static LegacyServer getServer() {
-		return server;
 	}
 	
 }

@@ -3,19 +3,22 @@ package com.wildermods.wilderforge.mixins;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.wildermods.wilderforge.launch.ClientContexted;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.ui.NoFeedbackPopup;
 
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
+import com.worldwalkergames.legacy.control.ClientContext;
 import com.worldwalkergames.legacy.ui.LegacyUIRoot;
 import com.worldwalkergames.legacy.ui.feedback.FeedbackPopup;
 
 @Mixin(value = LegacyUIRoot.class, remap = false)
-public class LegacyUIRootMixin {
+public abstract class LegacyUIRootMixin implements ClientContexted {
 	
 	protected @Shadow LegacyViewDependencies dependencies;
 	
@@ -44,5 +47,7 @@ public class LegacyUIRootMixin {
 		}
 		return;
 	}
+	
+	public abstract @Accessor ClientContext getControl();
 	
 }
