@@ -1,1 +1,22 @@
+pluginManagement {
+	repositories {
+		flatDir {
+			dirs 'libs'
+		}
+		gradlePluginPortal()
+	}
+	resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'com.wildermods.workspace') {
+                useModule('com.wildermods:wilderworkspace:4.0.0.0')
+            }
+        }
+    }
+	plugins {
+		id 'com.wildermods.workspace' version '4.0.0.0'
+	}
+}
+plugins {
+    id 'com.wildermods.workspace'
+}
 rootProject.name = "WilderForge"
