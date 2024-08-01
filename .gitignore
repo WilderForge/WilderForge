@@ -28,3 +28,6 @@ logs/*
 
 #WilderForge
 crashes/*
+
+#WilderWorkspace
+libs/
