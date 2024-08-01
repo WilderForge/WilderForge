@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.mixins;
 
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,8 +22,6 @@ import com.worldwalkergames.legacy.ui.MainScreen;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.ALogger.ILogConsumer;
 import com.worldwalkergames.logging.FilteringConsumer;
-
-import javassist.bytecode.Opcode;
 
 @Mixin(value = LegacyDesktop.class, remap = false)
 public class LegacyDesktopMixin {
@@ -69,7 +68,7 @@ public class LegacyDesktopMixin {
 		at = @At(
 			value = "FIELD",
 			shift = Shift.AFTER,
-			opcode = Opcode.PUTFIELD,
+			opcode = Opcodes.PUTFIELD,
 			target = "ui"
 		),
 		method = "create()V"
