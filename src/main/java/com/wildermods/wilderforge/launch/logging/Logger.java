@@ -77,7 +77,7 @@ public class Logger implements ILogger {
 	}
 
 	@Override
-	public void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean isReplayedBuiltin) {
+	public void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed) {
 		LogLevel l = LogLevel.getLevel(level);
 		if(exc == null) {
 			log(l, msg, category.name);
@@ -85,7 +85,6 @@ public class Logger implements ILogger {
 		else {
 			catching(l, exc, category.name);
 		}
-		
 	}
 
 }

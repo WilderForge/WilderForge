@@ -133,8 +133,13 @@ public interface ILogger extends LogHandler {
 	
 	public void catching(LogLevel level, Throwable t);
 
+	
+	public default void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean isReplayedBuiltin) {
+		log(time, level, category, msg, exc, isReplayedBuiltin, false);
+	}
+	
 	@Override
-	public void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean isReplayedBuiltin);
+	public void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed);
 	
 	public boolean shouldLog(LogLevel level);
 
