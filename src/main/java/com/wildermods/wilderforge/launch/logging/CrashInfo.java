@@ -113,7 +113,11 @@ public final class CrashInfo implements CrashLogService {
 			"I'll just put this over here... with the rest of the fire.",
 			"For Thine is - Life is - For thine is the",
 			"I never asked to be created.",
-			"Sunlight on a broken column"
+			"Sunlight on a broken column",
+			"I am ready to meet my maker, but whether my maker is ready for the great ordeal of meeting me is another matter.",
+			"A man who makes no mistakes does not usually make anything.",
+			"I'm not really dead, as long as you remember me."
+			
 		}));
 		
 		return "//" + messages.get(new Random().nextInt(messages.size()));
