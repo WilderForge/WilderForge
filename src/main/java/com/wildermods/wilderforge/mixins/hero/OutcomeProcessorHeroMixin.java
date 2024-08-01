@@ -31,7 +31,7 @@ public abstract class OutcomeProcessorHeroMixin {
 	)
 	public void onRecruitPre(EffectContext context, EID target, CallbackInfoReturnable<ProcessResult> c) {
 		Entity entity = entities.entity(context.action.getFirstEntity(Role.self));
-		if(WilderForge.EVENT_BUS.fire(new HeroEvent.Recruit.Pre(entity))) {
+		if(WilderForge.MAIN_BUS.fire(new HeroEvent.Recruit.Pre(entity))) {
 			c.setReturnValue(ProcessResult.fail);
 		}
 	}
@@ -43,7 +43,7 @@ public abstract class OutcomeProcessorHeroMixin {
 		locals = LocalCapture.CAPTURE_FAILHARD
 	)
 	public void onRecruitPost(EffectContext context, EID target, CallbackInfoReturnable<ProcessResult> cir, Entity e) {
-		WilderForge.EVENT_BUS.fire(new HeroEvent.Recruit.Post(e));
+		WilderForge.MAIN_BUS.fire(new HeroEvent.Recruit.Post(e));
 	}
 	
 	@Inject (
@@ -53,7 +53,7 @@ public abstract class OutcomeProcessorHeroMixin {
 		require = 1
 	)
 	public void processChangeControlPre(EffectContext context, Entity outcomeTarget, ChangeControl changeControl, CallbackInfoReturnable<ProcessResult> c) {
-		if(WilderForge.EVENT_BUS.fire(new HeroEvent.ControlChange.Pre(context, outcomeTarget, changeControl))) {
+		if(WilderForge.MAIN_BUS.fire(new HeroEvent.ControlChange.Pre(context, outcomeTarget, changeControl))) {
 			c.setReturnValue(ProcessResult.fail);
 		}
 	}
@@ -64,7 +64,7 @@ public abstract class OutcomeProcessorHeroMixin {
 		require = 1
 	)
 	public void processChangeControlPost(EffectContext context, Entity outcomeTarget, ChangeControl changeControl, CallbackInfoReturnable<ProcessResult> c) {
-		WilderForge.EVENT_BUS.fire(new HeroEvent.ControlChange.Post(context, outcomeTarget, changeControl));
+		WilderForge.MAIN_BUS.fire(new HeroEvent.ControlChange.Post(context, outcomeTarget, changeControl));
 	}
 	
 }

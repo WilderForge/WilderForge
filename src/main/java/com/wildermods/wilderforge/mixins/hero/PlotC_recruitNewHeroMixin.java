@@ -26,7 +26,7 @@ public abstract class PlotC_recruitNewHeroMixin extends PlotWorkerMixin {
 	public void resolveRecruitPre(CallbackInfoReturnable<Boolean> c) {
 		Entity hero = this.getEntity(Role.target);
 		Site site = this.getSite(Role.site);
-		if(WilderForge.EVENT_BUS.fire(new HeroEvent.Recruit.Pre(hero, site))) {
+		if(WilderForge.MAIN_BUS.fire(new HeroEvent.Recruit.Pre(hero, site))) {
 			c.setReturnValue(false);
 		}
 	}

@@ -20,7 +20,7 @@ public abstract class LegacyServerMixin {
 		method = "<init>"
 	)
 	public void onConstructionPost(CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new ServerInstantiationEvent(thiz()));
+		WilderForge.MAIN_BUS.fire(new ServerInstantiationEvent(thiz()));
 	}
 	
 	@Inject(
@@ -28,7 +28,7 @@ public abstract class LegacyServerMixin {
 		method = "shutDown"
 	)
 	public void onShutDownPost(CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new ServerDeathEvent(thiz()));
+		WilderForge.MAIN_BUS.fire(new ServerDeathEvent(thiz()));
 	}
 	
 	@Unique

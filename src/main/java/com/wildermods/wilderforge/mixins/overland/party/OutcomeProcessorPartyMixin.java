@@ -28,7 +28,7 @@ public abstract class OutcomeProcessorPartyMixin implements Kerneled {
 	public boolean disbandParty(Special thiz, EffectContext context, Entity outcomeTarget, Special outcome) {
 		if(thiz.disbandParty) {
 			Party party = Party.of(outcomeTarget);
-			if(WilderForge.EVENT_BUS.fire(new PartyDisbandEvent(party))) {
+			if(WilderForge.MAIN_BUS.fire(new PartyDisbandEvent(party))) {
 				getKernelWF().invokeDisbandParty(party);
 			}
 		}

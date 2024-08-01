@@ -27,7 +27,7 @@ public class OverlandTileMapLabMixin {
 		public OverlandTileMapGenerator create(OverlandTileMapGenerator generator) {
 			OverlandGenContext context = ((TileMapGenerator)generator).getContext();
 			OverlandMapGenerationEvent generationEvent = new OverlandMapGenerationEvent(generator, context, true);
-			WilderForge.EVENT_BUS.fire(generationEvent);
+			WilderForge.MAIN_BUS.fire(generationEvent);
 			return generationEvent.getGenerator();
 		}
 	

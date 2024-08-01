@@ -29,7 +29,7 @@ public class CampaignGeneratorMixin {
 	public OverlandTileMapGenerator create(OverlandTileMapGenerator generator, CampaignTemplate campaignTemplate, GameSettings settings, NewGameRequest request) {
 		OverlandGenContext context = ((TileMapGenerator)generator).getContext();
 		OverlandMapGenerationEvent generationEvent = new OverlandMapGenerationEvent(generator, context, campaignTemplate, settings, request);
-		WilderForge.EVENT_BUS.fire(generationEvent);
+		WilderForge.MAIN_BUS.fire(generationEvent);
 		return generationEvent.getGenerator();
 	}
 	

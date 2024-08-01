@@ -20,7 +20,7 @@ public class GameAPIPartyMixin {
 		require = 1
 	)
 	public void disbandParty(Party party, CallbackInfo c) {
-		if(WilderForge.EVENT_BUS.fire(new PartyDisbandEvent(party))) {
+		if(WilderForge.MAIN_BUS.fire(new PartyDisbandEvent(party))) {
 			c.cancel();
 		}
 	}

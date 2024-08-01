@@ -31,7 +31,7 @@ public class GameKernelPartyMixin {
 	 */
 	public void createPartyPre(PartyProposal proposal, boolean removeJobs, Array<Party.TravelGroup> oldTravelGroups, CallbackInfo c) {
 		PartyCreateEvent e = new PartyCreateEvent.Pre(proposal, removeJobs, oldTravelGroups);
-		if (WilderForge.EVENT_BUS.fire(e)) {
+		if (WilderForge.MAIN_BUS.fire(e)) {
 			c.cancel();
 		}
 		removeJobs = e.isRemovingJobs();
@@ -48,7 +48,7 @@ public class GameKernelPartyMixin {
 		require = 1
 	)
 	public void createPartyPost(PartyProposal proposal, boolean removeJobs, Array<Party.TravelGroup> oldTravelGroups, CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new PartyCreateEvent.Post(proposal, removeJobs, oldTravelGroups));
+		WilderForge.MAIN_BUS.fire(new PartyCreateEvent.Post(proposal, removeJobs, oldTravelGroups));
 	}
 	
 	@Inject (
@@ -58,7 +58,7 @@ public class GameKernelPartyMixin {
 		require = 1
 	)
 	public void disbandParty(Party party, CallbackInfo c) {
-		if(WilderForge.EVENT_BUS.fire(new PartyDisbandEvent(party))) {
+		if(WilderForge.MAIN_BUS.fire(new PartyDisbandEvent(party))) {
 			c.cancel();
 		}
 	}

@@ -35,7 +35,9 @@ public final class WilderForge {
 	@InternalOnly
 	private static ClientControl clientControl;
 	
-	public static final EventBus EVENT_BUS = new EventBus();
+	public static final EventBus MAIN_BUS = new EventBus("MAIN");
+	public static final EventBus NETWORK_BUS = new EventBus("NETWORK");
+	public static final EventBus RENDER_BUS = new EventBus("RENDER");
 	
 	@InternalOnly
 	public static ReflectionsHelper getReflectionsHelper() {
@@ -51,7 +53,9 @@ public final class WilderForge {
 		else {
 			throw new IllegalStateException();
 		}
-		EVENT_BUS.register(WilderForge.class);
+		MAIN_BUS.register(WilderForge.class);
+		NETWORK_BUS.register(WilderForge.class);
+		RENDER_BUS.register(WilderForge.class);
 	}
 	
 	@InternalOnly

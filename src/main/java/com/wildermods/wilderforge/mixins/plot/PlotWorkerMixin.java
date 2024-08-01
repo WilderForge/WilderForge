@@ -27,7 +27,7 @@ public abstract class PlotWorkerMixin implements PlotWorkerAccessor {
 		require = 1
 	)
 	public void onKill(String reason, CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new PlotEvent.Finish(this, this.getState(), reason));
+		WilderForge.MAIN_BUS.fire(new PlotEvent.Finish(this, this.getState(), reason));
 	}
 	
 	public abstract @Shadow Entity getEntity(Role role);

@@ -31,7 +31,7 @@ public class GameAPIHeroMixin implements Kerneled {
 		require = 1
 	)
 	public void onProposeRecruitPre(Proposal proposal, CallbackInfo c) {
-		if(WilderForge.EVENT_BUS.fire(new HeroProposeEvent.Pre(proposal))) {
+		if(WilderForge.MAIN_BUS.fire(new HeroProposeEvent.Pre(proposal))) {
 			changeWriter.resetEvents();
 			ObservantChangeWriterAccessor writer = (ObservantChangeWriterAccessor) changeWriter;
 			EntitiesCollection entities = writer.getEntities();
@@ -54,7 +54,7 @@ public class GameAPIHeroMixin implements Kerneled {
 		require = 1
 	)
 	public void onProposeRecruitPost(Proposal proposal, CallbackInfo c) {
-		WilderForge.EVENT_BUS.fire(new HeroProposeEvent.Post(proposal));
+		WilderForge.MAIN_BUS.fire(new HeroProposeEvent.Post(proposal));
 	}
 	
 }

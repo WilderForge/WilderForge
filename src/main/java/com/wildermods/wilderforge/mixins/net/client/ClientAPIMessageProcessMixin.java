@@ -24,7 +24,7 @@ public abstract class ClientAPIMessageProcessMixin implements ClientAPIAccessor 
 	)
 	public void preVanillaChecks(Message message, CallbackInfoReturnable<Boolean> c) {
 		ClientMessageEvent e = new ClientMessageEvent.PreVanillaChecks(this, message);
-		WilderForge.EVENT_BUS.fire(e);
+		WilderForge.NETWORK_BUS.fire(e);
 		Boolean handled = e.hasBeenHandled();
 		if(null != handled) {
 			c.setReturnValue(handled);
@@ -47,7 +47,7 @@ public abstract class ClientAPIMessageProcessMixin implements ClientAPIAccessor 
 	)
 	public void onVanillaMessageCheck(Message message, CallbackInfoReturnable<Boolean> c) {
 		ClientMessageEvent e = new ClientMessageEvent.OnVanillaCheck(this, message);
-		WilderForge.EVENT_BUS.fire(e);
+		WilderForge.NETWORK_BUS.fire(e);
 		Boolean handled = e.hasBeenHandled();
 		if(null != handled) {
 			c.setReturnValue(handled);
@@ -62,7 +62,7 @@ public abstract class ClientAPIMessageProcessMixin implements ClientAPIAccessor 
 	)
 	public void postVanillaChecks(Message message, CallbackInfoReturnable<Boolean> c) {
 		ClientMessageEvent e = new ClientMessageEvent.PostVanillaChecks(this, message);
-		WilderForge.EVENT_BUS.fire(e);
+		WilderForge.NETWORK_BUS.fire(e);
 		Boolean handled = e.hasBeenHandled();
 		if(null != handled) {
 			c.setReturnValue(handled);

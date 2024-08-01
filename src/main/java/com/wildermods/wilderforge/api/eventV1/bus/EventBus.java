@@ -17,13 +17,14 @@ import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
 public class EventBus {
-	private static final Logger LOGGER = new Logger(EventBus.class);
-	private static final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
-	private static final HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> LISTENERS = new HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>>();
+	private final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
+	private final HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> listeners = new HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>>();
+	private final String name;
+	private final Logger logger;
 	
-	
-	public EventBus() {
-		
+	public EventBus(String name) {
+		this.name = name;
+		this.logger = new Logger(EventBus.class + "/" + name);
 	}
 	
 	/**
@@ -91,11 +92,11 @@ public class EventBus {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public boolean fire(Event e) {
 		removeCollectedReferences();
-		Set<IEventListener<? extends Event>> listeners = LISTENERS.get(e.getClass());
-		if(listeners == null) { //nothing is subscribing to the event
+		Set<IEventListener<? extends Event>> foundListeners = listeners.get(e.getClass());
+		if(foundListeners == null) { //nothing is subscribing to the event
 			return false;
 		}
-		for(IEventListener listener: listeners) {
+		for(IEventListener listener: foundListeners) {
 			if(e.isCancelled() && !listener.acceptCancelled()) {
 				continue;
 			}
@@ -109,7 +110,7 @@ public class EventBus {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final void registerListeners(Object o) {
+	private final void registerListeners(Object o) {
 		removeCollectedReferences();
 		if(o == null) {
 			throw new NullPointerException();
@@ -124,10 +125,10 @@ public class EventBus {
 						EventListener listener = new StaticEventListener(m);
 						Set<Class> subclasses = WilderForge.getReflectionsHelper().getTypeAndSubTypesOf(listener.subscribedTo);
 						for(Class eventType : subclasses) {
-							if(!LISTENERS.containsKey(eventType)) {
-								LISTENERS.put(eventType, new TreeSet<IEventListener<? extends Event>>());
+							if(!listeners.containsKey(eventType)) {
+								listeners.put(eventType, new TreeSet<IEventListener<? extends Event>>());
 							}
-							Set<IEventListener<? extends Event>> staticListeners = LISTENERS.get(eventType);
+							Set<IEventListener<? extends Event>> staticListeners = listeners.get(eventType);
 							staticListeners.add(listener);
 						}
 					}
@@ -144,13 +145,13 @@ public class EventBus {
 					if(Modifier.isAbstract(m.getModifiers())) {
 						throw new EventTargetError("Abstract methods cannot subscribe to events. " + m.getClass().getCanonicalName() + "." + m.getName());
 					}
-					ObjectEventListener listener = new ObjectEventListener(o, m);
+					ObjectEventListener listener = new ObjectEventListener(this, o, m);
 					Set<Class> subclasses = WilderForge.getReflectionsHelper().getTypeAndSubTypesOf(listener.subscribedTo);
 					for(Class eventType : subclasses) {
-						if(!LISTENERS.containsKey(eventType)) {
-							LISTENERS.put(eventType, new TreeSet<IEventListener<? extends Event>>());
+						if(!listeners.containsKey(eventType)) {
+							listeners.put(eventType, new TreeSet<IEventListener<? extends Event>>());
 						}
-						Set<IEventListener<? extends Event>> objectListeners = LISTENERS.get(eventType);
+						Set<IEventListener<? extends Event>> objectListeners = listeners.get(eventType);
 						objectListeners.add(listener);
 					}
 				}
@@ -159,11 +160,11 @@ public class EventBus {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	static void removeCollectedReferences() {
+	void removeCollectedReferences() {
 		ObjectEventListener reference;
 		while((reference = (ObjectEventListener) refQueue.poll()) != null) {
 			Class<? extends Event> event = (Class<? extends Event>) reference.method.getParameters()[0].getType();
-			if(!LISTENERS.get(event).remove(reference)) {
+			if(!listeners.get(event).remove(reference)) {
 				throw new AssertionError();
 			}
 		}
@@ -249,12 +250,14 @@ public class EventBus {
 	}
 	
 	static class ObjectEventListener<T extends Event> extends WeakReference<Object> implements IEventListener<T> {
+		protected final EventBus bus;
 		protected final SubscribeEvent subscriberInfo;
 		protected final Method method;
 		protected final Class<? extends T> subscribedTo;
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public ObjectEventListener(Object o, Method method) throws EventTargetError  {
-			super(o, (ReferenceQueue)refQueue);
+		public ObjectEventListener(EventBus bus, Object o, Method method) throws EventTargetError  {
+			super(o, (ReferenceQueue)bus.refQueue);
+			this.bus = bus;
 			if(o == null) {
 				throw new NullPointerException();
 			}
@@ -278,7 +281,7 @@ public class EventBus {
 		@Override
 		public void fire(Event event) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 			if(getObject() == null) {
-				LOGGER.warn(event.getClass().getSimpleName() + " fired on garbage collected object. Hopefully this weakreference will be removed!");
+				bus.logger.warn(event.getClass().getSimpleName() + " fired on garbage collected object. Hopefully this weakreference will be removed!");
 				return;
 			}
 			method.invoke(getObject(), event);
