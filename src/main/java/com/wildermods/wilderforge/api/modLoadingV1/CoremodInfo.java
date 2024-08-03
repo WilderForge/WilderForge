@@ -81,7 +81,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 		this.coremod = coremod;
 	}
 	
-	protected CoremodInfo() {this.coremod = null;};
+	protected CoremodInfo() {this.coremod = null;}; //constructor for missing coremods
 	
 	public FileHandle getFolder() {
 		return files.classpath("");
@@ -116,7 +116,6 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 	public ModMetadata getMetadata() {
 		return coremod.getMetadata();
 	}
-
 
 	@Override
 	@Deprecated
@@ -162,6 +161,11 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 	@Deprecated
 	public Path getPath(String file) {
 		return coremod.getPath(file);
+	}
+	
+	@Override
+	public Optional<Path> findPath(String path) {
+		return coremod.findPath(path);
 	}
 	
 }
