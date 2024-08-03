@@ -1,7 +1,6 @@
 buildscript {
 	dependencies {
 		classpath group: 'commons-io', name: 'commons-io', version: commonsIOVersion
-		//classpath group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
 		classpath files('libs/wilderworkspace-4.0.0.0.jar')
 	}
 	repositories {
@@ -13,7 +12,6 @@ buildscript {
 plugins {
 	id 'java-library'
 	id 'eclipse'
-	id 'com.github.johnrengelman.shadow' version "7.0.0"
 }
 apply plugin: 'com.wildermods.workspace'
 
@@ -37,25 +35,8 @@ archivesBaseName = "wilderforge"
 
 dependencies {
 
-	compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.4.0'
-
-	compileOnly group: 'org.apache.commons', name: 'commons-text', version: '1.12.0'
-	compileOnly group: 'net.fabricmc', name: 'access-widener', version: '2.1.0'
-	compileOnly group: 'net.fabricmc', name: 'fabric-loader', version: '0.15.11'
-	compileOnly group: 'net.fabricmc', name: 'tiny-mappings-parser', version:'0.3.0+'
-	compileOnly group: 'net.fabricmc', name: 'fabric-loader', version: '0.13.1'
-	shadow group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.7'
-	shadow group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
-
-	//mixin requirements:
-	compileOnly 'org.spongepowered:mixin:' + mixinVersion
-	compileOnly 'com.google.guava:guava:33.2.1-jre'
-	compileOnly group: 'com.google.code.gson', name: 'gson', version: '2.11.0'
-	compileOnly group: 'org.ow2.asm', name: 'asm', version: asmVersion
-	compileOnly group: 'org.ow2.asm', name: 'asm-analysis', version: asmVersion
-	compileOnly group: 'org.ow2.asm', name: 'asm-commons', version: asmVersion
-	compileOnly group: 'org.ow2.asm', name: 'asm-tree', version: asmVersion
-	compileOnly group: 'org.ow2.asm', name: 'asm-util', version: asmVersion
+	implementation group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.7'
+	implementation group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
 	
 	/**********
 	don't alter the dependencies below
@@ -68,6 +49,7 @@ dependencies {
 	compileOnly fileTree(dir: './bin/lib/', include: ['*.jar'])
 }
 
+/*
 shadowJar {
 	mergeServiceFiles()
 	configurations = [project.configurations.shadow]
@@ -79,7 +61,7 @@ shadowJar {
 	exclude 'META-INF/DEPENDENCIES'
 	exclude 'LICENSE.txt'
 }
-
+*/
 
 import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
@@ -100,4 +82,4 @@ jar {
 	}
 }
 
-build.finalizedBy shadowJar
+//build.finalizedBy shadowJar
