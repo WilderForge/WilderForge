@@ -79,12 +79,11 @@
 		"wilderforge.mixins.vanillafixes.json"
 	],
 	"depends":{
-		"wildermyth": ">=1.0.0"
+		"wildermyth": ">=1.16.0"
 	},
 	"breaks":{
 		"wildermyth": [
-			"<1.0",
-			"git"
+			"<1.16.0"
 		],
 		"minecraft":["*"]
 	},
