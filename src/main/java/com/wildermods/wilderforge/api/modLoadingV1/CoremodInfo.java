@@ -104,8 +104,8 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 				ret.append(authors[i].getName());
 				ret.append(", ");
 			}
-			ret.append(" and ");
-			ret.append(authors.length - 1);
+			ret.append("and ");
+			ret.append(authors[authors.length - 1].getName());
 			return ret.toString();
 		}
 		throw new IllegalArgumentException(Arrays.toString(authors));

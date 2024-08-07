@@ -131,6 +131,7 @@ public class CoremodListPopup extends PopUp {
 		}
 		selectedMod = modButton;
 		
+		
 		Table table = new Table();
 		table.defaults().align(Align.topLeft).pad(3f).expandX();
 
@@ -146,6 +147,8 @@ public class CoremodListPopup extends PopUp {
 			
 		}
 		else {
+			
+			System.out.println("Author of " + modButton.coremod.name + ": " + modButton.coremod.author);
 			
 			Table topLabels = new Table();
 			topLabels.defaults().align(Align.topLeft).pad(3f).expandX();
@@ -206,13 +209,7 @@ public class CoremodListPopup extends PopUp {
 			String sources = metadata.getContact().get(SOURCE_URL).orElse(null);
 			String issues = metadata.getContact().get(ISSUES_URL).orElse(null);
 			String website = metadata.getContact().get(HOMEPAGE).orElse(null);
-			CustomValue licenseCV = metadata.getCustomValue(LICENSE_URL);
-			
-			String license = null;
-			
-			if(licenseCV != null) {
-				license = licenseCV.getAsString();
-			}
+			String license = metadata.getContact().get(LICENSE).orElse(null);
 			
 			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.source"), this, "gearLine", sources));
 			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.issues"), this, "gearLine", issues));
