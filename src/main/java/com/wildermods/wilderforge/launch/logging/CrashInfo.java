@@ -22,7 +22,7 @@ import java.util.Random;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.asm.mixin.throwables.MixinException;
 
-import com.wildermods.wilderloader.CrashLogService;
+import com.wildermods.provider.services.CrashLogService;
 
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
