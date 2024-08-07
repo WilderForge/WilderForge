@@ -19,11 +19,11 @@ public class GameSettingsVanillaFixMixin {
 	 * @param c
 	 */
 	@Inject(
-			at = @At("HEAD"),
-			method = "getPerilAndOdesEnabled(Lcom/worldwalkergames/engine/EntitiesCollection;)Z",
-			cancellable = true,
-			require = 1
-		)
+		at = @At("HEAD"),
+		method = "getPerilAndOdesEnabled(Lcom/worldwalkergames/engine/EntitiesCollection;)Z",
+		cancellable = true,
+		require = 1
+	)
 	private static void fixGetPerilAndOdesEnabled(EntitiesCollection entities, CallbackInfoReturnable<Boolean> c) {
 		if(GameSettings.getScenarioInfo(entities) == null) {
 			c.setReturnValue(false); //if no entities collection in the scenario, return false
