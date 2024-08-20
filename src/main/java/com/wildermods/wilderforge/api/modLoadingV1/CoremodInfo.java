@@ -23,6 +23,7 @@ import java.util.ResourceBundle;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+
 import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
 
@@ -30,7 +31,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 
 	public static Files files = Gdx.files;
 	
-	public final ModContainer coremod;
+	public transient final ModContainer coremod;
 	
 	@InternalOnly
 	public CoremodInfo(ModContainer coremod) {
@@ -42,7 +43,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 		modSteamWorkshopId = null;
 		alwaysOn = true;
 		showInStoryDialog = true;
-		showInModConfig = true;
+		showInModConfig = false;
 		listInCredits = true;
 		
 		this.folder = getFolder();
@@ -63,6 +64,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 			}
 		}
 		
+		metadata.getContact();
 		CustomValue creditArrayV = metadata.getCustomValue(CREDITS);
 		CvArray creditArray = null;
 		if(creditArrayV != null) {

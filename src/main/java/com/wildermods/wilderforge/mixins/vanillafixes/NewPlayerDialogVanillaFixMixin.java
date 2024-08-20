@@ -35,7 +35,7 @@ public class NewPlayerDialogVanillaFixMixin {
 */
 	
 	@Inject(
-			at = @At(
+		at = @At(
 			value = "TAIL"
 		),
 		method = "build()V",

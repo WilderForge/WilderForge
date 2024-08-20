@@ -16,6 +16,7 @@
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
 		"ModAwareResourceBundleMixin",
+		"NewGameDialogMixin",
 		"NiceLwjgl3ApplicationMixin",
 		"ObservantChangeWriterAccessor",
 		"OverlandTileMapLabMixin",
