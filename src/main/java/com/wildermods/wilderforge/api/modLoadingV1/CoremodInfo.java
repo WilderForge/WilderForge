@@ -55,7 +55,7 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 			if(author == null) {
 				author = "Unknown vendor";
 			}
-			url = "java.vendor.url";
+			url = System.getProperty("java.vendor.url");
 		}
 		else {
 			author = grammaticallyCorrectAuthorList((Person[]) metadata.getAuthors().toArray(new Person[]{}));
