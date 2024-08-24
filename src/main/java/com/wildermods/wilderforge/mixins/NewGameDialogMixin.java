@@ -1,25 +1,28 @@
 package com.wildermods.wilderforge.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.launch.logging.Logger;
 
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
 import com.worldwalkergames.legacy.ui.menu.NewGameDialog;
-import com.worldwalkergames.legacy.ui.menu.NewGameDialogData;
 
 @Debug(export = true)
 @Mixin(value = NewGameDialog.class, remap = false)
 public class NewGameDialogMixin {
 	
-	private @Shadow NewGameDialogData data;
+	private static @Unique Logger LOGGER = new Logger(NewGameDialog.class);
+	private @Shadow GameSettings gameSettings;
 	
 	@Inject(
 		at = @At(
@@ -37,11 +40,11 @@ public class NewGameDialogMixin {
 			to = @At("TAIL")
 		),
 		//locals = LocalCapture.PRINT,
+		locals = LocalCapture.CAPTURE_FAILHARD,
 		method = "applyGameSettings()V",
 		require = 1,
 		allow = 1,
-		cancellable = false,
-		locals = LocalCapture.PRINT
+		cancellable = false
 	)
 	/**
 	 * Makes it so that all coremods are considered locked by the game's mod API
@@ -49,7 +52,10 @@ public class NewGameDialogMixin {
 	 * @param c
 	 */
 	private void onApplyGameSettings(CallbackInfo c, @Local GameSettings.ModEntry e) {
-		
+		if(e.info instanceof CoremodInfo) {
+			LOGGER.info("Locking coremod " + e.modId);
+			gameSettings.lockedMods.add(e.modId);
+		}
 	}
 	
 }
