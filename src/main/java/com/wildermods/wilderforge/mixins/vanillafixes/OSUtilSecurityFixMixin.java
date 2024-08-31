@@ -12,16 +12,11 @@ import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.Shadow;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.util.OSUtil;
 
@@ -34,14 +29,13 @@ public class OSUtilSecurityFixMixin {
 
 	private static @Final @Shadow ALogger LOGGER;
 	
-	@Inject(
+	@ModifyVariable(
 		at = @At("HEAD"),
-		cancellable = true,
 		method = "openBrowser(Ljava/lang/String;)V",
 		require = 1
 	)
-	private static void patchOpenBrowser(String url, CallbackInfo c, @Share("url") LocalRef<String> urlRef) throws IOException { 
-		url = checkURL(url).toASCIIString();
+	private static String patchOpenBrowser(String url) throws IOException { 
+		return checkURL(url).toASCIIString();
 	}
 	
 	@WrapMethod(
@@ -60,20 +54,13 @@ public class OSUtilSecurityFixMixin {
 		}
 	}
 	
-	@Inject(
+	@ModifyVariable(
 		at = @At("HEAD"),
-		cancellable = true,
 		method = "showFile(Ljava/lang/String;)Z",
 		require = 1
 	)
-	private static final void patchShowFile(String absolutePath, CallbackInfoReturnable<Boolean> c) {
-		try {
-			absolutePath = checkPath(absolutePath).toASCIIString();
-		}
-		catch(IOException e) {
-			LOGGER.log5("unable to open a file viewer on {0} for path {1} with error {2}", System.getProperty("os.name"), absolutePath, e);
-			c.setReturnValue(false); //return false;
-		}
+	private static final String patchShowFile(String absolutePath) throws IOException {
+		return checkPath(absolutePath).toASCIIString();
 	}
 	
 	@WrapMethod(

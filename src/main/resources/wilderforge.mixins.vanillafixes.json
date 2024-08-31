@@ -9,6 +9,7 @@
 		"ClientDataContextVanillaFixMixin",
 		"GameSettingsVanillaFixMixin",
 		"NewPlayerDialogVanillaFixMixin",
+		"OSUtilSecurityFixMixin",
 		"ServerDataContextVanillaFixMixin"
 	]
 }
