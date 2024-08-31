@@ -1,5 +1,7 @@
 package com.wildermods.wilderforge.launch;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
@@ -56,6 +58,16 @@ public final class WilderForge {
 		MAIN_BUS.register(WilderForge.class);
 		NETWORK_BUS.register(WilderForge.class);
 		RENDER_BUS.register(WilderForge.class);
+		
+		dependencies.globalInputProcessor.anyKeyDown.add(WilderForge.class, () -> {
+			if(
+				Gdx.input.isKeyJustPressed(Input.Keys.C)
+				&& (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
+				&& (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
+			) {
+				throw new Error("Manually Triggered Debug Crash");
+			}
+		});
 	}
 	
 	@InternalOnly
