@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="warn" packages="com.wildermods.wilderforge">
+<Configuration status="warn">
     <Appenders>
         <Console name="SysOut" target="SYSTEM_OUT">
             <PatternLayout pattern="%highlight{[%d{HH:mm:ss.SSS}] [%t/%level] [%c{-3}/%markerSimpleName]: %msg %n}"/>
