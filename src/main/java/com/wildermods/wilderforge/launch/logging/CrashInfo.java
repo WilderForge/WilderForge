@@ -8,7 +8,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -33,6 +34,8 @@ import com.worldwalkergames.legacy.Version;
 
 public final class CrashInfo implements CrashLogService {
 
+	boolean dump = false;
+	
 	File crashFolder = new File("./crashes");
 	
 	@Override
@@ -44,11 +47,15 @@ public final class CrashInfo implements CrashLogService {
 		s.append("Time: ").append(getDate()).append('\n');
 		s.append("Description: ").append(getLowestDescription(t)).append('\n');
 		s.append('\n');
-		s.append(ExceptionUtils.getStackTrace(t));
+		s.append(ExceptionUtils.getStackTrace(t)).append('\n');
 		s.append("---- Additonal Information----").append('\n');
 		s.append('\n');
 		appendSystemDetails(s).append("\n\n");
-		appendCoremodDetails(s).append("\n\n");
+		appendCoremodDetails(s);
+		if(dump) {
+			s.append("\n\n");
+			appendThreadDump(s);
+		}
 
 		try {
 			File crashFile = getCrashFile();
@@ -174,6 +181,10 @@ public final class CrashInfo implements CrashLogService {
 		}
 	}
 	
+	private void appendThreadDump(StringBuilder s) {
+		s.append(dump());
+	}
+	
 	private StringBuilder appendCoremodDetails(StringBuilder s) {
 		s.append("-- Coremod Details --").append('\n');
 		s.append("Coremods Detected: " + Coremods.getCoremodCount()).append(":\n\n");
@@ -211,6 +222,31 @@ public final class CrashInfo implements CrashLogService {
 			throw new AssertionError(e);
 		}
 		return file;
+	}
+	
+	protected static String dump() {
+		StringBuilder text = new StringBuilder();
+		ThreadMXBean threads = ManagementFactory.getThreadMXBean();
+		ThreadInfo[] dumps = threads.getThreadInfo(threads.getAllThreadIds(), 255);
+		text.append("---- THREAD DUMP ----\n\n");
+		for (ThreadInfo dump : dumps) {
+			text.append("\"").append(dump.getThreadName()).append("\"\n");
+			Thread.State state = dump.getThreadState();
+			text.append("\tState: ").append(state);
+			String blockedBy = dump.getLockOwnerName();
+			if (blockedBy != null) {
+				text.append(" on ").append(blockedBy);
+			}
+			text.append("\n");
+			StackTraceElement[] elements = dump.getStackTrace();
+			for (StackTraceElement element : elements) {
+				text.append("\t\tat ");
+				text.append(element);
+				text.append("\n");
+			}
+			text.append("\n\n");
+		}
+		return text.toString();
 	}
 	
 }

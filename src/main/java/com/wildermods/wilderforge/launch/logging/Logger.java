@@ -1,15 +1,14 @@
 package com.wildermods.wilderforge.launch.logging;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import net.fabricmc.loader.impl.util.log.LogCategory;
 
 public class Logger implements ILogger {
-
-	private final int ordinal;
 	
-	private final String name;
+	private final org.apache.logging.log4j.Logger logger;
 	
 	public Logger(Class clazz) {
 		this(clazz.getSimpleName(), LogLevel.INFO);
@@ -24,22 +23,18 @@ public class Logger implements ILogger {
 	}
 	
 	public Logger(String name, LogLevel minLevel) {
-		this.name = name;
-		this.ordinal = minLevel.ordinal();
+		this.logger = LogManager.getLogger(name);
+		Configurator.setLevel(logger, minLevel.toLog4j());
 	}
 	
 	@Override
 	public void log(LogLevel level, String s) {
-		if(shouldLog(level)) {
-			System.out.println("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "] " + s);
-		}
+		logger.log(level.toLog4j(), s);
 	}
 	
 	public void log(LogLevel level, String s, String tag) {
 		if(tag != null) {
-			if(shouldLog(level)) {
-				System.out.println("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "/" + tag + "] " + s);
-			}
+			logger.log(level.toLog4j(), MarkerManager.getMarker(tag), s);
 		}
 		else {
 			log(level, s);
@@ -48,32 +43,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public void catching(LogLevel level, Throwable t) {
-		if(shouldLog(level)) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "] Catching " );
-			t.printStackTrace(pw);
-			System.out.println(sw.toString());
-		}
-	}
-	
-	public void catching(LogLevel level, Throwable t, String tag) {
-		if(tag == null) {
-			catching(level, t);
-			return;
-		}
-		if(shouldLog(level)) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			pw.append("[" + Thread.currentThread().getName() + "/" + level + "] [" + name + "/" + tag + "] Catching ");
-			t.printStackTrace(pw);
-			System.out.println(sw.toString());
-		}
-	}
-
-	@Override
-	public boolean shouldLog(LogLevel level) {
-		return level.ordinal() >= ordinal;
+		logger.catching(level.toLog4j(), t);
 	}
 
 	@Override
@@ -83,8 +53,13 @@ public class Logger implements ILogger {
 			log(l, msg, category.name);
 		}
 		else {
-			catching(l, exc, category.name);
+			catching(l, exc);
 		}
+	}
+
+	@Override
+	public boolean shouldLog(LogLevel level) {
+		return logger.getLevel().isInRange(LogLevel.FATAL.toLog4j(), level.toLog4j());
 	}
 
 }

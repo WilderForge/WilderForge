@@ -2,13 +2,18 @@ package com.wildermods.wilderforge.launch.logging;
 
 import java.util.LinkedHashMap;
 
-import static com.wildermods.wilderforge.launch.logging.LogLevel.*;
-
 import com.badlogic.gdx.ApplicationLogger;
 import com.codedisaster.steamworks.SteamAPIWarningMessageHook;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.logging.FilteringConsumer;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.MessageFormatMessageFactory;
+import static org.apache.logging.log4j.Level.*;
+
 
 @InternalOnly
 public class LoggerOverrider extends FilteringConsumer implements ApplicationLogger, SteamAPIWarningMessageHook {
@@ -29,12 +34,31 @@ public class LoggerOverrider extends FilteringConsumer implements ApplicationLog
 		getLogger(tag).log(getLevel(level), ALogger.compile(message, parameters));
 	}
 	
+	private final Level getLevel(int level) {
+		switch (level) {
+		case 0:
+			return TRACE;
+		case 1:
+			return DEBUG;
+		case 2:
+			return INFO;
+		case 3:
+			return WARN;
+		case 4:
+			return ERROR;
+		case 5:
+			return FATAL;
+		default:
+			return INFO;
+		}
+	}
+	
 	private Logger getLogger(String name) { 
 		Logger ret;
 		if((ret = LOGGERS.get(name)) != null) {
 			return ret;
 		}
-		ret = new Logger(name);
+		ret = LogManager.getLogger(name, new MessageFormatMessageFactory());
 		LOGGERS.putIfAbsent(name, ret);
 		return ret;
 	}

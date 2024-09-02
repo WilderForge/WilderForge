@@ -1,14 +1,26 @@
 package com.wildermods.wilderforge.launch.logging;
 
+import org.apache.logging.log4j.Level;
+
 public enum LogLevel {
 
-	TRACE,
-	DEBUG,
-	INFO,
-	WARN,
-	ERROR,
-	FATAL;
+	TRACE(Level.TRACE),
+	DEBUG(Level.DEBUG),
+	INFO(Level.INFO),
+	WARN(Level.WARN),
+	ERROR(Level.ERROR),
+	FATAL(Level.FATAL);
 	
+	private final Level log4jLevel;
+	
+	LogLevel(Level log4jLevel) {
+		this.log4jLevel = log4jLevel;
+	}
+	
+	public Level toLog4j() {
+		return log4jLevel;
+	}
+
 	public static LogLevel getLevel(net.fabricmc.loader.impl.util.log.LogLevel level) {
 		switch(level) {
 		case TRACE:
@@ -24,6 +36,14 @@ public enum LogLevel {
 		default:
 			return INFO;
 		}
+	}
+	
+	public static LogLevel getLevel(org.apache.logging.log4j.Level level) {
+		LogLevel logLevel = LogLevel.valueOf(level.name());
+		if(logLevel == null) {
+			logLevel = INFO;
+		}
+		return logLevel;
 	}
 	
 	public static final LogLevel getLevel(int level) {

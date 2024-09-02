@@ -32,8 +32,8 @@ public class LegacyDesktopMixin {
 	/**
 	 * Set steam's logger to be WilderForge's logger
 	 */
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/LinkedList;add(Ljava/lang/Object;)Z"), method = "initializeLogging()V")
-	private static void initializeLogging(CallbackInfo c) {
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/LinkedList;add(Ljava/lang/Object;)Z"), method = "initializeLogging()V", require = 1)
+	private static void setLogger(CallbackInfo c) {
 		ALogger.Aggregator aggregator = ALogger.getDefaultAggregator();
 		aggregator.consumers.clear();
 		LoggerOverrider loggerOverrider = new LoggerOverrider(new FilteringConsumer.Filter());
