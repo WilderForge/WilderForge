@@ -10,4 +10,7 @@ public class Descriptor {
 	public static final String BOOLEAN = "Z";
 	public static final String VOID = "V";
 	public static final String ARRAY_OF = "[";
+	
+	public static final String STRING = "Ljava/lang/String;";
+	public static final String OBJECT = "Ljava/lang/Object;";
 }
