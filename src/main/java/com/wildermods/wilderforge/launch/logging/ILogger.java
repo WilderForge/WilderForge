@@ -64,27 +64,27 @@ public interface ILogger extends LogHandler {
 	}
 	
 	public default void trace(String s, String tag) {
-		log(TRACE, s);
+		log(TRACE, s, tag);
 	}
 	
 	public default void debug(String s, String tag) {
-		log(DEBUG, s);
+		log(DEBUG, s, tag);
 	}
 	
 	public default void info(String s, String tag) {
-		log(INFO, s);
+		log(INFO, s, tag);
 	}
 	
 	public default void warn(String s, String tag) {
-		log(WARN, s);
+		log(WARN, s, tag);
 	}
 	
 	public default void error(String s, String tag) {
-		log(ERROR, s);
+		log(ERROR, s, tag);
 	}
 	
 	public default void fatal(String s, String tag) {
-		log(FATAL, s);
+		log(FATAL, s, tag);
 	}
 	
 	public default void log(String s, String tag) {
