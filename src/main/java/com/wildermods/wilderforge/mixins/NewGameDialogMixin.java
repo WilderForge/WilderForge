@@ -29,7 +29,7 @@ public class NewGameDialogMixin {
 	@Inject(
 		at = @At(
 			value = "INVOKE",
-			target = "Lcom/badlogic/gdx/utils/Array;add("+ OBJECT + ")" + VOID
+			target = GDX_ARRAY + "add("+ OBJECT + ")" + VOID
 		),
 		slice = @Slice(
 			from = @At(
@@ -37,7 +37,7 @@ public class NewGameDialogMixin {
 				target = 
 				"Lcom/worldwalkergames/legacy/ui/menu/NewGameDialogData;"
 				+ "getAdditionalMods()"
-				+ "Lcom/badlogic/gdx/utils/Array;"
+				+ GDX_ARRAY
 			),
 			to = @At("TAIL")
 		),

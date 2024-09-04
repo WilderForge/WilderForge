@@ -36,7 +36,7 @@ public abstract class ServerDataContextMixin {
 	
 	
 	@Inject(
-		at = @At("RETURN"), method = "retrieveAllMods("+ BOOLEAN + BOOLEAN +")Lcom/badlogic/gdx/utils/Array;", require = 1)
+		at = @At("RETURN"), method = "retrieveAllMods("+ BOOLEAN + BOOLEAN +")" + GDX_ARRAY, require = 1)
 	/*
 	 * Lets Wildermyth's mod engine know about coremods
 	 */
@@ -94,7 +94,7 @@ public abstract class ServerDataContextMixin {
 			value = "HEAD"
 		),
 		method = "applyGameSettings("
-			+ "Lcom/badlogic/gdx/utils/Array;"
+			+ GDX_ARRAY
 			+ "Lcom/worldwalkergames/legacy/server/context/ServerDataContext$LoadingProgressFrameCallback;"
 		+ ")V",
 		require = 1

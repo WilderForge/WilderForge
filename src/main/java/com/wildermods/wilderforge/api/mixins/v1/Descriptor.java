@@ -13,4 +13,5 @@ public class Descriptor {
 	
 	public static final String STRING = "Ljava/lang/String;";
 	public static final String OBJECT = "Ljava/lang/Object;";
+	public static final String GDX_ARRAY = "Lcom/badlogic/gdx/utils/Array;";
 }
