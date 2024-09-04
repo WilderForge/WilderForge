@@ -53,7 +53,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 	@InternalOnly
 	public void addResources(CoremodInfo coremod, String assetPath, Locale locale) {
 		String newAssetPath = "assets/" + coremod.modId + "/" + assetPath.replace("assets/", "");
-		LOGGER.info("Loading resources for coremod " + coremod + " in " + newAssetPath);
+		LOGGER.debug("Loading resources for coremod " + coremod + " in " + newAssetPath);
 		ResourceBundle resources = coremod.getResourceBundle(newAssetPath, locale);
 		HashMap<String, Object> coremodValues = new HashMap<String, Object>();
 		
@@ -69,7 +69,7 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 			this.contentByMod.put(coremod.modId, coremodValues);
 		}
 		else {
-			LOGGER.warn("Coremod " + coremod + " has no resources in " + assetPath);
+			LOGGER.debug("Coremod " + coremod + " has no resources in " + assetPath);
 		}
 	}
 	
