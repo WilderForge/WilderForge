@@ -2,6 +2,8 @@ package com.wildermods.wilderforge.mixins;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 
@@ -33,7 +35,7 @@ public class RootMenuMixin {
 	}
 	
 	@Redirect(
-		method = "build()V",
+		method = "build()" + VOID,
 		at = @At(
 			value = "NEW",
 			target = "Lcom/badlogic/gdx/scenes/scene2d/ui/Label;"

@@ -23,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.wildermods.wilderforge.api.overlandV1.WFBiome;
 import com.wildermods.wilderforge.api.traitV1.Trait;
+import static com.wildermods.wilderforge.api.mixins.v1.Initializer.*;
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.worldwalkergames.collection.WeightedList;
 import com.worldwalkergames.legacy.game.world.model.OverlandTile.Biome;
 import static com.worldwalkergames.legacy.game.world.model.OverlandTile.Biome.*;
@@ -38,20 +40,20 @@ public class BiomeMixin implements WFBiome {
 	private @Shadow @Final @Mutable boolean passable;
 	private @Unique HashMap<String, Trait<?>> traits = new HashMap<String, Trait<?>>();
 	
-	@Invoker("<init>")
+	@Invoker(CONSTRUCTOR)
 	private static Biome newBiome(String internalName, int internalId, boolean passable) {
 		throw new AssertionError();
 	}
 	
 	
-	@Inject(method = "<clinit>",
+	@Inject(method = STATIC_INIT,
 		at = @At(
 			value = "FIELD", 
 			opcode = Opcodes.PUTSTATIC,
 			target = 
 				"Lcom/worldwalkergames/legacy/game/world/model/OverlandTile$Biome;"
 				+ "$VALUES:"
-				+ "[Lcom/worldwalkergames/legacy/game/world/model/OverlandTile$Biome;",
+				 + ARRAY_OF + "Lcom/worldwalkergames/legacy/game/world/model/OverlandTile$Biome;",
 			shift = Shift.AFTER),
 		require = 1
 	)

@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Initializer.*;
+
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 
@@ -21,7 +23,7 @@ public class AggregatorMixin {
 	/*
 	 * Redirect Wildermyth's logging to Wilderforge's logger
 	 */
-	@Inject(at = @At("RETURN"), method = "<init>()V", require = 1)
+	@Inject(at = @At("RETURN"), method = DEFAULT_CONSTRUCTOR, require = 1)
 	public void initTraceConsumerWilderForge(CallbackInfo c) {
 		consumers.clear();
 		consumers.add(new LoggerOverrider());

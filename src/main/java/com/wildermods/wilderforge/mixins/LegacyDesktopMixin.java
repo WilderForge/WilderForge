@@ -16,6 +16,7 @@ import com.wildermods.wilderforge.launch.logging.GraphicalInfo;
 import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 import com.wildermods.wilderforge.launch.steam.SteamUtilityCallback;
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.ui.MainScreen;
@@ -32,7 +33,7 @@ public class LegacyDesktopMixin {
 	/**
 	 * Set steam's logger to be WilderForge's logger
 	 */
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/LinkedList;add(Ljava/lang/Object;)Z"), method = "initializeLogging()V", require = 1)
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/LinkedList;add("+ OBJECT +")" + BOOLEAN), method = "initializeLogging()" + VOID, require = 1)
 	private static void setLogger(CallbackInfo c) {
 		ALogger.Aggregator aggregator = ALogger.getDefaultAggregator();
 		aggregator.consumers.clear();
@@ -50,7 +51,7 @@ public class LegacyDesktopMixin {
 		}
 	}
 	
-	@Inject(at = @At(value = "HEAD"), method = "create()V")
+	@Inject(at = @At(value = "HEAD"), method = "create()" + VOID)
 	public void assignGraphicInfo(CallbackInfo c) {
 		GraphicalInfo.INSTANCE = new GraphicalInfo((LegacyDesktop)(Object)this);
 	}
@@ -71,7 +72,7 @@ public class LegacyDesktopMixin {
 			opcode = Opcodes.PUTFIELD,
 			target = "ui"
 		),
-		method = "create()V"
+		method = "create()" + VOID
 	)
 	public void assignWFMainScreen(CallbackInfo c) {
 		WilderForge.setMainScreen(ui); //set to the main screen instance

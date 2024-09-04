@@ -7,6 +7,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
+
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
@@ -31,7 +33,7 @@ public class OSUtilSecurityFixMixin {
 	
 	@ModifyVariable(
 		at = @At("HEAD"),
-		method = "openBrowser(Ljava/lang/String;)V",
+		method = "openBrowser(" + STRING + ")" + VOID,
 		require = 1
 	)
 	private static String patchOpenBrowser(String url) throws IOException { 
@@ -39,7 +41,7 @@ public class OSUtilSecurityFixMixin {
 	}
 	
 	@WrapMethod(
-		method = "openBrowser(Ljava/lang/String;)V"
+		method = "openBrowser("+ STRING +")" + VOID
 	)
 	private static void catchOpenBrowser(String url, Operation<Void> original) {
 		try {
@@ -56,7 +58,7 @@ public class OSUtilSecurityFixMixin {
 	
 	@ModifyVariable(
 		at = @At("HEAD"),
-		method = "showFile(Ljava/lang/String;)Z",
+		method = "showFile(" + STRING +")" + BOOLEAN,
 		require = 1
 	)
 	private static final String patchShowFile(String absolutePath) throws IOException {
@@ -64,7 +66,7 @@ public class OSUtilSecurityFixMixin {
 	}
 	
 	@WrapMethod(
-		method = "showFile(Ljava/lang/String;)Z"
+		method = "showFile(" + STRING + ")" + BOOLEAN
 	)
 	private static boolean catchShowFile(String absolutePath, Operation<Boolean> original) {
 		try {

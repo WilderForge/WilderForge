@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.launch.ClientContexted;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.ui.NoFeedbackPopup;
@@ -23,7 +24,7 @@ public abstract class LegacyUIRootMixin implements ClientContexted {
 	protected @Shadow LegacyViewDependencies dependencies;
 	
 	@Inject(
-		method = "before()V",
+		method = "before()" + VOID,
 		at = @At(value = "RETURN"),
 		require = 1
 	)

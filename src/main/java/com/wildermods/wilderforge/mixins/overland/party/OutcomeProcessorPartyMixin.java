@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.api.mechanicsV1.Kerneled;
 import com.wildermods.wilderforge.api.overlandV1.party.PartyDisbandEvent;
 import com.wildermods.wilderforge.launch.WilderForge;
@@ -20,7 +21,7 @@ public abstract class OutcomeProcessorPartyMixin implements Kerneled {
 		at = @At(
 			value = "FIELD",
 			target = "Lcom/worldwalkergames/legacy/game/model/effect/Outcome$Special;"
-					+ "disbandParty:Z"
+					+ "disbandParty:" + BOOLEAN
 		),
 		method = "processSpecial",
 		require = 1

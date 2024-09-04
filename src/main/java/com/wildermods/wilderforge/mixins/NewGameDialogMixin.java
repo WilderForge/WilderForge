@@ -1,6 +1,8 @@
 package com.wildermods.wilderforge.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
+
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
@@ -27,7 +29,7 @@ public class NewGameDialogMixin {
 	@Inject(
 		at = @At(
 			value = "INVOKE",
-			target = "Lcom/badlogic/gdx/utils/Array;add(Ljava/lang/Object;)V"
+			target = "Lcom/badlogic/gdx/utils/Array;add("+ OBJECT + ")" + VOID
 		),
 		slice = @Slice(
 			from = @At(
@@ -41,7 +43,7 @@ public class NewGameDialogMixin {
 		),
 		//locals = LocalCapture.PRINT,
 		locals = LocalCapture.CAPTURE_FAILHARD,
-		method = "applyGameSettings()V",
+		method = "applyGameSettings()" + VOID,
 		require = 1,
 		allow = 1,
 		cancellable = false

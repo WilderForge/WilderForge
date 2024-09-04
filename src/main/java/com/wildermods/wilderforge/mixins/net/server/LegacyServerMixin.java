@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Initializer.*;
 import com.wildermods.wilderforge.api.serverV1.ServerDeathEvent;
 import com.wildermods.wilderforge.api.serverV1.ServerInstantiationEvent;
 import com.wildermods.wilderforge.launch.WilderForge;
@@ -17,7 +18,7 @@ public abstract class LegacyServerMixin {
 	
 	@Inject(
 		at = @At("RETURN"),
-		method = "<init>"
+		method = CONSTRUCTOR
 	)
 	public void onConstructionPost(CallbackInfo c) {
 		WilderForge.MAIN_BUS.fire(new ServerInstantiationEvent(thiz()));

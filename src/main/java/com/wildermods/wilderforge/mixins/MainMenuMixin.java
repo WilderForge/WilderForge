@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.launch.ui.CoremodListPopup;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.game.common.ui.OptionButton;
@@ -24,12 +25,12 @@ public abstract class MainMenuMixin extends RootMenuPanel {
 			+ "Lcom/badlogic/gdx/scenes/scene2d/ui/Cell;",
 			ordinal = 2
 		),
-		method = "build()V"
+		method = "build()" + VOID
 	)
 	/*
 	 * Adds coremod button to the main menu
 	 */
-	protected void build(CallbackInfo c) {
+	protected void addCoremodButton(CallbackInfo c) {
 		this.stack.padTop(30);
 		OptionButton.Factory buttonFactory = new OptionButton.Factory(dependencies, null, "mainMenuButton");
 		OptionButton<Object> button = buttonFactory.ui(null, "wilderforge.mainMenu.coremods");

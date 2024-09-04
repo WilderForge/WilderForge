@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.badlogic.gdx.files.FileHandle;
+import static com.wildermods.wilderforge.api.mixins.v1.Initializer.*;
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
@@ -33,13 +35,13 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 	
 	
 	@Inject(at = @At("RETURN"), method = 
-			"<init>("
+			CONSTRUCTOR + "("
 				+ "Lcom/worldwalkergames/legacy/server/context/ServerDataContext;"
-				+ "Ljava/lang/String;"
+				+ STRING
 				+ "Lcom/badlogic/gdx/files/FileHandle;"
-				+ "Z"
+				+ BOOLEAN
 				+ "Ljava/util/Locale;"
-			+ ")V",
+			+ ")" + VOID,
 		require = 1)
 	public void constructor(ServerDataContext parentObj, String assetPath, FileHandle bundleForDependencies, boolean fromAllMods, Locale locale, CallbackInfo c) {
 		LOGGER.debug("ASSET PATH: " + assetPath);

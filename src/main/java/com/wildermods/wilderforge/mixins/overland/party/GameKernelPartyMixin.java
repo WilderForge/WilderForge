@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.badlogic.gdx.utils.Array;
 import com.wildermods.wilderforge.api.overlandV1.party.PartyCreateEvent;
 import com.wildermods.wilderforge.api.overlandV1.party.PartyDisbandEvent;
@@ -20,9 +21,9 @@ public class GameKernelPartyMixin {
 		method = 
 			"createParty("
 				+ "Lcom/worldwalkergames/legacy/game/campaign/event/PartyProposal;"
-				+ "Z"
+				+ BOOLEAN
 				+ "Lcom/badlogic/gdx/utils/Array;"		
-			+ ")V",
+			+ ")" + VOID,
 		cancellable = true,
 		require = 1
 	)
@@ -42,7 +43,7 @@ public class GameKernelPartyMixin {
 		method = 
 		"createParty("
 			+ "Lcom/worldwalkergames/legacy/game/campaign/event/PartyProposal;"
-			+ "Z"
+			+ BOOLEAN
 			+ "Lcom/badlogic/gdx/utils/Array;"		
 		+ ")V",
 		require = 1

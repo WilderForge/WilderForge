@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.LogLevel;
@@ -22,7 +23,7 @@ public class GlobalInputProcessorMixin {
 					+ "Lcom/worldwalkergames/legacy/context/CursorManager;"
 					+ "Lcom/worldwalkergames/legacy/options/InterfaceOptions;"
 					+ "Lcom/worldwalkergames/legacy/options/Keymap;"
-				+ ")V",
+				+ ")" + VOID,
 		at = @At (
 			value = "TAIL"
 		),

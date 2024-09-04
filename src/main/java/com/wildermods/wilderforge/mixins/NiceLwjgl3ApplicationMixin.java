@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.badlogic.gdx.ApplicationLogger;
 import com.badlogic.gdx.backends.lwjgl3.NiceLwjgl3Application;
+
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 
 @Mixin(value = NiceLwjgl3Application.class, remap = false)
@@ -17,7 +19,7 @@ public class NiceLwjgl3ApplicationMixin {
 	/**
 	 * Set the game's logger to be WilderForge's logger
 	 */
-	@Inject(method = "setApplicationLogger(Lcom/badlogic/gdx/ApplicationLogger;)V", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "setApplicationLogger(Lcom/badlogic/gdx/ApplicationLogger;)" + VOID, at = @At("HEAD"), cancellable = true)
 	private void setApplicationLogger(ApplicationLogger applicationLogger, CallbackInfo callback) {
 		this.applicationLogger = new LoggerOverrider();
 		callback.cancel();

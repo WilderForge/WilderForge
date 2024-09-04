@@ -16,6 +16,7 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.utils.Array;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.Logger;
@@ -35,7 +36,7 @@ public abstract class ServerDataContextMixin {
 	
 	
 	@Inject(
-		at = @At("RETURN"), method = "retrieveAllMods(ZZ)Lcom/badlogic/gdx/utils/Array;", require = 1)
+		at = @At("RETURN"), method = "retrieveAllMods("+ BOOLEAN + BOOLEAN +")Lcom/badlogic/gdx/utils/Array;", require = 1)
 	/*
 	 * Lets Wildermyth's mod engine know about coremods
 	 */
@@ -49,8 +50,8 @@ public abstract class ServerDataContextMixin {
 				value = "HEAD"
 			), 
 			method = "loadModInfo("
-				+ "Ljava/lang/String;"
-				+ "Z"
+				+ STRING
+				+ BOOLEAN
 			+ ")Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
 			require = 1)
 	/*
@@ -67,8 +68,8 @@ public abstract class ServerDataContextMixin {
 				by = -5
 			), 
 			method = "loadModInfo("
-				+ "Ljava/lang/String;"
-				+ "Z"
+				+ STRING
+				+ BOOLEAN
 			+ ")Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
 			require = 1,
 			cancellable = true)

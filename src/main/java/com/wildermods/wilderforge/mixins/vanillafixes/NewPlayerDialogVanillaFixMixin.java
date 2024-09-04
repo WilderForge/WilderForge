@@ -6,6 +6,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
+
 import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.menu.NewPlayerDialog;
 import com.worldwalkergames.ui.NiceLabel;
@@ -38,7 +40,7 @@ public class NewPlayerDialogVanillaFixMixin {
 		at = @At(
 			value = "TAIL"
 		),
-		method = "build()V",
+		method = "build()" + VOID,
 		cancellable = false,
 		require = 1
 	)
