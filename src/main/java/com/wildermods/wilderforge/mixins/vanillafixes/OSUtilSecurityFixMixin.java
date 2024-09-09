@@ -19,8 +19,14 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.wildermods.wilderforge.api.modLoadingV1.VersionHelper;
+import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.util.OSUtil;
+
+import net.fabricmc.loader.api.Version;
 
 /**
  * Patches arbitrary code execution vulnerabilities in OSUtil
@@ -37,22 +43,32 @@ public class OSUtilSecurityFixMixin {
 		require = 1
 	)
 	private static String patchOpenBrowser(String url) throws IOException { 
-		return checkURL(url).toASCIIString();
+		if(shouldPatchOpenBrowser()) {
+			return checkURL(url).toASCIIString();
+		}
+		else {
+			return url;
+		}
 	}
 	
 	@WrapMethod(
 		method = "openBrowser("+ STRING +")" + VOID
 	)
 	private static void catchOpenBrowser(String url, Operation<Void> original) {
-		try {
-			original.call(url);
-		}
-		catch(Throwable t) { //Cannot catch IOException directly, won't compile
-			if(!(t instanceof IOException)) {
-				throw t;
+		if(shouldPatchOpenBrowser()) {
+			try {
+				original.call(url);
 			}
-			IOException e = (IOException) t;
-			LOGGER.log5("unable to open a browser on {0} for url {1} with error {2}", System.getProperty("os.name"), url, e);
+			catch(Throwable t) { //Cannot catch IOException directly, won't compile
+				if(!(t instanceof IOException)) {
+					throw t;
+				}
+				IOException e = (IOException) t;
+				LOGGER.log5("unable to open a browser on {0} for url {1} with error {2}", System.getProperty("os.name"), url, e);
+			}
+		}
+		else {
+			original.call(url);
 		}
 	}
 	
@@ -62,23 +78,33 @@ public class OSUtilSecurityFixMixin {
 		require = 1
 	)
 	private static final String patchShowFile(String absolutePath) throws IOException {
-		return checkPath(absolutePath).toASCIIString();
+		if(shouldPatchShowFile()) {
+			return checkPath(absolutePath).toASCIIString();
+		}
+		else {
+			return absolutePath;
+		}
 	}
 	
 	@WrapMethod(
 		method = "showFile(" + STRING + ")" + BOOLEAN
 	)
 	private static boolean catchShowFile(String absolutePath, Operation<Boolean> original) {
-		try {
-			return original.call(absolutePath);
-		}
-		catch(Throwable t) { //Cannot catch IOException directly, won't compile
-			if(!(t instanceof IOException)) {
-				throw t;
+		if(shouldPatchShowFile()) {
+			try {
+				return original.call(absolutePath);
 			}
-			IOException e = (IOException) t;
-			LOGGER.log5("unable to open a file viewer on {0} for path {1} with error {2}", System.getProperty("os.name"), absolutePath, e);
-			return false;
+			catch(Throwable t) { //Cannot catch IOException directly, won't compile
+				if(!(t instanceof IOException)) {
+					throw t;
+				}
+				IOException e = (IOException) t;
+				LOGGER.log5("unable to open a file viewer on {0} for path {1} with error {2}", System.getProperty("os.name"), absolutePath, e);
+				return false;
+			}
+		}
+		else {
+			return original.call(absolutePath);
 		}
 	}
 
@@ -143,6 +169,19 @@ public class OSUtilSecurityFixMixin {
 		return toOpen;
 
 	}
-
 	
+	private static @Unique final Version patchedOpenBrowser = VersionHelper.parseVersion("1.16+549");
+	
+	private static @Unique final boolean shouldPatchOpenBrowser() {
+		boolean patch = VersionHelper.compareVersionIncludingBuild(Coremods.getCoremod("wildermyth").getMetadata().getVersion(), patchedOpenBrowser) < 0;
+		WilderForge.LOGGER.log(LogLevel.FATAL, patchedOpenBrowser);
+		WilderForge.LOGGER.log(LogLevel.FATAL, Coremods.getCoremod("wildermyth").getMetadata().getVersion());
+		WilderForge.LOGGER.log(VersionHelper.compareVersionIncludingBuild(Coremods.getCoremod("wildermyth").getMetadata().getVersion(), patchedOpenBrowser) < 0);
+		WilderForge.LOGGER.log(LogLevel.FATAL, "Patching openBrowser(): " + patch);
+		return patch;
+	}
+
+	private static @Unique final boolean shouldPatchShowFile() {
+		return true;
+	}
 }
