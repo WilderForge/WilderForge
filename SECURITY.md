@@ -4,7 +4,7 @@
 
 - Any issue that allows a foreign or non-administrative component to bypass restrictions, execute code, or perform harmful actions will be considered a security issue.
 
-- Additionally, we will accept reports of administrative components that are intentionally designed to perform harmful actions (e.g., coremods that are essentially malware).
+- Additionally, we will accept reports of components that are intentionally designed to perform harmful actions (e.g., coremods that are essentially malware are accepted even though coremods are an administrative component).
 
 - Any component that exists only on the remote game instance is considered a foreign component (A mod on one user's system shouldn't have permisison to do anything on another user's system, unless it's installed on both systems).
 
