@@ -5,15 +5,15 @@ import com.badlogic.gdx.Input;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
-import com.wildermods.wilderforge.api.netV1.clientV1.ClientMessageEvent;
-import com.wildermods.wilderforge.api.serverV1.ServerDeathEvent;
-import com.wildermods.wilderforge.api.serverV1.ServerEvent;
-import com.wildermods.wilderforge.api.serverV1.ServerInstantiationEvent;
+import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
+import com.wildermods.wilderforge.api.netV1.server.ServerBirthEvent;
+import com.wildermods.wilderforge.api.netV1.server.ServerDeathEvent;
+import com.wildermods.wilderforge.api.netV1.server.ServerEvent;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.control.ClientControl;
-import com.worldwalkergames.legacy.server.LegacyServer;
+import com.worldwalkergames.legacy.control.HostInfo;
 import com.worldwalkergames.legacy.ui.MainScreen;
 
 public final class WilderForge {
@@ -28,8 +28,7 @@ public final class WilderForge {
 	private static LegacyViewDependencies dependencies;
 	
 	@InternalOnly
-	@Deprecated(forRemoval = true)
-	private static LegacyServer server;
+	private static HostInfo host;
 	
 	@InternalOnly
 	private static MainScreen mainScreen;
@@ -87,30 +86,30 @@ public final class WilderForge {
 	}
 	
 	@InternalOnly
-	private static void initServer(LegacyServer server) {
-		if(WilderForge.server == null) {
-			WilderForge.server = server;
+	private static void initServer(HostInfo host) {
+		if(WilderForge.host == null) {
+			WilderForge.host = host;
 		}
 		else {
-			throw new IllegalStateException("Server initialized twice?! This shouldn't happen!");
+			throw new IllegalStateException("Host initialized twice?! This shouldn't happen!");
 		}
 	}
 	
 	@InternalOnly
-	private static void killServer(LegacyServer server) {
-		if(WilderForge.server != server) {
-			throw new IllegalStateException("Server mismatch?!");
+	private static void killServer(HostInfo host) {
+		if(WilderForge.host != host) {
+			throw new IllegalStateException("Host mismatch?!");
 		}
-		WilderForge.server = null;
+		WilderForge.host = null;
 	}
 	
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void onServerEvent(ServerEvent e) {
-		if(e instanceof ServerInstantiationEvent) {
-			initServer(e.getServer());
+		if(e instanceof ServerBirthEvent) {
+			initServer(e.getHost());
 		}
 		else if (e instanceof ServerDeathEvent) {
-			killServer(e.getServer());
+			killServer(e.getHost());
 		}
 	}
 	

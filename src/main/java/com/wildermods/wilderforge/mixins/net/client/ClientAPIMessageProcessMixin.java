@@ -7,7 +7,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
-import com.wildermods.wilderforge.api.netV1.clientV1.ClientMessageEvent;
+
+import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.worldwalkergames.communication.messages.Message;
 import com.worldwalkergames.legacy.game.api.ClientAPI;
