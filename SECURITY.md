@@ -23,6 +23,8 @@ We accept security issues for all of the components listed below. If those compo
 - Standard mods
 - A remote game instance (eg: another player connected to the currently running game)
   
+### Foreign components:
+ - Issues in foreign software/components that directly impact the game or coremodding environment
 
 ## Not accepted
 
