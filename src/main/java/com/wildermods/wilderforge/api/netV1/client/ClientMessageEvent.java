@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.netV1.clientV1;
+package com.wildermods.wilderforge.api.netV1.client;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
 import com.wildermods.wilderforge.launch.logging.Logger;
