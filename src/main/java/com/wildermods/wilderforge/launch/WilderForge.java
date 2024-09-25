@@ -1,14 +1,20 @@
 package com.wildermods.wilderforge.launch;
 
+import org.reflections8.Configuration;
+import org.reflections8.util.ConfigurationBuilder;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.wildermods.provider.services.CrashLogService;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
+import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerBirthEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerDeathEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerEvent;
+import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
@@ -64,7 +70,21 @@ public final class WilderForge {
 				&& (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
 				&& (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
 			) {
-				throw new Error("Manually Triggered Debug Crash");
+				CrashLogService crashService = CrashLogService.obtain();
+				CrashInfo c = null;
+				if(crashService instanceof CrashInfo) {
+					c =  Cast.from(crashService);
+				}
+				if(Gdx.input.isKeyPressed(Input.Keys.F1) && c != null) {
+					c.doThreadDump(true);
+				}
+				String message = "Manually Triggered Debug Crash";
+				if(c != null && c.isDumpingThreads()) {
+					message = message + " With Thread Dump Enabled";
+				}
+				message = message + " CTRL + ALT + SHIFT +";
+				message = message + ((c == null || !c.isDumpingThreads()) ? " C)" : " F1 + C)");
+				throw new Error(message);
 			}
 		});
 	}

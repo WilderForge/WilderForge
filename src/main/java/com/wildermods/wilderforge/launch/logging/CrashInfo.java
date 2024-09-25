@@ -34,7 +34,7 @@ import com.worldwalkergames.legacy.Version;
 
 public final class CrashInfo implements CrashLogService {
 
-	boolean dump = false;
+	volatile boolean dump = false;
 	
 	File crashFolder = new File("./crashes");
 	
@@ -42,12 +42,47 @@ public final class CrashInfo implements CrashLogService {
 	public void logCrash(Throwable t) {
 		StringBuilder s = new StringBuilder("---- WilderForge Crash Report----");
 		s.append('\n');
-		s.append(getWittyMessage(t)).append('\n');
+		try {
+			s.append(getWittyMessage(t)).append('\n');
+		}
+		catch(Throwable failedWittyMessage) {
+			//swallow, the message is just for the funnies, don't care if it's not added
+		};
 		s.append('\n');
-		s.append("Time: ").append(getDate()).append('\n');
-		s.append("Description: ").append(getLowestDescription(t)).append('\n');
+		s.append("Time: ");
+		try {
+			s.append(getDate()).append('\n');
+		}
+		catch(Throwable failedDate) {
+			s.append("COULD NOT APPEND TIME DUE TO THE FOLLOWING EXCPETION:").append('\n');
+			try {
+				s.append(ExceptionUtils.getStackFrames(failedDate));
+			}
+			catch(Throwable failedStack) {
+				s.append("YIKES! Couldn't get the stacktrace either! Printing to console instead!");
+				System.out.println(s);
+				failedStack.printStackTrace();
+			}
+			s.append('\n');
+		}
+		s.append("Description: ");
+		try {
+			s.append(getLowestDescription(t));
+		}
+		catch(Throwable failedDescription) {
+			s.append('\n');
+		}
 		s.append('\n');
-		s.append(ExceptionUtils.getStackTrace(t)).append('\n');
+		s.append('\n');
+		try {
+			s.append(ExceptionUtils.getStackTrace(t));
+		}
+		catch(Throwable failedStack) {
+			s.append("YIKES! Couldn't get the stacktrace! Printing to console instead!");
+			System.out.println(s);
+			failedStack.printStackTrace();
+		}
+		s.append('\n');
 		s.append("---- Additonal Information----").append('\n');
 		s.append('\n');
 		appendSystemDetails(s).append("\n\n");
@@ -68,6 +103,14 @@ public final class CrashInfo implements CrashLogService {
 			s.append(ExceptionUtils.getStackTrace(t2));
 		}
 		WilderForge.LOGGER.fatal(s);
+	}
+	
+	public void doThreadDump(boolean dumpThreads) {
+		this.dump = dumpThreads;
+	}
+	
+	public boolean isDumpingThreads() {
+		return this.dump;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -135,24 +178,29 @@ public final class CrashInfo implements CrashLogService {
 	}
 	
 	private StringBuilder appendSystemDetails(StringBuilder s) {
-		s.append("--System Details--").append('\n');
-		s.append("Wildermyth Version: ").append(Version.VERSION).append('\n');
-		s.append("Operating System: ").append(System.getProperty("os.name")).append('\n');
-		s.append("\tArchitecture: ").append(System.getProperty("os.arch")).append('\n');
-		s.append("\tVersion: ").append(System.getProperty("os.version")).append('\n');
-		s.append("Cores: ").append(Runtime.getRuntime().availableProcessors()).append('\n');
-		s.append("Memory:\n");
-		long heapSize = Runtime.getRuntime().totalMemory();
-		long maxHeapSize = Runtime.getRuntime().maxMemory();
-		long freeHeapSize = Runtime.getRuntime().freeMemory();
-		s.append("\tMax heap size: ").append(humanReadableByteCount(maxHeapSize)).append('\n');
-		s.append("\tCurrent heap size: ").append(humanReadableByteCount(heapSize)).append('\n');
-		s.append("\tHeap used: ").append(humanReadableByteCount(heapSize - freeHeapSize)).append('\n');
-		s.append("\tFree heap: ").append(humanReadableByteCount(freeHeapSize)).append('\n');
-		appendGraphicalDetails(s);
-		s.append("Java Version: ").append(System.getProperty("java.runtime.name")).append(" ").append(System.getProperty("java.runtime.version")).append(" \n");
-		s.append("\tVendor: ").append(System.getProperty("java.vm.vendor")).append('\n');
-		s.append("Uptime: ").append(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime())).append('\n');
+		try {
+			s.append("--System Details--").append('\n');
+			s.append("Wildermyth Version: ").append(Version.VERSION).append('\n');
+			s.append("Operating System: ").append(System.getProperty("os.name")).append('\n');
+			s.append("\tArchitecture: ").append(System.getProperty("os.arch")).append('\n');
+			s.append("\tVersion: ").append(System.getProperty("os.version")).append('\n');
+			s.append("Cores: ").append(Runtime.getRuntime().availableProcessors()).append('\n');
+			s.append("Memory:\n");
+			long heapSize = Runtime.getRuntime().totalMemory();
+			long maxHeapSize = Runtime.getRuntime().maxMemory();
+			long freeHeapSize = Runtime.getRuntime().freeMemory();
+			s.append("\tMax heap size: ").append(humanReadableByteCount(maxHeapSize)).append('\n');
+			s.append("\tCurrent heap size: ").append(humanReadableByteCount(heapSize)).append('\n');
+			s.append("\tHeap used: ").append(humanReadableByteCount(heapSize - freeHeapSize)).append('\n');
+			s.append("\tFree heap: ").append(humanReadableByteCount(freeHeapSize)).append('\n');
+			appendGraphicalDetails(s);
+			s.append("Java Version: ").append(System.getProperty("java.runtime.name")).append(" ").append(System.getProperty("java.runtime.version")).append(" \n");
+			s.append("\tVendor: ").append(System.getProperty("java.vm.vendor")).append('\n');
+			s.append("Uptime: ").append(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime())).append('\n');
+		}
+		catch(Throwable t) {
+			t.printStackTrace();
+		}
 		return s;
 	}
 	
@@ -182,7 +230,7 @@ public final class CrashInfo implements CrashLogService {
 	}
 	
 	private void appendThreadDump(StringBuilder s) {
-		s.append(dump());
+		s.append(getThreadDump());
 	}
 	
 	private StringBuilder appendCoremodDetails(StringBuilder s) {
@@ -224,27 +272,12 @@ public final class CrashInfo implements CrashLogService {
 		return file;
 	}
 	
-	protected static String dump() {
+	protected static String getThreadDump() {
 		StringBuilder text = new StringBuilder();
 		ThreadMXBean threads = ManagementFactory.getThreadMXBean();
-		ThreadInfo[] dumps = threads.getThreadInfo(threads.getAllThreadIds(), 255);
 		text.append("---- THREAD DUMP ----\n\n");
-		for (ThreadInfo dump : dumps) {
-			text.append("\"").append(dump.getThreadName()).append("\"\n");
-			Thread.State state = dump.getThreadState();
-			text.append("\tState: ").append(state);
-			String blockedBy = dump.getLockOwnerName();
-			if (blockedBy != null) {
-				text.append(" on ").append(blockedBy);
-			}
-			text.append("\n");
-			StackTraceElement[] elements = dump.getStackTrace();
-			for (StackTraceElement element : elements) {
-				text.append("\t\tat ");
-				text.append(element);
-				text.append("\n");
-			}
-			text.append("\n\n");
+		for (ThreadInfo dump : threads.dumpAllThreads(true, true)) {
+			text.append(dump.toString());
 		}
 		return text.toString();
 	}
