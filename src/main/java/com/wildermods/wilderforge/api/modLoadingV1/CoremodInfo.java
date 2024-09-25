@@ -86,7 +86,10 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 	protected CoremodInfo() {this.coremod = null;}; //constructor for missing coremods
 	
 	public FileHandle getFolder() {
-		return files.classpath("");
+		if(files != null) {
+			return files.classpath("");
+		}
+		return null;
 	}
 	
 	private String grammaticallyCorrectAuthorList(Person[] authors) {
