@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.reflections8.Configuration;
 import org.reflections8.Reflections;
 import org.reflections8.scanners.MethodAnnotationsScanner;
 import org.reflections8.scanners.SubTypesScanner;
@@ -16,7 +17,7 @@ public class ReflectionsHelper {
 	private final Reflections reflections;
 	
 	public ReflectionsHelper(ClassLoader classLoader) {
-		reflections = new Reflections(new ConfigurationBuilder().addClassLoader(classLoader).useParallelExecutor(), new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new SubTypesScanner());
+		reflections = new Reflections((Configuration)new ConfigurationBuilder().addClassLoader(classLoader).addScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new SubTypesScanner()));
 	}
 	
 	public Set<Class<?>> getAllClassesAnnotatedWith(Annotation annotation) {
