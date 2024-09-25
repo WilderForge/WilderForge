@@ -1,8 +1,5 @@
 package com.wildermods.wilderforge.launch;
 
-import org.reflections8.Configuration;
-import org.reflections8.util.ConfigurationBuilder;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.wildermods.provider.services.CrashLogService;

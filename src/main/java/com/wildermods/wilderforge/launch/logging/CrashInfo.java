@@ -276,8 +276,9 @@ public final class CrashInfo implements CrashLogService {
 		StringBuilder text = new StringBuilder();
 		ThreadMXBean threads = ManagementFactory.getThreadMXBean();
 		text.append("---- THREAD DUMP ----\n\n");
-		for (ThreadInfo dump : threads.dumpAllThreads(true, true)) {
-			text.append(dump.toString());
+		for (ThreadInfo dump : threads.dumpAllThreads(true, true, Integer.MAX_VALUE)) {
+			String trimmedInfo = FullThreadInfo.from(dump).toString();
+			text.append(trimmedInfo.toString());
 		}
 		return text.toString();
 	}
