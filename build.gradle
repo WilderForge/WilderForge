@@ -30,14 +30,28 @@ version = wilderForgeVersion
 group = "com.wildermods"
 archivesBaseName = "wilderforge"
 
+sourceSets {
+	fakeModLauncher {
+		java {
+			srcDir 'src/fake/modlauncher'
+		}
+	}
+	fakeLog4j {
+		java {
+			srcDir 'src/fake/log4j'
+		}
+	}
+}
+
 dependencies {
 
 	implementation group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.7'
 	implementation group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.16.0'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.23.1'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.23.1'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl', version: '2.23.1'
+	
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.24.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.0'
 	
 	/**********
 	don't alter the dependencies below
@@ -49,20 +63,6 @@ dependencies {
 	//All dependencies of Wildermyth itself
 	compileOnly fileTree(dir: './bin/lib/', include: ['*.jar'])
 }
-
-/*
-shadowJar {
-	mergeServiceFiles()
-	configurations = [project.configurations.shadow]
-	exclude 'META-INF/LICENSE'
-	exclude 'META-INF/LICENSE.txt'
-	exclude 'META-INF/LICENSsE.txt'
-	exclude 'META-INF/NOTICE'
-	exclude 'META-INF/NOTICE.txt'
-	exclude 'META-INF/DEPENDENCIES'
-	exclude 'LICENSE.txt'
-}
-*/
 
 import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
