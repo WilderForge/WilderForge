@@ -31,3 +31,6 @@ crashes/*
 
 #WilderWorkspace
 libs/
+
+#Logs
+*.log
