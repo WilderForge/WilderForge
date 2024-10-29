@@ -31,6 +31,7 @@ crashes/*
 
 #WilderWorkspace
 libs/
+providerSettings.json
 
 #Logs
 *.log
