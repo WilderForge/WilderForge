@@ -7,4 +7,9 @@ public class Cast {
 		return (T)(Object)o;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T> T as(Object o, Class<T> type) {
+		return (T)(Object)o;
+	}
+	
 }

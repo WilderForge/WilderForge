@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.wildermods.wilderforge.api.modLoadingV1.VersionHelper;
+import com.wildermods.wilderforge.api.utils.vanillafixes.TranslateForShellStatus;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.LogLevel;
@@ -33,7 +34,7 @@ import net.fabricmc.loader.api.Version;
  */
 @Debug(export = true)
 @Mixin(OSUtil.class)
-public class OSUtilSecurityFixMixin {
+public class OSUtilSecurityFixMixin implements TranslateForShellStatus {
 
 	private static @Final @Shadow ALogger LOGGER;
 	
@@ -183,5 +184,15 @@ public class OSUtilSecurityFixMixin {
 
 	private static @Unique final boolean shouldPatchShowFile() {
 		return true;
+	}
+
+	@Override
+	public boolean isWilderforgePatchingOpenBrowser() {
+		return shouldPatchOpenBrowser();
+	}
+
+	@Override
+	public boolean isWilderforgePatchingShowFile() {
+		return shouldPatchShowFile();
 	}
 }
