@@ -31,19 +31,6 @@ version = wilderForgeVersion
 group = "com.wildermods"
 archivesBaseName = "wilderforge"
 
-sourceSets {
-	fakeModLauncher {
-		java {
-			srcDir 'src/fake/modlauncher'
-		}
-	}
-	fakeLog4j {
-		java {
-			srcDir 'src/fake/log4j'
-		}
-	}
-}
-
 dependencies {
 
 	implementation group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.7'
@@ -67,9 +54,12 @@ dependencies {
 
 import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
-	filesMatching('mod.json') {
-		expand "WILDERFORGE_VERSION": project.version
-	}
+    filesMatching('fabric.mod.json') {
+    	logger.lifecycle("Found fabric.mod.json:")
+        filter(ReplaceTokens, tokens: [
+            'WILDERFORGE_VERSION': project.version.toString()
+        ])
+    }
 }
 
 jar {
