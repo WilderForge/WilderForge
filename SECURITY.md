@@ -9,7 +9,7 @@
 - Any component that exists only on the remote game instance is considered a foreign component (A mod on one user's system shouldn't have permisison to do anything on another user's system, unless it's installed on both systems).
 
 ## Accepted Components
-We accept security issues for all of the components listed below. If those components are not controlled by WilderForge, we will relay them privately to the relevant party if appropriate.
+We accept security issues for all repositories under the `WilderForge` github account. Additionally we accept security issues for any of the components listed below. If those components are not controlled by WilderForge, we will relay them privately to the relevant party if appropriate.
 
 ### Administrative components:
 - Any coremod
