@@ -11,6 +11,7 @@ buildscript {
 
 plugins {
 	id 'java-library'
+	id 'maven-publish'
 	id 'eclipse'
 }
 apply plugin: 'com.wildermods.workspace'
@@ -83,4 +84,16 @@ jar {
 	}
 }
 
-//build.finalizedBy shadowJar
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java // This already includes the jar
+            groupId = project.group
+            artifactId = project.archivesBaseName
+            version = project.version
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
