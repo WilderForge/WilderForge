@@ -11,6 +11,7 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.ModOrigin;
 import net.fabricmc.loader.api.metadata.Person;
 
+import java.lang.annotation.Annotation;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +28,7 @@ import com.badlogic.gdx.files.FileHandle;
 import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
 
-public class CoremodInfo extends ModInfo implements ModContainer {
+public class CoremodInfo extends ModInfo implements ModContainer, Mod {
 
 	public static Files files = Gdx.files;
 	
@@ -171,6 +172,21 @@ public class CoremodInfo extends ModInfo implements ModContainer {
 	@Override
 	public Optional<Path> findPath(String path) {
 		return coremod.findPath(path);
+	}
+
+	@Override
+	public Class<? extends Annotation> annotationType() {
+		return Mod.class;
+	}
+
+	@Override
+	public String modid() {
+		return coremod.getMetadata().getId();
+	}
+
+	@Override
+	public String version() {
+		return coremod.getMetadata().getVersion().toString();
 	}
 	
 }

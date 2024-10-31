@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.reflections8.Configuration;
 import org.reflections8.Reflections;
 import org.reflections8.scanners.MethodAnnotationsScanner;
 import org.reflections8.scanners.SubTypesScanner;
@@ -17,7 +16,21 @@ public class ReflectionsHelper {
 	private final Reflections reflections;
 	
 	public ReflectionsHelper(ClassLoader classLoader) {
-		reflections = new Reflections((Configuration)new ConfigurationBuilder().addClassLoader(classLoader).addScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new SubTypesScanner()));
+		ConfigurationBuilder builder = new ConfigurationBuilder().addClassLoader(classLoader).addScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new SubTypesScanner());
+
+		Set<Package> packages = Set.of(classLoader.getDefinedPackages());
+		Set<String> packageNames = new HashSet<String>();
+		for(Package packag : packages) {
+			String name = packag.getName();
+			if(name.startsWith("net")) {
+				continue;
+			}
+			packageNames.add(packag.getName());
+		}
+		
+		builder.forPackages(packageNames.toArray(new String[] {}));
+		
+		reflections = new Reflections(builder);
 	}
 	
 	public Set<Class<?>> getAllClassesAnnotatedWith(Annotation annotation) {
@@ -81,6 +94,10 @@ public class ReflectionsHelper {
 	@SuppressWarnings("unchecked")
 	public <T> Set<Class<?>> getTypeAndSubTypesOf(Object o) {
 		return (Set<Class<?>>)(Object)getTypeAndSubTypesOf(o.getClass());
+	}
+	
+	public <A extends Annotation> A getAnnotation(Class<A> annotation, Class<?> from) {
+		return from.getAnnotation(annotation);
 	}
 	
 	public <T> Set<Class<? extends T>> getTypeAndSubTypesOf(Class<T> clazz) {

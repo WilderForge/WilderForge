@@ -26,5 +26,9 @@
             <AppenderRef ref="File" level="INFO"/>
             <AppenderRef ref="DebugFile" level="TRACE"/>
         </Root>
+        <!-- Suppress reflections8 logs -->
+        <Logger name="org.reflections8" level="ERROR" additivity="false">
+            <AppenderRef ref="SysOut"/>
+        </Logger>
     </Loggers>
 </Configuration>

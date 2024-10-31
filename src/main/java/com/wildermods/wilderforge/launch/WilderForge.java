@@ -1,16 +1,25 @@
 package com.wildermods.wilderforge.launch;
 
+import java.util.Arrays;
+import java.util.Set;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+
 import com.wildermods.provider.services.CrashLogService;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
+import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
+import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerBirthEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerDeathEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerEvent;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
@@ -19,13 +28,18 @@ import com.worldwalkergames.legacy.control.ClientControl;
 import com.worldwalkergames.legacy.control.HostInfo;
 import com.worldwalkergames.legacy.ui.MainScreen;
 
+import net.fabricmc.loader.api.metadata.CustomValue;
+import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
+import net.fabricmc.loader.api.metadata.CustomValue.CvType;
+
+@Mod(modid = "wilderforge", version = "@WILDERFORGE_VERSION@")
 public final class WilderForge {
 	
 	@InternalOnly
 	public static final Logger LOGGER = new Logger("WilderForge");
 	
 	@InternalOnly
-	private static final ReflectionsHelper reflectionsHelper = new ReflectionsHelper(WilderForge.class.getClassLoader());
+	private static ReflectionsHelper reflectionsHelper;
 	
 	@InternalOnly
 	private static LegacyViewDependencies dependencies;
@@ -45,21 +59,76 @@ public final class WilderForge {
 	
 	@InternalOnly
 	public static ReflectionsHelper getReflectionsHelper() {
+		if(reflectionsHelper == null) {
+			reflectionsHelper = new ReflectionsHelper(WilderForge.class.getClassLoader());
+		}
 		return reflectionsHelper;
 	}
 
 	@InternalOnly
 	public static void init(LegacyViewDependencies dependencies) {
-		getReflectionsHelper().getTypeAndSubTypesOf(WilderForge.class);
+		
+		try {
+			for(CoremodInfo coremod : Coremods.getAllCoremods()) {
+				try {
+					CustomValue val = coremod.getMetadata().getCustomValue("annotatedClasses");
+					if(val == null) {
+						LOGGER.warn(coremod + " has no annotatedClasses");
+						continue;
+					}
+					String[] classes;
+					if(val.getType() == CvType.STRING) {
+						classes = new String[] {val.getAsString()};
+					}
+					else if(val.getType() == CvType.ARRAY) {
+						CvArray values = val.getAsArray();
+						classes = new String[values.size()];
+						for(int i = 0; i < classes.length; i++) {
+							CustomValue arrayVal = values.get(i);
+							if(arrayVal.getType() == CvType.STRING) {
+								classes[i] = arrayVal.getAsString();
+							}
+							else {
+								throw new IllegalArgumentException("Value in annotatedClasses array is not a String! Actual type: " + arrayVal.getType().name());
+							}
+						}
+					}
+					else {
+						throw new IllegalArgumentException("annotatedClasses must be a String or array of strings! Actual type: " + val.getType().name());
+					}
+					for(String clazz : classes) {
+						WilderForge.class.getClassLoader().loadClass(clazz);
+					}
+				}
+				catch(Throwable t) {
+					throw new Error("Error reading custom values for mod " + coremod.name + " (" + coremod.modId + ")");
+				}
+			}
+		}
+		catch(Throwable t) {
+			throw new Error("Error prepping mods for PreInitialization sequence!");
+		}
+		
+		Set<Class<?>> modClasses = getReflectionsHelper().getAllClassesAnnotatedWith(Mod.class);
+		
+		for(Class<?> clazz : modClasses) {
+			Mod mod = getReflectionsHelper().getAnnotation(Mod.class, clazz);
+			WilderForge.LOGGER.log("Registered " + clazz + " in the MAIN_BUS via annotation scanning.", mod.modid());
+			MAIN_BUS.register(clazz);
+		}
+		
+		NETWORK_BUS.register(WilderForge.class);
+		RENDER_BUS.register(WilderForge.class);
+		
+		MAIN_BUS.fire(new PreInitializationEvent());
+		
 		if(WilderForge.dependencies == null) {
 			WilderForge.dependencies = dependencies;
 		}
 		else {
 			throw new IllegalStateException();
 		}
-		MAIN_BUS.register(WilderForge.class);
-		NETWORK_BUS.register(WilderForge.class);
-		RENDER_BUS.register(WilderForge.class);
+
 		
 		dependencies.globalInputProcessor.anyKeyDown.add(WilderForge.class, () -> {
 			if(
@@ -84,6 +153,8 @@ public final class WilderForge {
 				throw new Error(message);
 			}
 		});
+		
+		MAIN_BUS.fire(new PostInitializationEvent());
 	}
 	
 	@InternalOnly

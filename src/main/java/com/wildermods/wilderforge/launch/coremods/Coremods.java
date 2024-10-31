@@ -2,6 +2,7 @@ package com.wildermods.wilderforge.launch.coremods;
 
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -25,6 +26,10 @@ public final class Coremods {
 		}
 		ModContainer modContainer = FabricLoader.getInstance().getModContainer(modid).orElse(null);
 		return modContainer != null ? new CoremodInfo(modContainer) : new MissingCoremod();
+	}
+	
+	public static CoremodInfo getCoremod(Mod mod) {
+		return getCoremod(mod.modid());
 	}
 	
 	public static int getCoremodCount() {
