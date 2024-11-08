@@ -8,15 +8,47 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
 import com.wildermods.wilderforge.launch.ReflectionsHelper;
 import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.launch.exception.EventTargetError;
+import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
 public class EventBus {
+	
+	private static final HashSet<EventBus> busses = new HashSet<>();
+	private static final Thread BUS_REFERENCE_CLEANER;
+	static {
+		final String threadName = "EventBus Cleaner";
+		BUS_REFERENCE_CLEANER = new Thread(() -> {
+			final Logger logger = new Logger(threadName);
+			while(true) {
+				try {
+					Thread.sleep(10000);
+					for(EventBus bus : busses) {
+						int removed = bus.removeCollectedReferences();
+						if(removed > 0) {
+							logger.info("Removed " + removed + " phantom references from the " + bus + " event bus.");
+						}
+					}
+				} catch (Throwable t) {
+					logger.catching(LogLevel.FATAL, t);
+					break;
+				}
+			}
+			logger.warn("Cleaner thread stopping!");
+		}); 
+		BUS_REFERENCE_CLEANER.setDaemon(true);
+		BUS_REFERENCE_CLEANER.setName(threadName);
+	}
+	
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
 	private final HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> listeners = new HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>>();
 	private final String name;
@@ -25,6 +57,7 @@ public class EventBus {
 	public EventBus(String name) {
 		this.name = name;
 		this.logger = new Logger(EventBus.class + "/" + name);
+		busses.add(this);
 	}
 	
 	/**
@@ -39,8 +72,13 @@ public class EventBus {
 	 */
 	@SuppressWarnings("rawtypes")
 	public final void register(Class c) {
-		removeCollectedReferences();
-		registerListeners(c);
+		lock.writeLock().lock();
+		try {
+			registerListeners(c);
+		}
+		finally {
+			lock.writeLock().unlock();
+		}
 	}
 	
 	/**
@@ -76,8 +114,13 @@ public class EventBus {
 	 * instead behave as if {@link #register(Class)} was called
 	 */
 	public final void register(Object o) {
-		removeCollectedReferences();
-		registerListeners(o);
+		lock.writeLock().lock();
+		try {
+			registerListeners(o);
+		}
+		finally {
+			lock.writeLock().unlock();
+		}
 	}
 	
 	/**
@@ -91,27 +134,31 @@ public class EventBus {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public boolean fire(Event e) {
-		removeCollectedReferences();
-		Set<IEventListener<? extends Event>> foundListeners = listeners.get(e.getClass());
-		if(foundListeners == null) { //nothing is subscribing to the event
-			return false;
+		lock.readLock().lock();
+		try {
+			Set<IEventListener<? extends Event>> foundListeners = listeners.get(e.getClass());
+			if(foundListeners == null) { //nothing is subscribing to the event
+				return false;
+			}
+			for(IEventListener listener: foundListeners) {
+				if(e.isCancelled() && !listener.acceptCancelled()) {
+					continue;
+				}
+				try {
+					listener.fire(e);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
+					throw new Error(e1);
+				}
+			}
 		}
-		for(IEventListener listener: foundListeners) {
-			if(e.isCancelled() && !listener.acceptCancelled()) {
-				continue;
-			}
-			try {
-				listener.fire(e);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
-				throw new Error(e1);
-			}
+		finally {
+			lock.readLock().unlock();
 		}
 		return e.isCancelled();
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private final void registerListeners(Object o) {
-		removeCollectedReferences();
 		if(o == null) {
 			throw new NullPointerException();
 		}
@@ -160,14 +207,17 @@ public class EventBus {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void removeCollectedReferences() {
+	int removeCollectedReferences() {
+		int collected = 0;
 		ObjectEventListener reference;
 		while((reference = (ObjectEventListener) refQueue.poll()) != null) {
 			Class<? extends Event> event = (Class<? extends Event>) reference.method.getParameters()[0].getType();
 			if(!listeners.get(event).remove(reference)) {
 				throw new AssertionError();
 			}
+			collected++;
 		}
+		return collected;
 	}
 	
 	@SuppressWarnings("rawtypes")
