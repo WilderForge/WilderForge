@@ -47,6 +47,11 @@ public class Logger implements ILogger {
 	}
 
 	@Override
+	public void catching(LogLevel level, Throwable t, String marker) {
+		logger.log(level.toLog4j(), MarkerManager.getMarker(marker), t.getMessage(), t);
+	}
+	
+	@Override
 	public void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed) {
 		LogLevel l = LogLevel.getLevel(level);
 		if(exc == null) {

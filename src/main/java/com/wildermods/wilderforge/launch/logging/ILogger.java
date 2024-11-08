@@ -132,6 +132,12 @@ public interface ILogger extends LogHandler {
 	}
 	
 	public void catching(LogLevel level, Throwable t);
+	
+	public default void catching(Throwable t, String tag) {
+		catching(INFO, t, tag);
+	}
+	
+	public void catching(LogLevel level, Throwable t, String tag);
 
 	
 	public default void log(long time, net.fabricmc.loader.impl.util.log.LogLevel level, LogCategory category, String msg, Throwable exc, boolean isReplayedBuiltin) {

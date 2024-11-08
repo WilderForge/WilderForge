@@ -272,7 +272,7 @@ public final class CrashInfo implements CrashLogService {
 		return file;
 	}
 	
-	protected static String getThreadDump() {
+	public static String getThreadDump() {
 		StringBuilder text = new StringBuilder();
 		ThreadMXBean threads = ManagementFactory.getThreadMXBean();
 		text.append("---- THREAD DUMP ----\n\n");

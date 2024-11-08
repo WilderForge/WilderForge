@@ -19,7 +19,7 @@ public class Debug extends Error {
 		else {
 			reason = "Tracing code path - " + reason;
 		}
-		WilderForge.LOGGER.catching(LogLevel.INFO, new Debug("Tracing code path "));
+		WilderForge.LOGGER.catching(LogLevel.INFO, new Debug(reason));
 	}
 	
 }

@@ -1,6 +1,5 @@
 package com.wildermods.wilderforge.launch;
 
-import java.util.Arrays;
 import java.util.Set;
 
 import com.badlogic.gdx.Gdx;
