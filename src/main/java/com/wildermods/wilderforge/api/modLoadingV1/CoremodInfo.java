@@ -27,16 +27,18 @@ import com.badlogic.gdx.files.FileHandle;
 
 import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
 import com.wildermods.wilderforge.launch.InternalOnly;
+import com.wildermods.wilderforge.launch.coremods.Configuration;
 
-public class CoremodInfo extends ModInfo implements ModContainer, Mod {
+public class CoremodInfo<C> extends ModInfo implements ModContainer, Mod {
 
 	public static Files files = Gdx.files;
 	
 	public transient final ModContainer coremod;
+	private transient final C config;
 	
 	@InternalOnly
 	public CoremodInfo(ModContainer coremod) {
-
+		this.config = Configuration.getConfig(this);
 		ModMetadata metadata = coremod.getMetadata();
 		
 		modId = metadata.getId();
@@ -84,7 +86,7 @@ public class CoremodInfo extends ModInfo implements ModContainer, Mod {
 		this.coremod = coremod;
 	}
 	
-	protected CoremodInfo() {this.coremod = null;}; //constructor for missing coremods
+	protected CoremodInfo() {this.coremod = null; this.config = null;}; //constructor for missing coremods
 	
 	public FileHandle getFolder() {
 		if(files != null) {
@@ -187,6 +189,10 @@ public class CoremodInfo extends ModInfo implements ModContainer, Mod {
 	@Override
 	public String version() {
 		return coremod.getMetadata().getVersion().toString();
+	}
+	
+	public C getConfig() {
+		return config;
 	}
 	
 }

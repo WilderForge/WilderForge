@@ -1,6 +1,7 @@
 package com.wildermods.wilderforge.launch;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
@@ -89,6 +90,21 @@ public class ReflectionsHelper {
 	@SuppressWarnings("rawtypes")
 	public Set<Method> getAllMethodsInAnnotatedWithParams(Class clazz, Annotation annotation, boolean strict, Class... params) {
 		return getAllMethodsInAnnotatedWithParams(clazz, annotation.annotationType(), strict, params);
+	}
+	
+	public Set<Field> getAllFieldsInAnnotatedWith(Class clazz, Annotation annotation) {
+		return getAllFieldsInAnnotatedWith(clazz, annotation.annotationType());
+	}
+	
+	public Set<Field> getAllFieldsInAnnotatedWith(Class clazz, Class<? extends Annotation> annotation) {
+		HashSet<Field> fields = new HashSet<Field>();
+		for(Field f : clazz.getDeclaredFields()) {
+			if(f.isAnnotationPresent(annotation)) {
+				fields.add(f);
+				f.setAccessible(true);
+			}
+		}
+		return fields;
 	}
 	
 	@SuppressWarnings("unchecked")

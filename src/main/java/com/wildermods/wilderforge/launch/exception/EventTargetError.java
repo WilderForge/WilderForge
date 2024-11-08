@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.eventV1.bus;
+package com.wildermods.wilderforge.launch.exception;
 
 @SuppressWarnings("serial")
 public class EventTargetError extends Error {
