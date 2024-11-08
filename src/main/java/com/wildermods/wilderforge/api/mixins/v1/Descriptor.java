@@ -6,6 +6,7 @@ public class Descriptor {
 	public static final String DOUBLE = "D";
 	public static final String FLOAT = "F";
 	public static final String INT = "I";
+	public static final String LONG = "J";
 	public static final String SHORT = "S";
 	public static final String BOOLEAN = "Z";
 	public static final String VOID = "V";
@@ -14,4 +15,5 @@ public class Descriptor {
 	public static final String STRING = "Ljava/lang/String;";
 	public static final String OBJECT = "Ljava/lang/Object;";
 	public static final String GDX_ARRAY = "Lcom/badlogic/gdx/utils/Array;";
+
 }
