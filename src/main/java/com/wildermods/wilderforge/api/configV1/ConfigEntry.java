@@ -150,7 +150,7 @@ public @interface ConfigEntry {
 		 * <p>
 		 *   <li>{@code localizedTooltip} - The localized tooltip text that appears when the
 		 *       user hovers over the field in the GUI. This is optional and defaults to an
-		 *       empty string if not provided.</li>
+		 *       empty string if not provided. Empty tooltips do not show up if hovered over.</li>
 		 * </ul>
 		 *
 		 * <p>Use this annotation for fields that need to be displayed with names and tooltips 
@@ -294,7 +294,8 @@ public @interface ConfigEntry {
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface Restart {
 		/**
-		 * Indicates whether the restart should be immediate when the field is changed.
+		 * Indicates whether the restart should be immediate when the field is changed,
+		 * or whether the game is allowed to continue to run after the change is made.
 		 * Defaults to {@code true}.
 		 *
 		 * @return {@code true} if the restart should be immediate, {@code false} otherwise
@@ -312,7 +313,8 @@ public @interface ConfigEntry {
 		
 		/**
 		 * Determines if the values is considered to be changed if the reference has
-		 * changed or the value has changed.
+		 * changed, or the value has changed.
+		 * Defaults to {@code false}
 		 * 
 		 * @return {@code true} if {@code == }should be used to compare, or {@code false} if
 		 * {@code Objects.equals} should be used.
