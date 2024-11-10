@@ -1,11 +1,11 @@
-package com.wildermods.wilderforge.api.configV1;
+package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import java.lang.reflect.Field;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.wildermods.wilderforge.api.configV1.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 
 /**

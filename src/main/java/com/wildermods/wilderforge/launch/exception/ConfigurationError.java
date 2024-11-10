@@ -1,8 +1,8 @@
 package com.wildermods.wilderforge.launch.exception;
 
-import com.wildermods.wilderforge.api.configV1.Config;
-import com.wildermods.wilderforge.api.configV1.ConfigEntry;
-import com.wildermods.wilderforge.api.configV1.BadConfigValueEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry;
 
 /**
  * Indicates one of the following:

@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.configV1;
+package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
-import com.wildermods.wilderforge.api.configV1.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.WilderForge;
 

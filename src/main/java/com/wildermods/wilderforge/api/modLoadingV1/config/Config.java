@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.configV1;
+package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import static java.lang.annotation.ElementType.TYPE;
 
@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
-import com.wildermods.wilderforge.api.configV1.ConfigEntry.Nullable;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 
 /**
  * Marks a class as a configuration object for mod settings.
