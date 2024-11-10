@@ -18,6 +18,7 @@ import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerBirthEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerDeathEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerEvent;
+import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
@@ -127,6 +128,8 @@ public final class WilderForge {
 		else {
 			throw new IllegalStateException();
 		}
+		
+		Configuration.initializeConfigurations();
 
 		
 		dependencies.globalInputProcessor.anyKeyDown.add(WilderForge.class, () -> {

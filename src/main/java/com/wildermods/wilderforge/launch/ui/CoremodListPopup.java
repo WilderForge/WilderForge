@@ -24,6 +24,7 @@ import com.wildermods.wilderforge.api.uiV1.TextureFilterDrawable;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
 import com.wildermods.wilderforge.api.uiV1.elements.buttons.LinkButton;
 import com.wildermods.wilderforge.launch.InternalOnly;
+import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.context.GameStrings;
@@ -33,6 +34,7 @@ import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.PopUp;
 import com.worldwalkergames.legacy.ui.component.FancyLabel;
 import com.worldwalkergames.legacy.ui.menu.OptionsDialog.Style;
+import com.worldwalkergames.ui.FancyPanelDrawable;
 import com.worldwalkergames.ui.NiceLabel;
 
 @InternalOnly
@@ -46,10 +48,9 @@ public class CoremodListPopup extends PopUp {
 	protected final Table masterTable;
 	
 	protected final NavTable left;
-	protected final NavTable right;
 	
 	private final ScrollPane2 leftScrollPane;
-	private final ScrollPane2 rightScrollPane;
+	private final Table rightPane;
 	
 	private ModButton selectedMod;
 	
@@ -70,14 +71,8 @@ public class CoremodListPopup extends PopUp {
 		this.leftScrollPane.setScrollingDisabled(true, false);
 		this.leftScrollPane.setFadeScrollBars(false);
 		
-		this.right = new NavTable(dependencies.skin);
-		this.right.defaults().expandX().left();
-		this.right.right().pad(scale(10f));
-		
-		this.rightScrollPane = new ScrollPane2(right, dependencies.skin, "insetOpaquePanel");
-		this.rightScrollPane.setScrollingDisabled(true, false);
-		this.rightScrollPane.setFadeScrollBars(false);
-		
+		this.rightPane = new Table();
+		rightPane.setBackground(new FancyPanelDrawable(FancyPanelDrawable.Style.inset));
 	}
 
 	@Override
@@ -120,7 +115,7 @@ public class CoremodListPopup extends PopUp {
 		leftScrollPane.setActor(modList);
 		
 		clickModButton(null); //I don't know why, but this has to be called twice or the right panel will not be the correct size.
-		clickModButton(null); //I'm done trying to debug this
+		//clickModButton(null); //I'm done trying to debug this
 		
 		group.add(frame).setVerticalCenter(0).setHorizontalCenter(0);
 	}
@@ -130,25 +125,13 @@ public class CoremodListPopup extends PopUp {
 			selectedMod.setChecked(false);
 		}
 		selectedMod = modButton;
-		
+		rightPane.clear();
 		
 		Table table = new Table();
 		table.defaults().align(Align.topLeft).pad(3f).expandX();
 
-		if(modButton == null) {
-
-			masterTable.clear();
-			masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame));
-			masterTable.add(rightScrollPane).width(Value.percentWidth(0.5f, frame)).height(leftScrollPane.getHeight());
-			
-			masterTable.getCell(rightScrollPane).align(Align.topLeft).grow();
-			
-			rightScrollPane.setActor(table);
-			
-		}
-		else {
-			
-			System.out.println("Author of " + modButton.coremod.name + ": " + modButton.coremod.author);
+		if(modButton != null) {
+			LOGGER.log("Author of " + modButton.coremod.name + ": " + modButton.coremod.author);
 			
 			Table topLabels = new Table();
 			topLabels.defaults().align(Align.topLeft).pad(3f).expandX();
@@ -163,7 +146,7 @@ public class CoremodListPopup extends PopUp {
 			modDataTable.defaults().align(Align.topLeft);
 			
 			Table linkButtons = new Table();
-			linkButtons.defaults().align(Align.center).width(Value.percentWidth(0.5f, table)).expandX();
+			linkButtons.defaults().align(Align.topLeft).width(Value.percentWidth(0.495f, rightPane)).expandX();
 			
 			Cell<Image> imageCell = null;
 			try {
@@ -216,26 +199,31 @@ public class CoremodListPopup extends PopUp {
 			linkButtons.row();
 			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.website"), this, "gearLine", website));
 			linkButtons.add(new LinkButton(I18N.ui("wilderforge.ui.coremods.button.license"), this, "gearLine", license));
+			linkButtons.row();
 			
-			table.add(linkButtons.align(Align.center)).growX();
-			
-			String summary = metadata.getDescription();
-			
-			FancyLabel summaryLabel = new FancyLabel(summary, this.dependencies.skin, "characterSheet", "details");
+			table.add(linkButtons.align(Align.center));
 			
 			table.row();
 			
-			table.add(summaryLabel).expand();
+			table.add(new ModConfigButton(this, modButton.coremod)).align(Align.center).expandX().width(Value.percentWidth(.99f, rightPane)).pad(-3f);
+			
+			String summary = metadata.getDescription();
+			
+			table.row();
+			
+			FancyLabel summaryLabel = new FancyLabel(summary, this.dependencies.skin, "characterSheet", "details");
+			summaryLabel.wrapEnabled = true;
+			ScrollPane2 textScroller = new ScrollPane2(summaryLabel, dependencies.skin, "clear");
+			textScroller.setScrollingDisabled(true, false);
+			
+			table.add(textScroller).grow();
 
+			rightPane.add(table).expand().grow();
 		}
-		
-		rightScrollPane.setActor(table);
 
 		masterTable.clear();
 		masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame));
-		masterTable.add(rightScrollPane).width(Value.percentWidth(0.5f, frame)).height(leftScrollPane.getHeight());
-		
-		masterTable.getCell(rightScrollPane).align(Align.topLeft).grow();
+		masterTable.add(rightPane).width(Value.percentWidth(0.5f, frame)).grow();
 		
 		frame.addInner(masterTable);
 		
@@ -247,16 +235,15 @@ public class CoremodListPopup extends PopUp {
 	}
 	
 	private static class ModButton extends UIButton<CoremodInfo> {
-		
-		private CoremodListPopup screen;
 		private CoremodInfo coremod;
+		private CoremodListPopup screen;
 		private Image modImage;
 		
 		private ModButton(CoremodListPopup screen, CoremodInfo coremod) throws IOException {
 			super("", screen.dependencies.skin, "gearLine");
 			this.setUserData(coremod);
-			this.screen = screen;
 			this.coremod = coremod;
+			this.screen = screen;
 			this.modImage = constructImage();
 			
 			Table buttonTable = new Table(screen.dependencies.skin);
@@ -272,7 +259,7 @@ public class CoremodListPopup extends PopUp {
 		}
 		
 		private Image constructImage() throws IOException {
-			CoremodInfo coremodInfo = coremod;
+			CoremodInfo coremodInfo = getUserData();
 			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null, TextureFilter.Nearest));
 			FileHandle imageFile = null;
 			if(coremodInfo.getFolder() != null) {
@@ -280,11 +267,11 @@ public class CoremodListPopup extends PopUp {
 					imageFile = Gdx.files.internal("assets/ui/icon/wildermythIcon_256.png");
 				}
 				else {
-					imageFile = coremodInfo.getFolder().child("assets/" + coremod.modId + "/icon.png");
+					imageFile = coremodInfo.getFolder().child("assets/" + coremodInfo.modId + "/icon.png");
 				}
 			}
 
-			CustomValue imgLoc = coremod.getMetadata().getCustomValue(IMAGE);
+			CustomValue imgLoc = coremodInfo.getMetadata().getCustomValue(IMAGE);
 			
 			if(imgLoc  != null) {
 				imageFile = coremodInfo.getFolder().child(imgLoc.getAsString());
@@ -294,7 +281,7 @@ public class CoremodListPopup extends PopUp {
 			}
 			else {
 				LOGGER.info("Could not find " + imageFile.path() + " " + imageFile.type());
-				LOGGER.info(coremod.getClass().getSimpleName());
+				LOGGER.info(coremodInfo.getClass().getSimpleName());
 			}
 
 			modImage.setScaling(Scaling.fill);
@@ -306,6 +293,19 @@ public class CoremodListPopup extends PopUp {
 			screen.clickModButton(this);
 		}
 		
+	}
+	
+	private static class ModConfigButton extends UIButton<CoremodInfo> {
+		private CoremodListPopup screen;
+		private CoremodInfo coremod;
+		
+		private ModConfigButton(CoremodListPopup screen, CoremodInfo coremod) {
+			super(screen.dependencies.gameStrings.ui("wilderforge.ui.coremods.button.configure"), screen.dependencies.skin, "gearLine");
+			setUserData(coremod);
+			if(Configuration.getConfig(coremod) == null) {
+				this.setDisabled(true);
+			}
+		}
 	}
 	
 	private static interface Filter {

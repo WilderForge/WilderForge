@@ -8,7 +8,6 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -51,8 +50,12 @@ public class Configuration {
 			}
 			try {
 				Constructor<?> constructor = c.getDeclaredConstructor();
+				constructor.setAccessible(true);
 				Object configuration = constructor.newInstance();
-				populate(config, coremod, c, Cast.from(configuration));
+				ConfigStatus status = populate(config, coremod, c, Cast.from(configuration));
+				if(status.changed()) {
+					throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
+				}
 				
 				configurations.put(coremod, Cast.from(configuration));
 			} catch (NoSuchMethodException e) {
@@ -65,9 +68,9 @@ public class Configuration {
 		}
 	}
 	
-	private static <C> Restart populate(Config config, CoremodInfo<C> coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
+	private static <C> ConfigStatus populate(Config config, CoremodInfo<C> coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
 		Set<Field> fields = WilderForge.getReflectionsHelper().getAllFieldsInAnnotatedWith(configClass, ConfigEntry.class);
-		
+		ConfigStatus ret;
 		Path configFile = getConfigFile(coremod);
 		JsonValue values = null;
 		if(Files.exists(configFile)) {
@@ -75,12 +78,12 @@ public class Configuration {
 		}
 		
 		if(values == null) {
-			return null;
+			return new ConfigStatus();
 		}
 		
-		final HashSet<Field> setFields = new HashSet<Field>();
-		RestartImpl ret = null;
+		RestartImpl restartInfo = null;
 		C previousConfig = Cast.from(configurations.get(coremod));
+		boolean changed = false;
 		
 		for(Field field : fields) {
 			if(Modifier.isTransient(field.getModifiers())) {
@@ -98,8 +101,8 @@ public class Configuration {
 			Range range = field.getAnnotation(Range.class);
 			Nullable nullable = field.getAnnotation(Nullable.class);
 			Restart restart = field.getAnnotation(Restart.class);
-			if(ret == null && restart != null) {
-				ret = new RestartImpl();
+			if(restartInfo == null && restart != null) {
+				restartInfo = new RestartImpl();
 			}
 			
 			if(isPrimitiveType && nullable != null) {
@@ -193,16 +196,20 @@ public class Configuration {
 				}
 			}
 			
-			if(previousConfig != null && restart != null) {
-				if((!restart.strict() && !Objects.equals(prevValue, value)) || (restart.strict() && prevValue != value)) {
-					ret.process(restart);
+			if(previousConfig != null) {
+				if(!Objects.equals(prevValue,  value)) {
+					changed = true;
+					if(restart != null) {
+						restartInfo.process(restart);
+					}
 				}
 			}
 			
 			field.set(configurationObj, value);
 			
 		}
-		return ret;
+		
+		return new ConfigStatus(changed, restartInfo);
 	}
 	
 	@InternalOnly
@@ -221,6 +228,42 @@ public class Configuration {
 			throw new SerializationException("Config " + path  + " is not a json object?!");
 		}
 		return configJson;
+	}
+	
+	private record ConfigStatus(boolean changed, RestartImpl restart) implements Restart {
+		
+		public ConfigStatus() {
+			this(false);
+		}
+		
+		public ConfigStatus(boolean changed) {
+			this(changed, null);
+		}
+		
+		public ConfigStatus(RestartImpl restart) {
+			this(true, restart);
+		}
+
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return null;
+		}
+
+		@Override
+		public boolean immediate() {
+			return restart != null && restart.immediate();
+		}
+
+		@Override
+		public boolean prompt() {
+			return restart != null && restart.prompt();
+		}
+
+		@Override
+		public boolean strict() {
+			return restart != null && restart.strict();
+		}
+		
 	}
 	
 	private static class RestartImpl implements Restart {
