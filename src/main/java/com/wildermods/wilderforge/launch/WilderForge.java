@@ -1,17 +1,20 @@
 package com.wildermods.wilderforge.launch;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import com.wildermods.provider.services.CrashLogService;
+import com.wildermods.wilderforge.launch.WilderForge.WildermythOptions;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
+import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
 import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
@@ -27,12 +30,14 @@ import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.control.ClientControl;
 import com.worldwalkergames.legacy.control.HostInfo;
 import com.worldwalkergames.legacy.ui.MainScreen;
+import com.worldwalkergames.legacy.ui.menu.OptionsDialog;
 
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.CustomValue.CvType;
 
 @Mod(modid = "wilderforge", version = "@WILDERFORGE_VERSION@")
+@CustomConfig(modid = "wildermyth", popup = WildermythOptions.class)
 public final class WilderForge {
 	
 	@InternalOnly
@@ -213,6 +218,15 @@ public final class WilderForge {
 	
 	public static LegacyViewDependencies getViewDependencies() {
 		return dependencies;
+	}
+	
+	static final class WildermythOptions implements Function<LegacyViewDependencies, OptionsDialog> {
+		
+		@Override
+		public OptionsDialog apply(LegacyViewDependencies t) {
+			return new OptionsDialog(t);
+		}
+		
 	}
 	
 }

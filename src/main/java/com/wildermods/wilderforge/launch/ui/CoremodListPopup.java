@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -296,15 +297,37 @@ public class CoremodListPopup extends PopUp {
 	}
 	
 	private static class ModConfigButton extends UIButton<CoremodInfo> {
+		private static final Runnable NO_ACTION = () -> {};
 		private CoremodListPopup screen;
 		private CoremodInfo coremod;
+		private Runnable onClick = NO_ACTION;
 		
 		private ModConfigButton(CoremodListPopup screen, CoremodInfo coremod) {
 			super(screen.dependencies.gameStrings.ui("wilderforge.ui.coremods.button.configure"), screen.dependencies.skin, "gearLine");
 			setUserData(coremod);
+			Function<LegacyViewDependencies, ? extends PopUp> customConfig;
+			customConfig = Configuration.getCustomConfigPopUp(coremod);
+			if(customConfig != null) {
+				onClick = () -> {
+					PopUp popup = customConfig.apply(screen.dependencies);
+					screen.dependencies.popUpManager.pushFront(popup, true);
+				};
+				this.setDisabled(false);
+				return;
+			}
 			if(Configuration.getConfig(coremod) == null) {
 				this.setDisabled(true);
+				return;
 			}
+			if(onClick == NO_ACTION) {
+				//open custom config screen
+			}
+		}
+		
+		@Override
+		public void clickImpl() {
+			onClick.run();
+			this.setChecked(false);
 		}
 	}
 	

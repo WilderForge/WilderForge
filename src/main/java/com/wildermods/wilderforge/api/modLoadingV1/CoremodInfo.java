@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -26,19 +27,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
 import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
+
+import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 
-public class CoremodInfo<C> extends ModInfo implements ModContainer, Mod {
+public class CoremodInfo extends ModInfo implements ModContainer, Mod {
 
 	public static Files files = Gdx.files;
 	
 	public transient final ModContainer coremod;
-	private transient final C config;
 	
 	@InternalOnly
 	public CoremodInfo(ModContainer coremod) {
-		this.config = Configuration.getConfig(this);
 		ModMetadata metadata = coremod.getMetadata();
 		
 		modId = metadata.getId();
@@ -86,7 +87,7 @@ public class CoremodInfo<C> extends ModInfo implements ModContainer, Mod {
 		this.coremod = coremod;
 	}
 	
-	protected CoremodInfo() {this.coremod = null; this.config = null;}; //constructor for missing coremods
+	protected CoremodInfo() {this.coremod = null;}; //constructor for missing coremods
 	
 	public FileHandle getFolder() {
 		if(files != null) {
@@ -191,8 +192,22 @@ public class CoremodInfo<C> extends ModInfo implements ModContainer, Mod {
 		return coremod.getMetadata().getVersion().toString();
 	}
 	
-	public C getConfig() {
-		return config;
+	public Object getConfig() {
+		return Configuration.getConfig(this);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof Mod) {
+			Mod otherMod = Cast.from(o);
+			return modid().equals(otherMod.modid()) && version().equals(otherMod.version());
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(modid(), version());
 	}
 	
 }

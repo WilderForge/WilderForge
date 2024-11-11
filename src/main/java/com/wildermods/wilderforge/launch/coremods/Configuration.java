@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -26,49 +27,85 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.Mi
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
+import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError.InvalidRangeError;
+import com.worldwalkergames.legacy.context.LegacyViewDependencies;
+import com.worldwalkergames.legacy.ui.PopUp;
 
 public class Configuration {
-
 	private static final Path CONFIG_FOLDER = Path.of(".").resolve("mods").resolve("configs");
+	private static final HashMap<CoremodInfo, Function<LegacyViewDependencies, ? extends PopUp>> customConfigurations = new HashMap<>();;
 	private static final HashMap<CoremodInfo, ?> configurations = new HashMap<>();
 	
 	@InternalOnly
 	@SuppressWarnings("unchecked")
 	public static void initializeConfigurations() {
-		Set<Class<?>> configClasses = WilderForge.getReflectionsHelper().getAllClassesAnnotatedWith(Config.class);
-		
-		for(Class<?> c : configClasses) {
-			Config config = c.getAnnotation(Config.class);
-			CoremodInfo coremod = Coremods.getCoremod(config.modId());
-			if(coremod instanceof MissingCoremod) {
-				throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @Config for the mod " + config.modId() + ", but that mod is missing!");
-			}
-			try {
-				Constructor<?> constructor = c.getDeclaredConstructor();
-				constructor.setAccessible(true);
-				Object configuration = constructor.newInstance();
-				ConfigStatus status = populate(config, coremod, c, Cast.from(configuration));
-				if(status.changed()) {
-					throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
+		try {
+			Set<Class<?>> customConfigs = WilderForge.getReflectionsHelper().getAllClassesAnnotatedWith(CustomConfig.class);
+			Set<Class<?>> configClasses = WilderForge.getReflectionsHelper().getAllClassesAnnotatedWith(Config.class);
+			
+			for(Class<?> c : customConfigs) {
+				CustomConfig config = c.getAnnotation(CustomConfig.class);
+				CoremodInfo coremod = Coremods.getCoremod(config.modid());
+				if(coremod instanceof MissingCoremod) {
+					throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @CustomConfig for the mod " + config.modid() + ", but that mod is missing!");
 				}
-				
-				configurations.put(coremod, Cast.from(configuration));
-			} catch (NoSuchMethodException e) {
-				throw new ConfigurationError("Class " + c.getCanonicalName() + "is a @Config, but it doesn't have a nullary constructor!", e);
-			} catch (IllegalAccessException e) {
-				throw new ConfigurationError("Nullary constructor for mod " + config.modId() + " is not accessable.", e);
-			} catch (Throwable t) {
-				throw new ConfigurationError("Couldn't construct configuration object for mod " + config.modId(), t);
+				try {
+					Constructor<? extends Function<LegacyViewDependencies, ? extends PopUp>> constructor = config.popup().getDeclaredConstructor();
+					constructor.setAccessible(true);
+					Function<LegacyViewDependencies, ? extends PopUp> function = constructor.newInstance();
+					customConfigurations.put(coremod, function);
+				} catch (NoSuchMethodException e) {
+					throw new ConfigurationError("Class " + config.popup() + " is a custom configuration popup function, but it doesn't have a nullary constructor!");
+				} catch (Throwable t) {
+					throw new ConfigurationError("Couldn't construct configuration function object for mod " + config.modid() + ". Unable to construct class " + config.popup().getCanonicalName(), t);
+				}
 			}
+			
+			for(Class<?> c : configClasses) {
+				Config config = c.getAnnotation(Config.class);
+				final String logTag = "Configuration/" + config.modId();
+				WilderForge.LOGGER.log("Found configuration class " + c.getCanonicalName(), logTag);
+				CoremodInfo coremod = Coremods.getCoremod(config.modId());
+				if(coremod instanceof MissingCoremod) {
+					throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @Config for the mod " + config.modId() + ", but that mod is missing!");
+				}
+				try {
+					if(customConfigs.contains(c)) {
+						throw new ConfigurationError("Mod " + config.modId() + " cannot have @Config and @CustomConfig definitions!");
+					}
+					Constructor<?> constructor = c.getDeclaredConstructor();
+					constructor.setAccessible(true);
+					Object configuration = constructor.newInstance();
+					ConfigStatus status = populate(config, coremod, c, Cast.from(configuration));
+					if(status.changed()) {
+						throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
+					}
+					
+					configurations.put(coremod, Cast.from(configuration));
+					WilderForge.LOGGER.log("Placed configuration in configuration map", logTag);
+				} catch (NoSuchMethodException e) {
+					throw new ConfigurationError("Class " + c.getCanonicalName() + "is a @Config, but it doesn't have a nullary constructor!", e);
+				} catch (IllegalAccessException e) {
+					throw new ConfigurationError("Nullary constructor for mod " + config.modId() + " is not accessable.", e);
+				} catch (Throwable t) {
+					throw new ConfigurationError("Couldn't construct configuration object for mod " + config.modId(), t);
+				}
+			}
+		}
+		catch(ConfigurationError ce) {
+			throw ce;
+		}
+		catch(Throwable t) {
+			throw new ConfigurationError("Couldn't initilaize configurations", t);
 		}
 	}
 	
-	private static <C> ConfigStatus populate(Config config, CoremodInfo<C> coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
+	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
 		Set<Field> fields = WilderForge.getReflectionsHelper().getAllFieldsInAnnotatedWith(configClass, ConfigEntry.class);
 		ConfigStatus ret;
 		Path configFile = getConfigFile(coremod);
@@ -213,11 +250,16 @@ public class Configuration {
 	}
 	
 	@InternalOnly
-	public static <C> C getConfig(CoremodInfo<C> c) {
+	public static <C> C getConfig(CoremodInfo c) {
 		return Cast.from(configurations.get(c));
 	}
 	
-	private static Path getConfigFile(CoremodInfo<?> c) {
+	@InternalOnly
+	public static Function<LegacyViewDependencies, ? extends PopUp> getCustomConfigPopUp(CoremodInfo c) {
+		return customConfigurations.get(c);
+	}
+	
+	private static Path getConfigFile(CoremodInfo c) {
 		return CONFIG_FOLDER.resolve(c.modId + ".config.json");
 	}
 	
