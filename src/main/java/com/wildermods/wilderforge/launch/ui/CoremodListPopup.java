@@ -85,39 +85,31 @@ public class CoremodListPopup extends PopUp {
 		
 		RuntimeSkin skin = dependencies.skin;
 		style = skin.get(Style.class);
-		
+
 		frame = new DialogFrame(dependencies);
-		frame.preferredWidth = Float.valueOf(style.f("dialogWidth"));
-		frame.preferredWidth = Float.valueOf(style.f("dialogHeight"));
-		
+		frame.preferredWidth = style.f("dialogWidth");
+
 		float padLeft = style.f("padLeft");
-		float padRight = style.f("padRight");
-		
+
 		String title = I18N.ui("wilderforge.ui.coremods.title");
-			Label titleLabel = new Label(title, skin, "dialogTitle");
-			frame.addInner(titleLabel).expandX().left().padLeft(padLeft).padBottom(style.f("titlePadBottom"));
-			
+		Label titleLabel = new Label(title, skin, "dialogTitle");
+		frame.addInner(titleLabel).expandX().left().padLeft(padLeft).padBottom(style.f("titlePadBottom"));
+
 		Table modList = new Table();
-		
-		modList.defaults().left();
 		modList.align(Align.left);
-		
+
 		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 			try {
 				UIButton<CoremodInfo> modButton = new ModButton(this, coremod);
-				modList.add(modButton).left();
-				modList.row();
-			}
-			catch(IOException e) {
+				modList.add(modButton).expandX().fillX().align(Align.left).row();
+			} catch(IOException e) {
 				throw new AssertionError(e);
 			}
 		}
-		
+
 		leftScrollPane.setActor(modList);
-		
-		clickModButton(null); //I don't know why, but this has to be called twice or the right panel will not be the correct size.
-		//clickModButton(null); //I'm done trying to debug this
-		
+		clickModButton(null);
+
 		group.add(frame).setVerticalCenter(0).setHorizontalCenter(0);
 	}
 	
@@ -223,7 +215,7 @@ public class CoremodListPopup extends PopUp {
 		}
 
 		masterTable.clear();
-		masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame));
+		masterTable.add(leftScrollPane).width(Value.percentWidth(0.5f, frame)).grow();
 		masterTable.add(rightPane).width(Value.percentWidth(0.5f, frame)).grow();
 		
 		frame.addInner(masterTable);
@@ -241,31 +233,35 @@ public class CoremodListPopup extends PopUp {
 		private Image modImage;
 		
 		private ModButton(CoremodListPopup screen, CoremodInfo coremod) throws IOException {
-			super("", screen.dependencies.skin, "gearLine");
+			super(coremod.name, screen.dependencies.skin, "gearLine");
 			this.setUserData(coremod);
 			this.coremod = coremod;
 			this.screen = screen;
 			this.modImage = constructImage();
 			
-			Table buttonTable = new Table(screen.dependencies.skin);
-			buttonTable.add(modImage).height(screen.scale(50f)).padLeft(-screen.scale(4f)).padRight(screen.scale(6f)).width(screen.scale(50f));
-			
 			NiceLabel nameLabel = new NiceLabel(coremod.name, screen.dependencies.skin, "darkInteractive");
 			nameLabel.setEllipsis(true);
-			buttonTable.add(nameLabel).left().minWidth(screen.scale(325f));
-			buttonTable.row();
+			nameLabel.setAlignment(Align.left);
+			this.label = nameLabel;
+
+			this.add(modImage).height(screen.scale(48f)).padLeft(-screen.scale(4f)).padRight(screen.scale(6f)).width(screen.scale(48f)).align(Align.left);
+			this.add(nameLabel).expandX().fillX();
 			
-			
-			this.add(buttonTable).left();	
+			this.align(Align.left);
+		}
+		
+		@Override
+		public void build(String text) {
+			//NO-OP
 		}
 		
 		private Image constructImage() throws IOException {
 			CoremodInfo coremodInfo = getUserData();
-			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null, TextureFilter.Nearest));
+			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null, TextureFilter.Nearest)); 
 			FileHandle imageFile = null;
 			if(coremodInfo.getFolder() != null) {
 				if(coremodInfo.modId.equals("wildermyth")) {
-					imageFile = Gdx.files.internal("assets/ui/icon/wildermythIcon_256.png");
+					imageFile = Gdx.files.internal("assets/ui/icon/wildermythIcon_256.png"); //OFFICE ACTION #1: Assets from the base game must be pulled from the user's filesystem.
 				}
 				else {
 					imageFile = coremodInfo.getFolder().child("assets/" + coremodInfo.modId + "/icon.png");
@@ -315,12 +311,14 @@ public class CoremodListPopup extends PopUp {
 				this.setDisabled(false);
 				return;
 			}
-			if(Configuration.getConfig(coremod) == null) {
-				this.setDisabled(true);
-				return;
+			if(Configuration.getConfig(coremod) != null) {
+				onClick = () -> {
+					PopUp popup = new ModConfigurationPopup(screen.dependencies, coremod);
+					screen.dependencies.popUpManager.pushFront(popup, true);
+				};
 			}
 			if(onClick == NO_ACTION) {
-				//open custom config screen
+				this.setDisabled(true);
 			}
 		}
 		
