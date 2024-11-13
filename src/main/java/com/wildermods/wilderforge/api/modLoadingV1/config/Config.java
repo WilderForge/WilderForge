@@ -56,5 +56,5 @@ public @interface Config {
      *
      * @return the mod ID that owns the configuration.
      */
-    public String modId();
+    public String modid();
 }

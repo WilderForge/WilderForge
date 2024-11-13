@@ -26,13 +26,14 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.Co
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
-import com.wildermods.wilderforge.launch.exception.ConfigurationError.InvalidRangeError;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
 
@@ -68,15 +69,16 @@ public class Configuration {
 			
 			for(Class<?> c : configClasses) {
 				Config config = c.getAnnotation(Config.class);
-				final String logTag = "Configuration/" + config.modId();
+				CustomBuilder builder = c.getAnnotation(CustomBuilder.class);
+				final String logTag = "Configuration/" + config.modid();
 				WilderForge.LOGGER.log("Found configuration class " + c.getCanonicalName(), logTag);
-				CoremodInfo coremod = Coremods.getCoremod(config.modId());
+				CoremodInfo coremod = Coremods.getCoremod(config.modid());
 				if(coremod instanceof MissingCoremod) {
-					throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @Config for the mod " + config.modId() + ", but that mod is missing!");
+					throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @Config for the mod " + config.modid() + ", but that mod is missing!");
 				}
 				try {
 					if(customConfigs.contains(c)) {
-						throw new ConfigurationError("Mod " + config.modId() + " cannot have @Config and @CustomConfig definitions!");
+						throw new ConfigurationError("Mod " + config.modid() + " cannot have @Config and @CustomConfig definitions!");
 					}
 					Constructor<?> constructor = c.getDeclaredConstructor();
 					constructor.setAccessible(true);
@@ -86,14 +88,29 @@ public class Configuration {
 						throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
 					}
 					
+					if(builder != null) {
+						Constructor builderFuncConstructor;
+						try {
+							builderFuncConstructor = c.getDeclaredConstructor();
+							builderFuncConstructor.setAccessible(true);
+							builderFuncConstructor.newInstance();
+						}
+						catch(NoSuchMethodException e) {
+							throw new ConfigurationError("Custom builder function " + c.getCanonicalName() + " must have a nullary constructor!", e);
+						}
+						catch(IllegalAccessException e) {
+							throw new ConfigurationError("Nullary constructor for builder " + c.getCanonicalName() + " is not accessable.", e);
+						}
+					}
+					
 					configurations.put(coremod, Cast.from(configuration));
 					WilderForge.LOGGER.log("Placed configuration in configuration map", logTag);
 				} catch (NoSuchMethodException e) {
 					throw new ConfigurationError("Class " + c.getCanonicalName() + "is a @Config, but it doesn't have a nullary constructor!", e);
 				} catch (IllegalAccessException e) {
-					throw new ConfigurationError("Nullary constructor for mod " + config.modId() + " is not accessable.", e);
+					throw new ConfigurationError("Nullary constructor for mod " + config.modid() + " is not accessable.", e);
 				} catch (Throwable t) {
-					throw new ConfigurationError("Couldn't construct configuration object for mod " + config.modId(), t);
+					throw new ConfigurationError("Couldn't construct configuration object for mod " + config.modid(), t);
 				}
 			}
 		}
@@ -250,8 +267,14 @@ public class Configuration {
 	}
 	
 	@InternalOnly
-	public static <C> C getConfig(CoremodInfo c) {
-		return Cast.from(configurations.get(c));
+	public static Object getConfig(Config c) {
+		if(!(c instanceof CoremodInfo)) {
+			c = Coremods.getCoremod(c.modid());
+			if(c instanceof MissingCoremod) {
+				return null;
+			}
+		}
+		return configurations.get(c);
 	}
 	
 	@InternalOnly
@@ -340,103 +363,6 @@ public class Configuration {
 		@Override
 		public boolean prompt() {
 			return prompt;
-		}
-		
-	}
-	
-	private static enum Ranges implements Range {
-		
-		BYTE(Byte.MIN_VALUE, Byte.MAX_VALUE),
-		SHORT(Short.MIN_VALUE, Short.MAX_VALUE),
-		CHAR(Character.MIN_VALUE, Character.MAX_VALUE),
-		INT(Integer.MIN_VALUE, Integer.MAX_VALUE),
-		LONG(Long.MIN_VALUE, Long.MAX_VALUE),
-		FLOAT(Float.MIN_VALUE, Float.MAX_VALUE),
-		DOUBLE(Double.MIN_VALUE, Double.MAX_VALUE);
-
-		private long min = Long.MIN_VALUE;
-		private long max = Long.MAX_VALUE;
-		private double minDecimal = Double.MIN_VALUE;
-		private double maxDecimal = Double.MAX_VALUE;
-		
-		private Ranges(long min, long max) {
-			this.min = min;
-			this.max = max;
-		}
-		
-		private Ranges(double minDecimal, double maxDecimal) {
-			this.minDecimal = minDecimal;
-			this.maxDecimal = maxDecimal;
-		}
-		
-		@Override
-		public Class<? extends Annotation> annotationType() {
-			return null;
-		}
-
-		@Override
-		public long min() {
-			return min;
-		}
-
-		@Override
-		public long max() {
-			return max;
-		}
-
-		@Override
-		public double minDecimal() {
-			return minDecimal;
-		}
-
-		@Override
-		public double maxDecimal() {
-			return maxDecimal;
-		}
-		
-		public static boolean within(Number number, Range range) {
-			if(number instanceof Float || number instanceof Double) {
-				double dval = number.doubleValue();
-				return dval >= range.minDecimal() && dval <= range.maxDecimal();
-			}
-			else {
-				long ival = number.longValue();
-				return ival >= range.min() && ival <= range.max();
-			}
-		}
-		
-		public static void validateRange(Range range) {
-			if(range.min() >= range.max()) {
-				throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
-			}
-			if(range.minDecimal() >= range.maxDecimal()) {
-				throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
-			}
-		}
-		
-		public static Ranges getRangeOfType(Class c) {
-			if(TypeUtil.isInt(c)) {
-				return INT;
-			}
-			else if(TypeUtil.isLong(c)) {
-				return LONG;
-			}
-			else if(TypeUtil.isFloat(c)) {
-				return FLOAT;
-			}
-			else if(TypeUtil.isDouble(c)) {
-				return DOUBLE;
-			}
-			else if(TypeUtil.isShort(c)) {
-				return SHORT;
-			}
-			else if(TypeUtil.isByte(c)) {
-				return BYTE;
-			}
-			else if(TypeUtil.isChar(c)) {
-				return CHAR;
-			}
-			throw new IllegalArgumentException(c.getCanonicalName());
 		}
 		
 	}

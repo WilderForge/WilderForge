@@ -31,8 +31,9 @@ import static com.wildermods.wilderforge.api.modLoadingV1.ModConstants.*;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.coremods.Configuration;
+import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
 
-public class CoremodInfo extends ModInfo implements ModContainer, Mod {
+public class CoremodInfo extends ModInfo implements ModContainer, Mod, Config {
 
 	public static Files files = Gdx.files;
 	

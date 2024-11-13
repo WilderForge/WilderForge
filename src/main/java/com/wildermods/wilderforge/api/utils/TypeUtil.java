@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.api.utils;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 
 import com.google.common.collect.Sets;
@@ -46,8 +47,72 @@ public class TypeUtil {
 		return type == void.class || type == Void.class;
 	}
 	
+	public static final boolean isLong(Field f) {
+		return isLong(f.getType());
+	}
+	
+	public static final boolean isInt(Field f) {
+		return isInt(f.getType());
+	}
+	
+	public static final boolean isBoolean(Field f) {
+		return isBoolean(f.getType());
+	}
+	
+	public static final boolean isDouble(Field f) {
+		return isDouble(f.getType());
+	}
+	
+	public static final boolean isFloat(Field f) {
+		return isFloat(f.getType());
+	}
+	
+	public static final boolean isShort(Field f) {
+		return isShort(f.getType());
+	}
+	
+	public static final boolean isByte(Field f) {
+		return isByte(f.getType());
+	}
+	
+	public static final boolean isChar(Field f) {
+		return isChar(f.getType());
+	}
+	
+	public static final boolean isVoid(Field f) {
+		return isVoid(f.getType());
+	}
+	
+	public static final boolean isNumeric(Class<?> type) {
+		return representsPrimitive(type) && !isBoolean(type);
+	}
+	
+	public static final boolean isDecimal(Class<?> type) {
+		return isFloat(type) || isDouble(type);
+	}
+	
+	public static final boolean isIntegral(Class<?> type) {
+		return isNumeric(type) && !isDecimal(type);
+	}
+	
+	public static final boolean isNumeric(Field f) {
+		return isNumeric(f.getType());
+	}
+	
+	public static final boolean isDecimal(Field f) {
+		return isDecimal(f.getType());
+	}
+	
+	public static final boolean isIntegral(Field f) {
+		return isIntegral(f.getType());
+	}
+	
 	public static boolean representsPrimitive(Class<?> type) {
 		return boxableClasses.contains(type) && !isVoid(type);
+	}
+	
+	public static boolean representsPrimitive(Field f) {
+		return representsPrimitive(f.getType());
 	}
 	
 	public static Number castDown(Object value, Class<? extends Number> type) {

@@ -1,13 +1,20 @@
 package com.wildermods.wilderforge.api.modLoadingV1.config;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.util.function.Function;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
+import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
+import com.wildermods.wilderforge.launch.exception.ConfigurationError.InvalidRangeError;
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 
 /**
@@ -133,6 +140,26 @@ public @interface ConfigEntry {
 		    boolean expanded() default false;
 		}
 		
+		@Target(ElementType.FIELD)
+		@Retention(RetentionPolicy.RUNTIME)
+		public @interface Slider{
+			float step();
+		}
+		
+		@Target({ElementType.TYPE, ElementType.FIELD})
+		@Retention(RetentionPolicy.RUNTIME)
+		public @interface CustomBuilder {
+			public static final class DefaultConfigurationBuilder implements Function<ConfigurationUIContext, ModConfigurationEntryBuilder> {
+				@Override
+				public ModConfigurationEntryBuilder apply(ConfigurationUIContext context) {
+					return new ModConfigurationEntryBuilder(context);
+				}
+			};
+			
+			Class<? extends Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder>> value();
+		}
+		
+		
 		/**
 		 * An annotation used to provide localized names and tooltips for configuration fields.
 		 * This annotation allows fields to be displayed with a user-friendly name and a
@@ -160,19 +187,19 @@ public @interface ConfigEntry {
 		@Retention(RetentionPolicy.RUNTIME)
 		public @interface Localized {
 		    /**
-		     * The localized display name of the field, shown in the GUI.
+		     * The translation string to derive the name of the field, shown in the GUI.
 		     * 
-		     * @return The translated name for the field to be displayed in the GUI.
+		     * @return The translation string for the field
 		     */
-		    String localizedName();
+		    String nameLocalizer();
 
 		    /**
 		     * The localized tooltip text displayed when the user hovers over the field in the GUI.
 		     * This is optional and defaults to an empty string if not provided.
 		     * 
-		     * @return The translated tooltip text, or an empty string if no tooltip is provided.
+		     * @return The translation string for tooltip text, or an empty string if no tooltip is provided.
 		     */
-		    String localizedTooltip() default "";
+		    String tooltipLocalizer() default "";
 		}
 	}
 	
@@ -227,6 +254,147 @@ public @interface ConfigEntry {
 		public long max() default Long.MAX_VALUE;
 		public double minDecimal() default Double.MIN_VALUE;
 		public double maxDecimal() default Double.MAX_VALUE;
+		
+		public static enum Ranges implements Range {
+			
+			BYTE(Byte.MIN_VALUE, Byte.MAX_VALUE),
+			SHORT(Short.MIN_VALUE, Short.MAX_VALUE),
+			CHAR(Character.MIN_VALUE, Character.MAX_VALUE),
+			INT(Integer.MIN_VALUE, Integer.MAX_VALUE),
+			LONG(Long.MIN_VALUE, Long.MAX_VALUE),
+			FLOAT(Float.MIN_VALUE, Float.MAX_VALUE),
+			DOUBLE(Double.MIN_VALUE, Double.MAX_VALUE),
+			@InternalOnly SLIDER(-1000, 1000);
+
+			private long min = Long.MIN_VALUE;
+			private long max = Long.MAX_VALUE;
+			private double minDecimal = Double.MIN_VALUE;
+			private double maxDecimal = Double.MAX_VALUE;
+			
+			private Ranges(long min, long max) {
+				this.min = min;
+				this.max = max;
+			}
+			
+			private Ranges(double minDecimal, double maxDecimal) {
+				this.minDecimal = minDecimal;
+				this.maxDecimal = maxDecimal;
+			}
+			
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			public long min() {
+				return min;
+			}
+
+			@Override
+			public long max() {
+				return max;
+			}
+
+			@Override
+			public double minDecimal() {
+				return minDecimal;
+			}
+
+			@Override
+			public double maxDecimal() {
+				return maxDecimal;
+			}
+			
+			public static boolean within(Number number, Range range) {
+				if(number instanceof Float || number instanceof Double) {
+					double dval = number.doubleValue();
+					return dval >= range.minDecimal() && dval <= range.maxDecimal();
+				}
+				else {
+					long ival = number.longValue();
+					return ival >= range.min() && ival <= range.max();
+				}
+			}
+			
+			public static void validateRange(Range range) {
+				if(range.min() >= range.max()) {
+					throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
+				}
+				if(range.minDecimal() >= range.maxDecimal()) {
+					throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
+				}
+			}
+			
+			public static Ranges getRangeOfType(Class c) {
+				if(TypeUtil.isInt(c)) {
+					return INT;
+				}
+				else if(TypeUtil.isLong(c)) {
+					return LONG;
+				}
+				else if(TypeUtil.isFloat(c)) {
+					return FLOAT;
+				}
+				else if(TypeUtil.isDouble(c)) {
+					return DOUBLE;
+				}
+				else if(TypeUtil.isShort(c)) {
+					return SHORT;
+				}
+				else if(TypeUtil.isByte(c)) {
+					return BYTE;
+				}
+				else if(TypeUtil.isChar(c)) {
+					return CHAR;
+				}
+				throw new IllegalArgumentException(c.getCanonicalName());
+			}
+			
+			public static Ranges getRangeOfType(Field f) {
+				return getRangeOfType(f.getType());
+			}
+			
+		}
+	}
+	
+	public static @interface Step {
+		public double value();
+		
+		public static enum Steps implements Step {
+			INTEGRAL(1d),
+			DECIMAL(0.01d);
+
+			private final double step;
+			
+			private Steps(double step) {
+				this.step = step;
+			}
+			
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			public double value() {
+				return step;
+			}
+			
+			public static Steps getStepOfType(Class c) {
+				if(TypeUtil.isInt(c) || TypeUtil.isLong(c) || TypeUtil.isShort(c) || TypeUtil.isByte(c) || TypeUtil.isChar(c)) {
+					return INTEGRAL;
+				}
+				else if(TypeUtil.isFloat(c) || TypeUtil.isDouble(c)) {
+					return DECIMAL;
+				}
+				throw new IllegalArgumentException(c.getCanonicalName());
+			}
+			
+			public static Steps getStepOfType(Field f) {
+				return getStepOfType(f.getType());
+			}
+		}
 	}
 	
 	/**
