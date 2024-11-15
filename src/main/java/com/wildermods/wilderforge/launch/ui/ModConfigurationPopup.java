@@ -24,7 +24,6 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryB
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
-import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.DialogFrame;
@@ -40,8 +39,6 @@ public class ModConfigurationPopup extends PopUp {
 	private final Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builder;
 	private HashSet<Field> configFields = new LinkedHashSet<>();
 	private final ConfigurationUIContext context;
-	
-	private static final Logger LOGGER = new Logger(ModConfigurationPopup.class);
 	
 	public ModConfigurationPopup(LegacyViewDependencies dependencies, Config config) {
 		super(true, dependencies);

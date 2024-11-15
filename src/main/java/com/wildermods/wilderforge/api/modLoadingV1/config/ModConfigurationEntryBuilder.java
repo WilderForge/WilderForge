@@ -3,9 +3,12 @@ package com.wildermods.wilderforge.api.modLoadingV1.config;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
+import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -29,6 +32,7 @@ import com.worldwalkergames.ui.FancySliderStyle;
 import com.worldwalkergames.ui.NiceCheckBox;
 import com.worldwalkergames.ui.NiceLabel;
 
+@SuppressWarnings("rawtypes")
 public class ModConfigurationEntryBuilder {
 	
 	protected final Logger LOGGER;
@@ -45,42 +49,48 @@ public class ModConfigurationEntryBuilder {
 	
 	public void buildValueSpan(ConfigurationUIEntryContext context) {
 		buildNameLabel(context);
-		buildHorizontalRule(context);
+		buildConnectingRule(context);
 		try {
-			buildInputField(context);
+			Cell inputField = buildInputField(context);
+			applyInputField(context, inputField);
 		}
 		catch(ConfigElementException e) {
 			LOGGER.catching(e);
 		}
 	}
-	
-	public void buildNameLabel(ConfigurationUIEntryContext context) {
+
+	public Cell buildNameLabel(ConfigurationUIEntryContext context) {
 		LocalizationContext localization = new LocalizationContext(context);
 		String name = localization.name();
 		String tooltip = localization.tooltip();
 		final Table valueSpanTable = context.valueSpanTable;
 		final NiceLabel nameLabel = new NiceLabel(name, dependencies.skin, "darkInteractive");
-		valueSpanTable.add(nameLabel).align(Align.left);
+		return valueSpanTable.add(nameLabel).align(Align.left);
 	}
 	
-	public void buildHorizontalRule(ConfigurationUIEntryContext context) {
+	public Cell buildHorizontalRule(ConfigurationUIEntryContext context) {
 		final Table valueSpanTable = context.valueSpanTable;
 		final AutoSwapDrawable dividerDrawer = new AutoSwapDrawable(dependencies.skin.getSisterSkin(ClientDataContext.Skins.SCALE_UI));
 		dividerDrawer.addOption("dividerBar");
 		dividerDrawer.addOption("dividerBar2x");
 		final Image image = new Image(dividerDrawer, Scaling.stretch);
-		valueSpanTable.add(image).expandX().fillX();
+		return valueSpanTable.add(image).expandX().fillX();
 	}
 	
-	public void buildInputField(ConfigurationUIEntryContext context) throws ConfigElementException {
-		final Table fieldTable = context.fieldTable;
+	public Cell buildConnectingRule(ConfigurationUIEntryContext context) {
+		Cell cell = buildHorizontalRule(context);
+		cell.minWidth(Value.percentWidth(0.3f));
+		
+		return cell;
+	}
+	
+	public Cell buildInputField(ConfigurationUIEntryContext context) throws ConfigElementException {
 		final Table valueSpanTable = context.valueSpanTable;
-		final String name = context.localization.name();
-		final Object configuration = context.configurationObj;
 		final Field f = context.field;
+		
 		if(TypeUtil.isBoolean(f)) {
 			try {
-				buildBoolean(context);
+				return buildBoolean(context);
 			} catch (ConfigElementException e) {
 				LOGGER.catching(e);
 			}
@@ -96,46 +106,54 @@ public class ModConfigurationEntryBuilder {
 			}
 			if(TypeUtil.isDecimal(f)) {
 				if(TypeUtil.isFloat(f)) {
-					buildFloat(context, range, step);
+					return buildFloat(context, range, step);
 				}
 			}
 		}
-
-		valueSpanTable.debug();
+		
+		return valueSpanTable.add();
+	}
+	
+	public void applyInputField(ConfigurationUIEntryContext context, Cell cell) {
+		final Table fieldTable = context.fieldTable;
+		final Table valueSpanTable = context.valueSpanTable;
 		fieldTable.add(valueSpanTable).align(Align.left).expandX().fillX();
 		fieldTable.row();
 	}
 	
-	public void buildBoolean(ConfigurationUIEntryContext context) throws ConfigElementException {
-		buildCheckbox(context);
+	public Cell buildBoolean(ConfigurationUIEntryContext context) throws ConfigElementException {
+		return buildCheckbox(context);
 	}
 	
-	public void buildCheckbox(ConfigurationUIEntryContext context) throws ConfigElementException {
+	public Cell buildCheckbox(ConfigurationUIEntryContext context) throws ConfigElementException {
 		final Field f = context.field;
 		final Object config = context.configurationObj;
 		final Table valueSpanTable = context.valueSpanTable;
 		try {
 			NiceCheckBox checkbox = new NiceCheckBox("", dependencies.skin, "default");
 			checkbox.setChecked(f.getBoolean(config));
-			valueSpanTable.add(checkbox);
+			return valueSpanTable.add(checkbox);
 		}
 		catch(Exception e) {
 			throw new ConfigElementException(context.popup.coremod, f, config, e);
 		}
 	}
 	
-	public void buildFloat(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
+	public Cell buildFloat(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
 		if(context.field.getAnnotation(Slider.class) != null) {
 			if(range.minDecimal() >= -1000 || range.maxDecimal() <= 1000) {
-				buildSlider(context, range, step);
+				return buildSlider(context, range, step);
 			}
 			else {
-				throw new ConfigurationError("Slider range out of bounds. Range boundaries must be between -1000 and 1000");
+				throw new ConfigurationError("Slider @Range out of bounds or not present. Slider @Range boundaries must be between -1000 and 1000");
 			}
+		}
+		else {
+			Cell textInputCell = buildTextInput(context);
 		}
 	}
 	
-	public void buildSlider(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
+	public Cell buildSlider(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
 		Table valueSpanTable = context.valueSpanTable;
 		final Field f = context.field;
 		final CoremodInfo coremod = context.popup.coremod;
@@ -167,8 +185,9 @@ public class ModConfigurationEntryBuilder {
 				LOGGER.log("Min range: " + range.minDecimal());
 				LOGGER.log("Current value: " + slider.getValue());
 				LOGGER.log("Max range: " + range.maxDecimal());
-				valueSpanTable.add(slider).expandX().fillX();
+				return valueSpanTable.add(slider).expandX().fillX();
 			}
+			throw new AssertionError("Unreachable code reached");
 		}
 		catch(ConfigElementException e) {
 			throw e;
@@ -176,6 +195,10 @@ public class ModConfigurationEntryBuilder {
 		catch(Throwable t) {
 			throw new ConfigElementException(coremod, f, config, t);
 		}
+	}
+	
+	public Cell buildTextInput(ConfigurationUIEntryContext context) {
+		
 	}
 	
 	public static class ConfigurationUIContext {
