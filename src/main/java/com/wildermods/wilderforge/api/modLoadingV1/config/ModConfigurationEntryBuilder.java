@@ -2,13 +2,14 @@ package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.function.BiPredicate;
+
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
-import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -24,6 +25,7 @@ import com.wildermods.wilderforge.launch.exception.ConfigElementException;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.ui.ModConfigurationPopup;
+import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryTextBox;
 import com.worldwalkergames.legacy.context.ClientDataContext;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.controller.NiceSlider;
@@ -148,9 +150,19 @@ public class ModConfigurationEntryBuilder {
 				throw new ConfigurationError("Slider @Range out of bounds or not present. Slider @Range boundaries must be between -1000 and 1000");
 			}
 		}
-		else {
-			Cell textInputCell = buildTextInput(context);
-		}
+		return buildTextInput(context, (c, textBox) -> {
+			float val;
+			if(textBox == null || textBox.getText() == null) {
+				return false;
+			}
+			try {
+				val = Float.parseFloat(textBox.getText());
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return val <= range.max() && val >= range.min();
+		});
 	}
 	
 	public Cell buildSlider(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
@@ -197,8 +209,13 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public Cell buildTextInput(ConfigurationUIEntryContext context) {
-		
+	public Cell buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator) {
+		Table valueSpanTable = context.valueSpanTable;
+		final WFConfigEntryTextBox textField = new WFConfigEntryTextBox(context, "", dependencies.skin);
+		textField.setValidator(validator);
+		textField.test(context, textField);
+		textField.setAlignment(Align.center);
+		return valueSpanTable.add(textField).expandX().fillX();
 	}
 	
 	public static class ConfigurationUIContext {
