@@ -17,6 +17,9 @@ public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<C
 	BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator = null;
 	Boolean isValid = null;
 	
+	Color invalidColor = new Color(0xFF6496FF);
+	Color validColor = new Color(0x64E664FF);
+	
 	TintedDrawable<AutoSwapDrawable> backgroundNeutral;
 	TintedDrawable<AutoSwapDrawable> backgroundOver;
 	TintedDrawable<AutoSwapDrawable> backgroundDown;
@@ -119,11 +122,11 @@ public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<C
 		}
 		
 		if(Boolean.TRUE.equals(isValid)) {
-			drawable.setTint(Color.GREEN);
+			drawable.setTint(validColor);
 			//setColor(Color.GREEN);
 		}
 		else if(Boolean.FALSE.equals(isValid)) {
-			drawable.setTint(Color.PINK);
+			drawable.setTint(invalidColor);
 			//setColor(Color.RED);
 		}
 		else {

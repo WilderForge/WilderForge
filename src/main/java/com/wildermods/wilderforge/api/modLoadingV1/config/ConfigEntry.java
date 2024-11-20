@@ -255,78 +255,21 @@ public @interface ConfigEntry {
 		public double minDecimal() default Double.MIN_VALUE;
 		public double maxDecimal() default Double.MAX_VALUE;
 		
-		public static enum Ranges implements Range {
+		public static class Ranges {
+		
+			public static final IntegralRange BYTE = new IntegralRange(Byte.MIN_VALUE, Byte.MAX_VALUE);
+			public static final IntegralRange SHORT = new IntegralRange(Short.MIN_VALUE, Short.MAX_VALUE);
+			public static final IntegralRange CHAR = new IntegralRange(Character.MIN_VALUE, Character.MAX_VALUE);
+			public static final IntegralRange INT = new IntegralRange(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			public static final IntegralRange LONG = new IntegralRange(Long.MIN_VALUE, Long.MAX_VALUE);
+			public static final DecimalRange FLOAT = new DecimalRange(Float.MIN_VALUE, Float.MAX_VALUE);
+			public static final DecimalRange DOUBLE = new DecimalRange(Double.MIN_VALUE, Double.MAX_VALUE);
 			
-			BYTE(Byte.MIN_VALUE, Byte.MAX_VALUE),
-			SHORT(Short.MIN_VALUE, Short.MAX_VALUE),
-			CHAR(Character.MIN_VALUE, Character.MAX_VALUE),
-			INT(Integer.MIN_VALUE, Integer.MAX_VALUE),
-			LONG(Long.MIN_VALUE, Long.MAX_VALUE),
-			FLOAT(Float.MIN_VALUE, Float.MAX_VALUE),
-			DOUBLE(Double.MIN_VALUE, Double.MAX_VALUE),
-			@InternalOnly SLIDER(-1000, 1000);
-
-			private long min = Long.MIN_VALUE;
-			private long max = Long.MAX_VALUE;
-			private double minDecimal = Double.MIN_VALUE;
-			private double maxDecimal = Double.MAX_VALUE;
+			@InternalOnly 
+			public static final DecimalRange SLIDER = new DecimalRange(-1000f, 1000f);
 			
-			private Ranges(long min, long max) {
-				this.min = min;
-				this.max = max;
-			}
-			
-			private Ranges(double minDecimal, double maxDecimal) {
-				this.minDecimal = minDecimal;
-				this.maxDecimal = maxDecimal;
-			}
-			
-			@Override
-			public Class<? extends Annotation> annotationType() {
-				return null;
-			}
-
-			@Override
-			public long min() {
-				return min;
-			}
-
-			@Override
-			public long max() {
-				return max;
-			}
-
-			@Override
-			public double minDecimal() {
-				return minDecimal;
-			}
-
-			@Override
-			public double maxDecimal() {
-				return maxDecimal;
-			}
-			
-			public static boolean within(Number number, Range range) {
-				if(number instanceof Float || number instanceof Double) {
-					double dval = number.doubleValue();
-					return dval >= range.minDecimal() && dval <= range.maxDecimal();
-				}
-				else {
-					long ival = number.longValue();
-					return ival >= range.min() && ival <= range.max();
-				}
-			}
-			
-			public static void validateRange(Range range) {
-				if(range.min() >= range.max()) {
-					throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
-				}
-				if(range.minDecimal() >= range.maxDecimal()) {
-					throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
-				}
-			}
-			
-			public static Ranges getRangeOfType(Class c) {
+			@SuppressWarnings("rawtypes")
+			public static Range getRangeOfType(Class c) {
 				if(TypeUtil.isInt(c)) {
 					return INT;
 				}
@@ -351,8 +294,184 @@ public @interface ConfigEntry {
 				throw new IllegalArgumentException(c.getCanonicalName());
 			}
 			
-			public static Ranges getRangeOfType(Field f) {
+			public static Range getRangeOfType(Field f) {
 				return getRangeOfType(f.getType());
+			}
+			
+			public static void validateBounds(Range range) {
+				if(range.min() >= range.max()) {
+					throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
+				}
+				if(range.minDecimal() >= range.maxDecimal()) {
+					throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
+				}
+			}
+		}
+		
+		public static final class DecimalRange implements Range {
+			
+			private final Range parent;
+			
+			public DecimalRange(double minDecimal, double maxDecimal) {
+				this(new Range() {
+
+					@Override
+					public Class<? extends Annotation> annotationType() {
+						return null;
+					}
+
+					@Override
+					@Deprecated
+					public long min() {
+						return Long.MIN_VALUE;
+					}
+
+					@Override
+					@Deprecated
+					public long max() {
+						return Long.MAX_VALUE;
+					}
+
+					@Override
+					public double minDecimal() {
+						return minDecimal;
+					}
+
+					@Override
+					public double maxDecimal() {
+						return maxDecimal;
+					}
+					
+				});
+			}
+			
+			public DecimalRange(Range parent) {
+				if(parent instanceof IntegralRange) {
+					throw new IllegalArgumentException("Parent of decimal range cannot be an instance of IntegralRage");
+				}
+				if(!(parent instanceof DecimalRange)) {
+					if(parent.min() != Long.MIN_VALUE || parent.max() != Long.MAX_VALUE) {
+						throw new IllegalArgumentException("Parent of decimal range cannot have integral bounds set!");
+					}
+				}
+				Ranges.validateBounds(parent);
+				this.parent = parent;
+			}
+
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			@Deprecated
+			public long min() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call min() on a decimal range! Use minDecimal() instead!");
+			}
+
+			@Override
+			@Deprecated
+			public long max() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call max() on a decimal range! Use maxDecimal() instead!");
+			}
+
+			@Override
+			public double minDecimal() {
+				return parent.minDecimal();
+			}
+
+			@Override
+			public double maxDecimal() {
+				return parent.maxDecimal();
+			}
+			
+			public boolean contains(Number number) {
+				double val = number.doubleValue();
+				return val >= minDecimal() && val <= maxDecimal();
+			}
+
+		}
+		
+		public static final class IntegralRange implements Range {
+
+			private final Range parent;
+			
+			public IntegralRange(long min, long max) {
+				this(new Range() {
+
+					@Override
+					public Class<? extends Annotation> annotationType() {
+						return null;
+					}
+
+					@Override
+					public long min() {
+						return min;
+					}
+
+					@Override
+					public long max() {
+						return max;
+					}
+
+					@Override
+					@Deprecated
+					public double minDecimal() {
+						return Double.MIN_VALUE;
+					}
+
+					@Override
+					@Deprecated
+					public double maxDecimal() {
+						return Double.MAX_VALUE;
+					}
+						
+				});
+			}
+			
+			public IntegralRange(Range parent) {
+				if(parent instanceof DecimalRange) {
+					throw new IllegalArgumentException("Parent of integral range cannot be an instance of DecimalRange");
+				}
+				if(!(parent instanceof IntegralRange)) {
+					if(parent.minDecimal() != Double.MIN_VALUE || parent.maxDecimal() != Double.MAX_VALUE) {
+						throw new IllegalArgumentException("Parent of integral range cannot have decimal bounds set!");
+					}
+				}
+				Ranges.validateBounds(parent);
+				this.parent = parent;
+			}
+			
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			public long min() {
+				return parent.min();
+			}
+
+			@Override
+			public long max() {
+				return parent.max();
+			}
+
+			@Override
+			@Deprecated
+			public double minDecimal() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call minDecimal() on a integral range! Use min() instead!");
+			}
+
+			@Override
+			@Deprecated
+			public double maxDecimal() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call maxDecimal() on a integral range! Use max() instead!");
+			}
+			
+			public boolean contains(Number number) {
+				double val = number.longValue();
+				return val >= min() && val <= maxDecimal();
 			}
 			
 		}

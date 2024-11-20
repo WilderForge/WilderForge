@@ -26,6 +26,8 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.Co
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
@@ -152,7 +154,9 @@ public class Configuration {
 			Class<?> type = field.getType();
 			boolean isPrimitiveType = field.getType().isPrimitive() && !TypeUtil.isVoid(type);
 			ConfigEntry configEntry = field.getAnnotation(ConfigEntry.class);
-			Range range = field.getAnnotation(Range.class);
+			Range uRange = field.getAnnotation(Range.class);
+			IntegralRange iRange;
+			DecimalRange dRange;
 			Nullable nullable = field.getAnnotation(Nullable.class);
 			Restart restart = field.getAnnotation(Restart.class);
 			if(restartInfo == null && restart != null) {
@@ -201,30 +205,37 @@ public class Configuration {
 						break;
 					case doubleValue:
 						value = jsonValue.asDouble();
-						if(range == null) {
-							range = Ranges.getRangeOfType(type);
+						if(uRange == null) {
+							uRange = Ranges.getRangeOfType(type);
 						}
-						if(range.min() != Long.MIN_VALUE || range.max() != Long.MAX_VALUE) {
-							throw new ConfigurationError("Integeral range specified on a floating point type");
+						try {
+							dRange = new DecimalRange(uRange);
+						}
+						catch(Throwable t) {
+							throw new ConfigurationError("Invalid @Range", t);
 						}
 						Double dval = Cast.from(value);
-						if(!Ranges.within(dval, range)) {
-							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, dval, range);
+						if(dRange.contains(dval)) {
+							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, dval, dRange);
 							WilderForge.MAIN_BUS.fire(e);
 							dval = ((Number)e.getValue()).doubleValue();
 						}
 						break;
 					case longValue:
 						value = jsonValue.asLong();
-						if(range == null) {
-							range = Ranges.getRangeOfType(type);
+						if(uRange == null) {
+							uRange = Ranges.getRangeOfType(type);
 						}
-						if(range.minDecimal() != Double.MIN_VALUE || range.maxDecimal() != Double.MAX_VALUE) {
-							throw new ConfigurationError("Decimal range specified on integral type");
+						try {
+							iRange = new IntegralRange(uRange);
 						}
+						catch(Throwable t) {
+							throw new ConfigurationError("Invalid @Range", t);
+						}
+						
 						Long ival = Cast.from(value);
-						if(!Ranges.within(ival, range)) {
-							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, ival, range);
+						if(iRange.contains(ival)) {
+							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, ival, iRange);
 							WilderForge.MAIN_BUS.fire(e);
 							ival = ((Number)e.getValue()).longValue();
 						}

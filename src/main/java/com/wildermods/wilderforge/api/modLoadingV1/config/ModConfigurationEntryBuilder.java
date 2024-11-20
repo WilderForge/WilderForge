@@ -15,8 +15,10 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
+import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Localized;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Slider;
@@ -107,8 +109,9 @@ public class ModConfigurationEntryBuilder {
 				step = Steps.getStepOfType(f);
 			}
 			if(TypeUtil.isDecimal(f)) {
+				DecimalRange dRange = new DecimalRange(range);
 				if(TypeUtil.isFloat(f)) {
-					return buildFloat(context, range, step);
+					return buildFloat(context, dRange, step);
 				}
 			}
 		}
@@ -141,7 +144,7 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public Cell buildFloat(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
+	public Cell buildFloat(ConfigurationUIEntryContext context, DecimalRange range, Step step) throws ConfigElementException {
 		if(context.field.getAnnotation(Slider.class) != null) {
 			if(range.minDecimal() >= -1000 || range.maxDecimal() <= 1000) {
 				return buildSlider(context, range, step);
@@ -150,7 +153,7 @@ public class ModConfigurationEntryBuilder {
 				throw new ConfigurationError("Slider @Range out of bounds or not present. Slider @Range boundaries must be between -1000 and 1000");
 			}
 		}
-		return buildTextInput(context, (c, textBox) -> {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
 			float val;
 			if(textBox == null || textBox.getText() == null) {
 				return false;
@@ -161,8 +164,24 @@ public class ModConfigurationEntryBuilder {
 			catch(NumberFormatException e) {
 				return false;
 			}
-			return val <= range.max() && val >= range.min();
+			return val <= range.maxDecimal() && val >= range.minDecimal();
 		});
+		
+		float val;
+		try {
+			val = context.getVal(float.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			if(range.contains(0f)) {
+				val = 0;
+			}
+			else {
+				val = (float) range.minDecimal();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
 	}
 	
 	public Cell buildSlider(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
@@ -209,7 +228,7 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public Cell buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator) {
+	public Cell<WFConfigEntryTextBox> buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator) {
 		Table valueSpanTable = context.valueSpanTable;
 		final WFConfigEntryTextBox textField = new WFConfigEntryTextBox(context, "", dependencies.skin);
 		textField.setValidator(validator);
@@ -226,6 +245,7 @@ public class ModConfigurationEntryBuilder {
 			this.popup = popup;
 			this.configurationObj = configurationObj;
 		}
+		
 	}
 	
 	public static class ConfigurationUIEntryContext extends ConfigurationUIContext {
@@ -241,6 +261,14 @@ public class ModConfigurationEntryBuilder {
 			this.valueSpanTable = valueSpanTable;
 			this.field = f;
 			this.localization = new LocalizationContext(this);
+		}
+		
+		public <T> T getVal(Class<T> type) {
+			try {
+				return Cast.from(field.get(configurationObj));
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new ConfigurationError("Could not get field " + field.getName(), e);
+			}
 		}
 	}
 	
