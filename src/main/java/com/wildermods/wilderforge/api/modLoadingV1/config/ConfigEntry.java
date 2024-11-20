@@ -299,11 +299,15 @@ public @interface ConfigEntry {
 			}
 			
 			public static void validateBounds(Range range) {
-				if(range.min() >= range.max()) {
-					throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
+				if(!(range instanceof DecimalRange)) {
+					if(range.min() >= range.max()) {
+						throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
+					}
 				}
-				if(range.minDecimal() >= range.maxDecimal()) {
-					throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
+				if(!(range instanceof IntegralRange)) {
+					if(range.minDecimal() >= range.maxDecimal()) {
+						throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
+					}
 				}
 			}
 		}
@@ -471,7 +475,7 @@ public @interface ConfigEntry {
 			
 			public boolean contains(Number number) {
 				double val = number.longValue();
-				return val >= min() && val <= maxDecimal();
+				return val >= min() && val <= max();
 			}
 			
 		}
