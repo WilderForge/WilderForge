@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
@@ -113,6 +114,36 @@ public class ModConfigurationEntryBuilder {
 				if(TypeUtil.isFloat(f)) {
 					return buildFloat(context, dRange, step);
 				}
+				else if (TypeUtil.isDouble(f)) {
+					return buildDouble(context, dRange, step);
+				}
+				else {
+					throw new AssertionError();
+				}
+			}
+			else if(TypeUtil.isIntegral(f)) {
+				IntegralRange iRange = new IntegralRange(range);
+				if(TypeUtil.isLong(f)) {
+					return buildLong(context, iRange, step);
+				}
+				else if(TypeUtil.isInt(f)) {
+					return buildInt(context, iRange, step);
+				}
+				else if(TypeUtil.isChar(f)) {
+					return buildChar(context, iRange, step);
+				}
+				else if(TypeUtil.isShort(f)) {
+					return buildShort(context, iRange, step);
+				}
+				else if(TypeUtil.isByte(f)) {
+					return buildByte(context, iRange, step);
+				}
+				else {
+					throw new AssertionError();
+				}
+			}
+			else {
+				throw new AssertionError();
 			}
 		}
 		
@@ -155,16 +186,24 @@ public class ModConfigurationEntryBuilder {
 		}
 		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
 			float val;
-			if(textBox == null || textBox.getText() == null) {
+			if(textBox == null) {
 				return false;
 			}
+			
+			//We set a local instance of text just in case another thread modifies it while we're checking
+			String text = textBox.getText(); 
+			if(text == null) {
+				return false;
+			}
+			
+			
 			try {
-				val = Float.parseFloat(textBox.getText());
+				val = Float.parseFloat(text);
 			}
 			catch(NumberFormatException e) {
 				return false;
 			}
-			return val <= range.maxDecimal() && val >= range.minDecimal();
+			return range.contains(val);
 		});
 		
 		float val;
@@ -174,10 +213,246 @@ public class ModConfigurationEntryBuilder {
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
 			if(range.contains(0f)) {
-				val = 0;
+				val = 0f;
 			}
 			else {
 				val = (float) range.minDecimal();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildDouble(ConfigurationUIEntryContext context, DecimalRange range, Step step) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			double val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			try {
+				val = Double.parseDouble(textBox.getText());
+			} 
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return range.contains(val);
+			
+		});
+		
+		double val;
+		try {
+			val = context.getVal(double.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			if(range.contains(0d)) {
+				val = 0d;
+			}
+			else {
+				val = range.minDecimal();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildLong(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			long val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			try {
+				val = Long.parseLong(textBox.getText());
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return range.contains(val);
+		});
+		
+		long val;
+		try {
+			val = context.getVal(long.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			if(range.contains(0l)) {
+				val = 0l;
+			}
+			else {
+				val = range.min();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildInt(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			int val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			try {
+				val = Integer.parseInt(text);
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return range.contains(val);
+		});
+		
+		int val;
+		try {
+			val = context.getVal(int.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			if(range.contains(0)) {
+				val = 0;
+			}
+			else {
+				val = (int)range.min();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildChar(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			int val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			try {
+				val = Integer.parseInt(text);
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return range.contains(val) && Ranges.CHAR.contains(val);
+		});
+		
+		int val;
+		try {
+			val = (int)context.getVal(char.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			if(range.contains(0)) {
+				val = 0;
+			}
+			else {
+				val = (int)range.min();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildShort(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			short val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			try {
+				val = Short.parseShort(text);
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return range.contains(val);
+		});
+		
+		short val;
+		try {
+			val = context.getVal(short.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			if(range.contains(0)) {
+				val = 0;
+			}
+			else {
+				val = (short)range.min();
+			}
+		}
+		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildByte(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			byte val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			try {
+				val = Byte.parseByte(text);
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+			return range.contains(val);
+		});
+		
+		byte val;
+		try { 
+			val = context.getVal(byte.class);
+		}
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			
+			if(range.contains(0)) {
+				val = 0;
+			}
+			else {
+				val = (byte)range.min();
 			}
 		}
 		ret.getActor().setText(val + "");

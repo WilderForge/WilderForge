@@ -45,7 +45,8 @@ import com.wildermods.wilderforge.launch.WilderForge;
  * provided in the {@link #valueCorrectors()} method. It is a violation of the 
  * specification for any mod not listed as a value corrector to attempt to 
  * modify the configuration value. This specification may be enforced via
- * relevant language constructs in the future.
+ * relevant language constructs in the future. Enforcement of this specification
+ * will not be considered a breaking change.
  *
  * @see Config
  * @see BadConfigValueEvent
