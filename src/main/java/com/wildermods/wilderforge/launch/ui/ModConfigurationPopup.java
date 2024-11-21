@@ -27,6 +27,8 @@ import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
+import com.worldwalkergames.legacy.game.common.ui.OptionButton;
+import com.worldwalkergames.legacy.options.Keymap;
 import com.worldwalkergames.legacy.ui.DialogFrame;
 import com.worldwalkergames.legacy.ui.PopUp;
 import com.worldwalkergames.legacy.ui.menu.OptionsDialog.Style;
@@ -74,7 +76,6 @@ public class ModConfigurationPopup extends PopUp {
 			}
 			f.setAccessible(true);
 		}
-		
 	}
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -132,12 +133,37 @@ public class ModConfigurationPopup extends PopUp {
 		this.scrollPane = new ScrollPane2(fieldTable, dependencies.skin, "darkDialogPanel");
 		scrollPane.setScrollingDisabled(true, false);
 		frame.addInner(scrollPane).expandX().fillX();
+		
+		Table bottomButtons = new Table();
+		bottomButtons.defaults().expandX().uniformX();
+		OptionButton.Factory buttonFactory = new OptionButton.Factory(dependencies, actionBus, "dialogActionButton");
+		OptionButton<Object> cancel = buttonFactory.ui(Keymap.Actions.menu_customCloseDialog, "optionsDialog.cancel", this::cancel);
+		OptionButton<Object> confirm = buttonFactory.ui(Keymap.Actions.menu_customConfirmDialog, "optionsDialog.confirm", this::saveAndClose);
+		
+		bottomButtons.add(cancel);
+		bottomButtons.add(confirm);
+		
+		frame.addInner(bottomButtons).expandX().fillX();
 		//frame.debugAll();
 		group.add(frame).setVerticalCenter(0f).setHorizontalCenter(0f);
 	}
 	
 	public DialogFrame getFrame() {
 		return frame;
+	}
+	
+	@Override
+	public void close() {
+		//NO-OP
+	}
+	
+	public void cancel() {
+		super.close();
+	}
+	
+	public void saveAndClose() {
+		
+		super.close();
 	}
 	
 	public LegacyViewDependencies getDependencies() {
