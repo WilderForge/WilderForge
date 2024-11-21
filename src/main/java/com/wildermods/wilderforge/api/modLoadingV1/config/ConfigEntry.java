@@ -292,7 +292,7 @@ public @interface ConfigEntry {
 				else if(TypeUtil.isChar(c)) {
 					return CHAR;
 				}
-				throw new IllegalArgumentException(c.getCanonicalName());
+				return null;
 			}
 			
 			public static Range getRangeOfType(Field f) {
@@ -310,6 +310,42 @@ public @interface ConfigEntry {
 						throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
 					}
 				}
+			}
+			
+			public static Number getMinimum(Range range) {
+				if(range instanceof IntegralRange) {
+					return range.min();
+				}
+				else if(range instanceof DecimalRange) {
+					return range.minDecimal();
+				}
+				else {
+					if(range.min() != Long.MIN_VALUE || range.max() != Long.MAX_VALUE) {
+						return range.min();
+					}
+					if(range.minDecimal() != Double.MIN_VALUE || range.maxDecimal() != Double.MAX_VALUE) {
+						return range.minDecimal();
+					}
+				}
+				throw new IllegalStateException();
+			}
+			
+			public static Number getMaximum(Range range) {
+				if(range instanceof IntegralRange) {
+					return range.max();
+				}
+				else if(range instanceof DecimalRange) {
+					return range.maxDecimal();
+				}
+				else {
+					if(range.min() != Long.MIN_VALUE || range.max() != Long.MAX_VALUE) {
+						return range.max();
+					}
+					if(range.minDecimal() != Double.MIN_VALUE || range.maxDecimal() != Double.MAX_VALUE) {
+						return range.maxDecimal();
+					}
+				}
+				throw new IllegalStateException();
 			}
 		}
 		

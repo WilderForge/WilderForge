@@ -11,6 +11,7 @@ import java.util.function.Function;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane2;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
@@ -34,6 +35,7 @@ public class ModConfigurationPopup extends PopUp {
 	public final CoremodInfo coremod;
 	private Object configuration;
 	private DialogFrame frame;
+	private ScrollPane2 scrollPane;
 	private Style style;
 	public final GameStrings I18N = dependencies.gameStrings;
 	private final Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builder;
@@ -104,7 +106,9 @@ public class ModConfigurationPopup extends PopUp {
 		RuntimeSkin skin = dependencies.skin;
 		style = skin.get(Style.class);
 		
-		//frame.preferredWidth = Float.valueOf(style.f("dialogWidth"));
+		frame.preferredWidth = style.f("dialogWidth");
+		
+		
 		
 		float padLeft = style.f("padLeft");
 		float padRight = style.f("padRight");
@@ -117,16 +121,23 @@ public class ModConfigurationPopup extends PopUp {
 		Table fieldTable = new Table().padLeft(padLeft).padRight(padRight);
 		
 		for(Field f : configFields) {
-			Table valueSpanTable = new Table();
 			Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builderObtainer = getBuilder(f.getAnnotation(CustomBuilder.class), context);
 			ModConfigurationEntryBuilder builder = builderObtainer.apply(context);
-			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(this, fieldTable, valueSpanTable, f, configuration);
+			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(this, fieldTable, f, configuration);
 			builder.buildValueSpan(entryContext);
 		}
 		
-		frame.debug();
-		frame.addInner(fieldTable).left().expandX().fillX();
+		
+		//frame.addInner(fieldTable).left().expandX().fillX();
+		this.scrollPane = new ScrollPane2(fieldTable, dependencies.skin, "darkDialogPanel");
+		scrollPane.setScrollingDisabled(true, false);
+		frame.addInner(scrollPane).expandX().fillX();
+		//frame.debugAll();
 		group.add(frame).setVerticalCenter(0f).setHorizontalCenter(0f);
+	}
+	
+	public DialogFrame getFrame() {
+		return frame;
 	}
 	
 	public LegacyViewDependencies getDependencies() {

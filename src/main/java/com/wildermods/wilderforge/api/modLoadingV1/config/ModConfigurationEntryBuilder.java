@@ -18,11 +18,13 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Localized;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Slider;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.exception.ConfigElementException;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
@@ -34,7 +36,6 @@ import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.controller.NiceSlider;
 import com.worldwalkergames.ui.AutoSwapDrawable;
 import com.worldwalkergames.ui.FancySliderStyle;
-import com.worldwalkergames.ui.NiceCheckBox;
 import com.worldwalkergames.ui.NiceLabel;
 
 @SuppressWarnings("rawtypes")
@@ -54,7 +55,7 @@ public class ModConfigurationEntryBuilder {
 	
 	public void buildValueSpan(ConfigurationUIEntryContext context) {
 		buildNameLabel(context);
-		buildConnectingRule(context);
+		
 		try {
 			Cell inputField = buildInputField(context);
 			applyInputField(context, inputField);
@@ -67,30 +68,23 @@ public class ModConfigurationEntryBuilder {
 	public Cell buildNameLabel(ConfigurationUIEntryContext context) {
 		LocalizationContext localization = new LocalizationContext(context);
 		String name = localization.name();
-		String tooltip = localization.tooltip();
-		final Table valueSpanTable = context.valueSpanTable;
+		final Table fieldTable = context.fieldTable;
 		final NiceLabel nameLabel = new NiceLabel(name, dependencies.skin, "darkInteractive");
-		return valueSpanTable.add(nameLabel).align(Align.left);
+		buildTooltip(nameLabel, context);
+		return fieldTable.add(nameLabel).align(Align.right);
 	}
 	
 	public Cell buildHorizontalRule(ConfigurationUIEntryContext context) {
-		final Table valueSpanTable = context.valueSpanTable;
+		final Table fieldTable = context.fieldTable;
 		final AutoSwapDrawable dividerDrawer = new AutoSwapDrawable(dependencies.skin.getSisterSkin(ClientDataContext.Skins.SCALE_UI));
 		dividerDrawer.addOption("dividerBar");
 		dividerDrawer.addOption("dividerBar2x");
 		final Image image = new Image(dividerDrawer, Scaling.stretch);
-		return valueSpanTable.add(image).expandX().fillX();
-	}
-	
-	public Cell buildConnectingRule(ConfigurationUIEntryContext context) {
-		Cell cell = buildHorizontalRule(context);
-		cell.minWidth(Value.percentWidth(0.3f));
-		
-		return cell;
+		return fieldTable.add(image).expandX().fillX();
 	}
 	
 	public Cell buildInputField(ConfigurationUIEntryContext context) throws ConfigElementException {
-		final Table valueSpanTable = context.valueSpanTable;
+		final Table fieldTable = context.fieldTable;
 		final Field f = context.field;
 		
 		if(TypeUtil.isBoolean(f)) {
@@ -147,32 +141,43 @@ public class ModConfigurationEntryBuilder {
 			}
 		}
 		
-		return valueSpanTable.add();
+		return fieldTable.add();
 	}
 	
 	public void applyInputField(ConfigurationUIEntryContext context, Cell cell) {
-		final Table fieldTable = context.fieldTable;
-		final Table valueSpanTable = context.valueSpanTable;
-		fieldTable.add(valueSpanTable).align(Align.left).expandX().fillX();
-		fieldTable.row();
+		cell.width(Value.percentWidth(0.333f, context.popup.getFrame())).align(Align.left);
+		buildTooltip(cell.getActor(), context);
+		context.fieldTable.row();
 	}
 	
 	public Cell buildBoolean(ConfigurationUIEntryContext context) throws ConfigElementException {
-		return buildCheckbox(context);
-	}
-	
-	public Cell buildCheckbox(ConfigurationUIEntryContext context) throws ConfigElementException {
-		final Field f = context.field;
-		final Object config = context.configurationObj;
-		final Table valueSpanTable = context.valueSpanTable;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
+			boolean val;
+			
+			if(textBox == null) {
+				return false;
+			}
+			
+			String text = textBox.getText();
+			if(text == null) {
+				return false;
+			}
+			
+			return ("true".equals(text) || "false".equals(text));
+		});
+		
+		boolean val;
+		
 		try {
-			NiceCheckBox checkbox = new NiceCheckBox("", dependencies.skin, "default");
-			checkbox.setChecked(f.getBoolean(config));
-			return valueSpanTable.add(checkbox);
+			val = context.getVal(boolean.class);
 		}
-		catch(Exception e) {
-			throw new ConfigElementException(context.popup.coremod, f, config, e);
+		catch(ConfigurationError e) {
+			LOGGER.catching(e);
+			val = false;
 		}
+		
+		ret.getActor().setText(val + "");
+		return ret;
 	}
 	
 	public Cell buildFloat(ConfigurationUIEntryContext context, DecimalRange range, Step step) throws ConfigElementException {
@@ -460,7 +465,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildSlider(ConfigurationUIEntryContext context, Range range, Step step) throws ConfigElementException {
-		Table valueSpanTable = context.valueSpanTable;
+		Table fieldTable = context.fieldTable;
 		final Field f = context.field;
 		final CoremodInfo coremod = context.popup.coremod;
 		final Object config = context.configurationObj;
@@ -491,7 +496,7 @@ public class ModConfigurationEntryBuilder {
 				LOGGER.log("Min range: " + range.minDecimal());
 				LOGGER.log("Current value: " + slider.getValue());
 				LOGGER.log("Max range: " + range.maxDecimal());
-				return valueSpanTable.add(slider).expandX().fillX();
+				return fieldTable.add(slider).expandX().fillX();
 			}
 			throw new AssertionError("Unreachable code reached");
 		}
@@ -504,12 +509,63 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell<WFConfigEntryTextBox> buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator) {
-		Table valueSpanTable = context.valueSpanTable;
+		Table fieldTable = context.fieldTable;
 		final WFConfigEntryTextBox textField = new WFConfigEntryTextBox(context, "", dependencies.skin);
 		textField.setValidator(validator);
 		textField.test(context, textField);
 		textField.setAlignment(Align.center);
-		return valueSpanTable.add(textField).expandX().fillX();
+		return fieldTable.add(textField);
+	}
+	
+	public void buildTooltip(Actor actor, ConfigurationUIEntryContext context) {
+		final StringBuilder s = new StringBuilder();
+		final Field field = context.field;
+		s.append(context.localization.tooltip());
+		
+		Range range = field.getAnnotation(Range.class);
+		if(range == null) {
+			range = Ranges.getRangeOfType(field);
+		}
+		
+		if(range != null) {
+			if(!s.toString().isBlank()) {
+				s.append("\n\n");
+			}
+			s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.range.tooltip", Ranges.getMinimum(range).toString(), Ranges.getMaximum(range).toString()));
+		}
+		
+		Nullable nullable = field.getAnnotation(Nullable.class);
+		if(nullable != null) {
+			if(!s.toString().isBlank()) {
+				s.append("\n\n");
+			}
+			s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.nullable.tooltip"));
+		}
+		
+		Restart restart = field.getAnnotation(Restart.class);
+		if(restart != null) {
+			
+			if(!s.toString().isBlank()) {
+				s.append("\n\n");
+			}
+			
+			if(restart.immediate()) {
+				if(!restart.prompt()) {
+					s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.immediate"));
+				}
+				else {
+					s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.hard"));
+				}
+			}
+			else {
+				s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.soft"));
+			}
+		}
+		
+		String tooltip = s.toString();
+		if(!tooltip.isBlank()) {
+			dependencies.tooltipManager.autoTooltip(actor, tooltip);
+		}
 	}
 	
 	public static class ConfigurationUIContext {
@@ -526,14 +582,12 @@ public class ModConfigurationEntryBuilder {
 	public static class ConfigurationUIEntryContext extends ConfigurationUIContext {
 		
 		public final Table fieldTable;
-		public Table valueSpanTable;
 		public final Field field;
 		public final LocalizationContext localization;
 		
-		public ConfigurationUIEntryContext(ModConfigurationPopup popup, Table fieldTable, Table valueSpanTable, Field f, Object configurationObj) {
+		public ConfigurationUIEntryContext(ModConfigurationPopup popup, Table fieldTable, Field f, Object configurationObj) {
 			super(popup, configurationObj);
 			this.fieldTable = fieldTable;
-			this.valueSpanTable = valueSpanTable;
 			this.field = f;
 			this.localization = new LocalizationContext(this);
 		}
