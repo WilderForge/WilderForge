@@ -3,8 +3,10 @@ package com.wildermods.wilderforge.launch.ui;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Function;
@@ -22,6 +24,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Custom
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIEntryContext;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
@@ -42,6 +45,18 @@ public class ModConfigurationPopup extends PopUp {
 	public final GameStrings I18N = dependencies.gameStrings;
 	private final Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builder;
 	private HashSet<Field> configFields = new LinkedHashSet<>();
+	
+	/*
+	* This looks unusual, but using a HashMap with the same key and value is most optimal because we need:
+	* 
+	* 1. Uniqueness of objects in the collection
+	* 2. Check if a ConfigurationUIEntryContext already exists before using a new one. (retrieved via containsKey())
+	* 3. Retrieve the existing context if it does exist instead of using the new context (via get())
+	* 
+	* Using the same object as both the key and value allows efficient lookups and retrievals, which a HashSet alone cannot provide.
+	*/
+	private HashMap<ConfigurationUIEntryContext, ConfigurationUIEntryContext> values = new LinkedHashMap<>();
+	
 	private final ConfigurationUIContext context;
 	
 	public ModConfigurationPopup(LegacyViewDependencies dependencies, Config config) {
@@ -125,7 +140,11 @@ public class ModConfigurationPopup extends PopUp {
 			Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builderObtainer = getBuilder(f.getAnnotation(CustomBuilder.class), context);
 			ModConfigurationEntryBuilder builder = builderObtainer.apply(context);
 			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(this, fieldTable, f, configuration);
+			values.putIfAbsent(entryContext, entryContext);
+			entryContext = values.get(entryContext);
+			entryContext.fieldTable = fieldTable;
 			builder.buildValueSpan(entryContext);
+
 		}
 		
 		
@@ -161,8 +180,12 @@ public class ModConfigurationPopup extends PopUp {
 		super.close();
 	}
 	
+	private void save() {
+		//save config
+	}
+	
 	public void saveAndClose() {
-		
+		save();
 		super.close();
 	}
 	

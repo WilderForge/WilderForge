@@ -2,7 +2,9 @@ package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -26,6 +28,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Locali
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Slider;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigElementException;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.Logger;
@@ -151,25 +154,30 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildBoolean(ConfigurationUIEntryContext context) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			boolean val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				boolean val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				return ("true".equals(text) || "false".equals(text));
+			},
+			(input) -> {
+				return Boolean.parseBoolean(input);
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			return ("true".equals(text) || "false".equals(text));
-		});
+		);
 		
 		boolean val;
 		
 		try {
-			val = context.getVal(boolean.class);
+			val = context.getNewVal(boolean.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -189,31 +197,36 @@ public class ModConfigurationEntryBuilder {
 				throw new ConfigurationError("Slider @Range out of bounds or not present. Slider @Range boundaries must be between -1000 and 1000");
 			}
 		}
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			float val;
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				float val;
+				if(textBox == null) {
+					return false;
+				}
+				
+				//We set a local instance of text just in case another thread modifies it while we're checking
+				String text = textBox.getText(); 
+				if(text == null) {
+					return false;
+				}
+				
+				
+				try {
+					val = Float.parseFloat(text);
+				}
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val);
+			},
+			(input) -> {
+				return Float.parseFloat(input);
 			}
-			
-			//We set a local instance of text just in case another thread modifies it while we're checking
-			String text = textBox.getText(); 
-			if(text == null) {
-				return false;
-			}
-			
-			
-			try {
-				val = Float.parseFloat(text);
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val);
-		});
+		);
 		
 		float val;
 		try {
-			val = context.getVal(float.class);
+			val = context.getNewVal(float.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -229,31 +242,36 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildDouble(ConfigurationUIEntryContext context, DecimalRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			double val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				double val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				try {
+					val = Double.parseDouble(textBox.getText());
+				} 
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val);
+				
+			},
+			(input) -> {
+				return Double.parseDouble(input);
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			try {
-				val = Double.parseDouble(textBox.getText());
-			} 
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val);
-			
-		});
+		);
 		
 		double val;
 		try {
-			val = context.getVal(double.class);
+			val = context.getNewVal(double.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -269,30 +287,35 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildLong(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			long val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				long val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				try {
+					val = Long.parseLong(textBox.getText());
+				}
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val);
+			},
+			(input) -> {
+				return Long.parseLong(input);
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			try {
-				val = Long.parseLong(textBox.getText());
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val);
-		});
+		);
 		
 		long val;
 		try {
-			val = context.getVal(long.class);
+			val = context.getNewVal(long.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -308,30 +331,35 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildInt(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			int val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				int val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				try {
+					val = Integer.parseInt(text);
+				}
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val);
+			},
+			(input) -> {
+				return Integer.parseInt(input);
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			try {
-				val = Integer.parseInt(text);
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val);
-		});
+		);
 		
 		int val;
 		try {
-			val = context.getVal(int.class);
+			val = context.getNewVal(int.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -347,30 +375,40 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildChar(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			int val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				int val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				try {
+					val = Integer.parseInt(text);
+				}
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val) && Ranges.CHAR.contains(val);
+			},
+			(input) -> {
+				int val = Integer.parseInt(input);
+				IntegralRange charRange = Ranges.CHAR;
+				if(charRange.contains(val)) {
+					return (char)val;
+				}
+				throw new NumberFormatException(val + "");
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			try {
-				val = Integer.parseInt(text);
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val) && Ranges.CHAR.contains(val);
-		});
+		);
 		
 		int val;
 		try {
-			val = (int)context.getVal(char.class);
+			val = (int)context.getNewVal(char.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -386,30 +424,35 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildShort(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			short val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				short val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				try {
+					val = Short.parseShort(text);
+				}
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val);
+			},
+			(input) -> {
+				return Short.parseShort(input);
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			try {
-				val = Short.parseShort(text);
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val);
-		});
+		);
 		
 		short val;
 		try {
-			val = context.getVal(short.class);
+			val = context.getNewVal(short.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -425,30 +468,35 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildByte(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, (c, textBox) -> {
-			byte val;
-			
-			if(textBox == null) {
-				return false;
+		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+			(c, textBox) -> {
+				byte val;
+				
+				if(textBox == null) {
+					return false;
+				}
+				
+				String text = textBox.getText();
+				if(text == null) {
+					return false;
+				}
+				
+				try {
+					val = Byte.parseByte(text);
+				}
+				catch(NumberFormatException e) {
+					return false;
+				}
+				return range.contains(val);
+			},
+			(input) -> {
+				return Byte.parseByte(input);
 			}
-			
-			String text = textBox.getText();
-			if(text == null) {
-				return false;
-			}
-			
-			try {
-				val = Byte.parseByte(text);
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-			return range.contains(val);
-		});
+		);
 		
 		byte val;
 		try { 
-			val = context.getVal(byte.class);
+			val = context.getNewVal(byte.class);
 		}
 		catch(ConfigurationError e) {
 			LOGGER.catching(e);
@@ -508,12 +556,19 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public Cell<WFConfigEntryTextBox> buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator) {
+	public Cell<WFConfigEntryTextBox> buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator, Function<String, Object> builder) {
 		Table fieldTable = context.fieldTable;
 		final WFConfigEntryTextBox textField = new WFConfigEntryTextBox(context, "", dependencies.skin);
 		textField.setValidator(validator);
+		textField.setBuilder(builder);
 		textField.test(context, textField);
 		textField.setAlignment(Align.center);
+		textField.setTextFieldListener((tfield, c) -> {
+			WFConfigEntryTextBox tbox = Cast.from(tfield);
+			if(tbox.test(context, tbox)) {
+				context.setNewVal(tbox.buildFromString(context, textField));
+			}
+		});
 		return fieldTable.add(textField);
 	}
 	
@@ -581,8 +636,10 @@ public class ModConfigurationEntryBuilder {
 	
 	public static class ConfigurationUIEntryContext extends ConfigurationUIContext {
 		
-		public final Table fieldTable;
+		public Table fieldTable;
 		public final Field field;
+		protected final Object oldVal;
+		protected Object newVal;
 		public final LocalizationContext localization;
 		
 		public ConfigurationUIEntryContext(ModConfigurationPopup popup, Table fieldTable, Field f, Object configurationObj) {
@@ -590,15 +647,60 @@ public class ModConfigurationEntryBuilder {
 			this.fieldTable = fieldTable;
 			this.field = f;
 			this.localization = new LocalizationContext(this);
+			this.oldVal = obtainVal();
+			this.newVal = oldVal;
 		}
 		
-		public <T> T getVal(Class<T> type) {
+		protected Object obtainVal() {
 			try {
-				return Cast.from(field.get(configurationObj));
+				return field.get(configurationObj);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new ConfigurationError("Could not get field " + field.getName(), e);
 			}
 		}
+		
+		public <T> T getOldVal(Class<T> type) {
+			return Cast.from(oldVal);
+		}
+		
+		public void setNewVal(Object newVal) {
+			this.newVal = newVal;
+		}
+		
+		public <T> T getNewVal(Class<T> type) {
+			return Cast.from(newVal);
+		}
+		
+		public boolean changed() {
+			ConfigEntry entry = field.getAnnotation(ConfigEntry.class);
+			if(entry == null || !entry.strict()) {
+				return Objects.equals(oldVal, newVal);
+			}
+			return oldVal == newVal;
+		}
+		
+		/**
+		 * @return true if the this object and the parameter represent the same field
+		 */
+		@Override
+		public boolean equals(Object o) {
+			if(o instanceof ConfigurationUIEntryContext) {
+				if(field.equals(((ConfigurationUIEntryContext)o).field)) {
+					WilderForge.LOGGER.log(field + ".equals" + ((ConfigurationUIEntryContext)o).field);
+					return true;
+				}
+				else {
+					WilderForge.LOGGER.log("!" + field + ".equals" + ((ConfigurationUIEntryContext)o).field);
+				}
+			}
+			return false;
+		}
+		
+		@Override
+		public int hashCode() {
+			return field.hashCode();
+		}
+
 	}
 	
 	public static class LocalizationContext implements Localized {
