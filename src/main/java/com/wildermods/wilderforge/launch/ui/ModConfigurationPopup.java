@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.launch.ui;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -24,7 +25,6 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Custom
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIEntryContext;
-import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
@@ -157,7 +157,14 @@ public class ModConfigurationPopup extends PopUp {
 		bottomButtons.defaults().expandX().uniformX();
 		OptionButton.Factory buttonFactory = new OptionButton.Factory(dependencies, actionBus, "dialogActionButton");
 		OptionButton<Object> cancel = buttonFactory.ui(Keymap.Actions.menu_customCloseDialog, "optionsDialog.cancel", this::cancel);
-		OptionButton<Object> confirm = buttonFactory.ui(Keymap.Actions.menu_customConfirmDialog, "optionsDialog.confirm", this::saveAndClose);
+		OptionButton<Object> confirm = buttonFactory.ui(Keymap.Actions.menu_customConfirmDialog, "optionsDialog.confirm", () -> {
+			try {
+				saveAndClose();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 		
 		bottomButtons.add(cancel);
 		bottomButtons.add(confirm);
@@ -180,11 +187,11 @@ public class ModConfigurationPopup extends PopUp {
 		super.close();
 	}
 	
-	private void save() {
-		//save config
+	private void save() throws IOException {
+		Configuration.saveConfig(coremod, configuration, Cast.from(values));
 	}
 	
-	public void saveAndClose() {
+	public void saveAndClose() throws IOException {
 		save();
 		super.close();
 	}

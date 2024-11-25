@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.launch.coremods;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -7,16 +8,24 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+
 import com.badlogic.gdx.utils.SerializationException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
@@ -32,17 +41,26 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Rang
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationFieldContext;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
+
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
+
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
 
 public class Configuration {
+	public static final Gson gson;
 	private static final Path CONFIG_FOLDER = Path.of(".").resolve("mods").resolve("configs");
 	private static final HashMap<CoremodInfo, Function<LegacyViewDependencies, ? extends PopUp>> customConfigurations = new HashMap<>();;
 	private static final HashMap<CoremodInfo, ?> configurations = new HashMap<>();
+	static {
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.setPrettyPrinting();
+		gson = gsonBuilder.create();
+	}
 	
 	@InternalOnly
 	@SuppressWarnings("unchecked")
@@ -279,13 +297,27 @@ public class Configuration {
 	
 	@InternalOnly
 	public static Object getConfig(Config c) {
-		if(!(c instanceof CoremodInfo)) {
-			c = Coremods.getCoremod(c.modid());
-			if(c instanceof MissingCoremod) {
-				return null;
-			}
+		CoremodInfo coremod = getCoremod(c);
+		if(coremod instanceof MissingCoremod) {
+			return null;
 		}
 		return configurations.get(c);
+	}
+	
+	public static void saveConfig(Config c, Object configObject, HashMap<ConfigurationFieldContext, ConfigurationFieldContext> fields) throws IOException {
+		
+		Path configFile = getConfigFile(c);
+		Files.createDirectories(configFile.getParent());
+
+		try (BufferedWriter writer = Files.newBufferedWriter(configFile, StandardOpenOption.CREATE)) {
+			
+			LinkedHashMap<String, Object> jsonMap = new LinkedHashMap<>();
+			for(ConfigurationFieldContext context : fields.keySet()) {
+				jsonMap.put(context.getField().getName(), context.obtainVal());
+			}
+			writer.append(gson.toJson(jsonMap));
+		}
+		
 	}
 	
 	@InternalOnly
@@ -293,8 +325,15 @@ public class Configuration {
 		return customConfigurations.get(c);
 	}
 	
-	private static Path getConfigFile(CoremodInfo c) {
-		return CONFIG_FOLDER.resolve(c.modId + ".config.json");
+	private static Path getConfigFile(Config c) {
+		return CONFIG_FOLDER.resolve(c.modid() + ".config.json");
+	}
+	
+	private static CoremodInfo getCoremod(Config c) {
+		if(c instanceof CoremodInfo) {
+			return Cast.from(c);
+		}
+		return Coremods.getCoremod(c.modid());
 	}
 	
 	private static JsonValue readConfigFile(Path path) throws IOException {
@@ -304,6 +343,10 @@ public class Configuration {
 			throw new SerializationException("Config " + path  + " is not a json object?!");
 		}
 		return configJson;
+	}
+	
+	private static void writeFieldToJson(Json json, ConfigurationFieldContext context) {
+		json.writeValue(context.getField().getName(), context.obtainVal());
 	}
 	
 	private record ConfigStatus(boolean changed, RestartImpl restart) implements Restart {
@@ -334,11 +377,6 @@ public class Configuration {
 		public boolean prompt() {
 			return restart != null && restart.prompt();
 		}
-
-		@Override
-		public boolean strict() {
-			return restart != null && restart.strict();
-		}
 		
 	}
 	
@@ -359,11 +397,6 @@ public class Configuration {
 		@Override
 		public Class<? extends Annotation> annotationType() {
 			return null;
-		}
-		
-		@Override
-		public boolean strict() {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override

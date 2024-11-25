@@ -88,6 +88,16 @@ public @interface ConfigEntry {
      */
 	public String[] valueCorrectors() default "wilderforge";
 	
+	/**
+	 * Determines if the values is considered to be changed if the reference has
+	 * changed, or the value has changed.
+	 * Defaults to {@code false}
+	 * 
+	 * @return {@code true} if {@code == }should be used to compare, or {@code false} if
+	 * {@code Objects.equals} should be used.
+	 */
+	public boolean strict() default false;
+	
 	public static class GUI {
 		
 		private GUI() {}
@@ -638,16 +648,6 @@ public @interface ConfigEntry {
 		 * @return {@code true} if the user should be prompted, {@code false} otherwise
 		 */
 		public boolean prompt() default true;
-		
-		/**
-		 * Determines if the values is considered to be changed if the reference has
-		 * changed, or the value has changed.
-		 * Defaults to {@code false}
-		 * 
-		 * @return {@code true} if {@code == }should be used to compare, or {@code false} if
-		 * {@code Objects.equals} should be used.
-		 */
-		public boolean strict() default false;
 	}
 	
 }

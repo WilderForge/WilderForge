@@ -634,7 +634,7 @@ public class ModConfigurationEntryBuilder {
 		
 	}
 	
-	public static class ConfigurationUIEntryContext extends ConfigurationUIContext {
+	public static class ConfigurationUIEntryContext extends ConfigurationUIContext implements ConfigurationFieldContext {
 		
 		public Table fieldTable;
 		public final Field field;
@@ -651,7 +651,7 @@ public class ModConfigurationEntryBuilder {
 			this.newVal = oldVal;
 		}
 		
-		protected Object obtainVal() {
+		public Object obtainVal() {
 			try {
 				return field.get(configurationObj);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -679,6 +679,10 @@ public class ModConfigurationEntryBuilder {
 			return oldVal == newVal;
 		}
 		
+		public Field getField() {
+			return field;
+		}
+		
 		/**
 		 * @return true if the this object and the parameter represent the same field
 		 */
@@ -701,6 +705,14 @@ public class ModConfigurationEntryBuilder {
 			return field.hashCode();
 		}
 
+	}
+	
+	public static interface ConfigurationFieldContext {
+		public Object obtainVal();
+		public <T> T getOldVal(Class<T> type);
+		public void setNewVal(Object newVal);
+		public <T> T getNewVal(Class<T> type);
+		public Field getField();
 	}
 	
 	public static class LocalizationContext implements Localized {
