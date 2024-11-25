@@ -37,9 +37,9 @@ dependencies {
 	implementation group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.16.0'
 	
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.2'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.24.2'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.2'
 	
 	/**********
 	don't alter the dependencies below
