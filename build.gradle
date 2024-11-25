@@ -35,7 +35,7 @@ dependencies {
 
 	implementation group: 'net.oneandone.reflections8', name: 'reflections8', version: '0.11.7'
 	implementation group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.16.0'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
 	
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.24.0'
