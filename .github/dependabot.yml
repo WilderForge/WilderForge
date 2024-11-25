@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle" 
+    directory: "/" 
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "Gamebuster19901"
+    assignees:
+      - "Gamebuster19901"
+    labels:
+      - "Category - Enhancement"
+      - "Priority - Normal ↓"
+    open-pull-requests-limit: 99
