@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -25,7 +24,7 @@ import com.badlogic.gdx.utils.SerializationException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
+import com.google.gson.JsonSerializer;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
@@ -47,17 +46,25 @@ import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
-
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
 
 public class Configuration {
 	public static final Gson gson;
+	private static final Logger LOGGER = new Logger(Configuration.class);
 	private static final Path CONFIG_FOLDER = Path.of(".").resolve("mods").resolve("configs");
 	private static final HashMap<CoremodInfo, Function<LegacyViewDependencies, ? extends PopUp>> customConfigurations = new HashMap<>();;
 	private static final HashMap<CoremodInfo, ?> configurations = new HashMap<>();
+	private static final HashMap<CoremodInfo, ?> defaults = new HashMap<>();
 	static {
 		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(Character.class, (JsonSerializer<Character>)(src, typeOfSrc, context) -> {
+			if(src == null) {
+				return null;
+			}
+			return context.serialize((int) src.charValue());
+		});
 		gsonBuilder.setPrettyPrinting();
 		gson = gsonBuilder.create();
 	}
@@ -102,7 +109,9 @@ public class Configuration {
 					}
 					Constructor<?> constructor = c.getDeclaredConstructor();
 					constructor.setAccessible(true);
+					Object defaultConfig = constructor.newInstance();
 					Object configuration = constructor.newInstance();
+					defaults.put(coremod, Cast.from(defaultConfig));
 					ConfigStatus status = populate(config, coremod, c, Cast.from(configuration));
 					if(status.changed()) {
 						throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
@@ -143,7 +152,8 @@ public class Configuration {
 	}
 	
 	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
-		Set<Field> fields = WilderForge.getReflectionsHelper().getAllFieldsInAnnotatedWith(configClass, ConfigEntry.class);
+		Set<Field> fields = new LinkedHashSet<>();
+		fields.addAll(List.of(configClass.getDeclaredFields()));
 		ConfigStatus ret;
 		Path configFile = getConfigFile(coremod);
 		JsonValue values = null;
@@ -222,7 +232,14 @@ public class Configuration {
 						value = jsonValue.asBoolean();
 						break;
 					case doubleValue:
-						value = jsonValue.asDouble();
+						
+						if(TypeUtil.isDouble(field)) {
+							value = jsonValue.asDouble();
+						}
+						else if(TypeUtil.isFloat(field)) {
+							value = jsonValue.asFloat();
+						}
+						
 						if(uRange == null) {
 							uRange = Ranges.getRangeOfType(type);
 						}
@@ -232,15 +249,34 @@ public class Configuration {
 						catch(Throwable t) {
 							throw new ConfigurationError("Invalid @Range", t);
 						}
-						Double dval = Cast.from(value);
-						if(dRange.contains(dval)) {
-							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, dval, dRange);
-							WilderForge.MAIN_BUS.fire(e);
-							dval = ((Number)e.getValue()).doubleValue();
+						if(value != null) {
+							Double dval = ((Number)value).doubleValue();
+							if(dRange.contains(dval)) {
+								ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, dval, dRange);
+								WilderForge.MAIN_BUS.fire(e);
+								dval = ((Number)e.getValue()).doubleValue();
+							}
 						}
 						break;
 					case longValue:
-						value = jsonValue.asLong();
+						
+						if(TypeUtil.isLong(field)) {
+							value = jsonValue.asLong();
+						}
+						else if(TypeUtil.isInt(field)) {
+							value = jsonValue.asInt();
+						}
+						if(TypeUtil.isChar(field)) {
+							value = jsonValue.asChar();
+						}
+						else if(TypeUtil.isShort(field)) {
+							value = jsonValue.asShort();
+						}
+						else if(TypeUtil.isByte(field)) {
+							value = jsonValue.asByte();
+						}
+						
+						
 						if(uRange == null) {
 							uRange = Ranges.getRangeOfType(type);
 						}
@@ -251,11 +287,19 @@ public class Configuration {
 							throw new ConfigurationError("Invalid @Range", t);
 						}
 						
-						Long ival = Cast.from(value);
-						if(iRange.contains(ival)) {
-							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, ival, iRange);
-							WilderForge.MAIN_BUS.fire(e);
-							ival = ((Number)e.getValue()).longValue();
+						if(value != null) {
+							Long ival;
+							if(TypeUtil.isChar(field)) {
+								ival = (long) ((Character)value).charValue();
+							}
+							else {
+								ival = ((Number)value).longValue();
+							}
+							if(iRange.contains(ival)) {
+								ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, ival, iRange);
+								WilderForge.MAIN_BUS.fire(e);
+								ival = ((Number)e.getValue()).longValue();
+							}
 						}
 						break;
 					case nullValue:
@@ -289,10 +333,20 @@ public class Configuration {
 			}
 			
 			field.set(configurationObj, value);
-			
+			LOGGER.log("Set " + field.getName() + " to " + value);
 		}
 		
 		return new ConfigStatus(changed, restartInfo);
+	}
+	
+	@InternalOnly
+	public static Object getDefaultConfig(Config c) {
+		CoremodInfo coremod = getCoremod(c);
+		if(coremod instanceof MissingCoremod) {
+			return null;
+		}
+		Object config = defaults.get(c);
+		return config;
 	}
 	
 	@InternalOnly
@@ -301,21 +355,48 @@ public class Configuration {
 		if(coremod instanceof MissingCoremod) {
 			return null;
 		}
-		return configurations.get(c);
+		Object config = configurations.get(c);
+		return config;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static void saveConfig(Config c, Object configObject, HashMap<ConfigurationFieldContext, ConfigurationFieldContext> fields) throws IOException {
 		
-		Path configFile = getConfigFile(c);
-		Files.createDirectories(configFile.getParent());
-
-		try (BufferedWriter writer = Files.newBufferedWriter(configFile, StandardOpenOption.CREATE)) {
+		try {
+		
+			Path configFile = getConfigFile(c);
+			Files.createDirectories(configFile.getParent());
+			Object newConfigObject;
 			
-			LinkedHashMap<String, Object> jsonMap = new LinkedHashMap<>();
-			for(ConfigurationFieldContext context : fields.keySet()) {
-				jsonMap.put(context.getField().getName(), context.obtainVal());
+			try {
+				Constructor configConstructor = configObject.getClass().getDeclaredConstructor();
+				configConstructor.setAccessible(true);
+				newConfigObject = configConstructor.newInstance();
+			} catch (Throwable t) {
+				throw new ConfigurationError("Unable to create configuration object for mod " + c.modid(), t);
 			}
-			writer.append(gson.toJson(jsonMap));
+			
+			try (BufferedWriter writer = Files.newBufferedWriter(configFile, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+				
+				LinkedHashMap<String, Object> jsonMap = new LinkedHashMap<>();
+				for(ConfigurationFieldContext context : fields.keySet()) {
+					jsonMap.put(context.getField().getName(), context.obtainVal());
+					context.getField().set(newConfigObject, context.obtainVal());
+				}
+				writer.append(gson.toJson(jsonMap));
+			}
+			
+			
+			
+			if(configurations.put(getCoremod(c), Cast.from(newConfigObject)) == null) {
+				if(getConfig(c) != newConfigObject) {
+					throw new AssertionError("wtf");
+				}
+				throw new AssertionError();
+			}
+		}
+		catch(Throwable t) {
+			throw new ConfigurationError("Unable to save configuration for mod " + c.modid());
 		}
 		
 	}
@@ -343,10 +424,6 @@ public class Configuration {
 			throw new SerializationException("Config " + path  + " is not a json object?!");
 		}
 		return configJson;
-	}
-	
-	private static void writeFieldToJson(Json json, ConfigurationFieldContext context) {
-		json.writeValue(context.getField().getName(), context.obtainVal());
 	}
 	
 	private record ConfigStatus(boolean changed, RestartImpl restart) implements Restart {

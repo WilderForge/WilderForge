@@ -38,6 +38,7 @@ import com.worldwalkergames.legacy.ui.menu.OptionsDialog.Style;
 
 public class ModConfigurationPopup extends PopUp {
 	public final CoremodInfo coremod;
+	private Object defaultConfiguration;
 	private Object configuration;
 	private DialogFrame frame;
 	private ScrollPane2 scrollPane;
@@ -72,6 +73,7 @@ public class ModConfigurationPopup extends PopUp {
 			}
 		}
 		
+		defaultConfiguration = Configuration.getDefaultConfig(config);
 		configuration = Configuration.getConfig(config);
 		if(configuration == null) {
 			throw new AssertionError();
@@ -139,7 +141,7 @@ public class ModConfigurationPopup extends PopUp {
 		for(Field f : configFields) {
 			Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builderObtainer = getBuilder(f.getAnnotation(CustomBuilder.class), context);
 			ModConfigurationEntryBuilder builder = builderObtainer.apply(context);
-			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(this, fieldTable, f, configuration);
+			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(this, fieldTable, f, configuration, defaultConfiguration);
 			values.putIfAbsent(entryContext, entryContext);
 			entryContext = values.get(entryContext);
 			entryContext.fieldTable = fieldTable;

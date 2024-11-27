@@ -1,7 +1,7 @@
 package com.wildermods.wilderforge.launch.ui.element;
 
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -14,15 +14,23 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIEntryContext;
 import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.launch.logging.Logger;
+import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.worldwalkergames.legacy.context.ClientDataContext.Skins;
 import com.worldwalkergames.ui.AutoSwapDrawable;
 import com.worldwalkergames.ui.Dropdown;
+import com.worldwalkergames.ui.FancyImageButton;
 
-public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> {
+public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>> {
 
+	private static final Logger LOGGER = new Logger(WFConfigEntryTextBox.class);
 	private final ConfigurationUIEntryContext context;
-	volatile BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator = null;
-	volatile Function<String, Object> valueBuilder = null;
+	volatile BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>> validator = null;
+	volatile BiFunction<ConfigurationUIEntryContext, String, T> valueBuilder = null;
+	volatile BiFunction<ConfigurationUIEntryContext, T, String> stringConverter = null;
+	volatile FancyImageButton undoButton = null;
+	volatile FancyImageButton resetButton = null;
+	
 	
 	Color invalidColor = new Color(0xFF6496FF);
 	Color validColor = new Color(0x64E664FF);
@@ -37,25 +45,54 @@ public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<C
 	};
 	
 	InputListener keyListener = new InputListener() {
-		@SuppressWarnings("incomplete-switch")
+
 		@Override
+		@SuppressWarnings("incomplete-switch")
 		public boolean handle(Event e) {
-			if(e instanceof InputEvent) {
+			if(e instanceof Update) {
+				update();
+			}
+			else if(e instanceof InputEvent) {
 				InputEvent event = Cast.from(e);
 				switch(event.getType()) {
 					case keyDown:
 					case keyTyped:
 					case keyUp:
-						WilderForge.LOGGER.log("Key event");
-						if(test(context, WFConfigEntryTextBox.this)) {
-							Object val = buildFromString(context, WFConfigEntryTextBox.this);
-							WilderForge.LOGGER.log("set value to " + val);
-							context.setNewVal(val);
-						}
+						update();
 						break;
 				}
 			}
 			return false;
+		}
+		
+		private void update() {
+			WilderForge.LOGGER.log("Key event");
+			if(test(context, WFConfigEntryTextBox.this)) {
+				Object val = buildFromString(context, WFConfigEntryTextBox.this);
+				WilderForge.LOGGER.log("set value to " + val);
+				context.setNewVal(val);
+			}
+			
+			if(undoButton != null) {
+				if(!test(context, WFConfigEntryTextBox.this) || context.changed()) {
+					undoButton.setDisabled(false);
+				}
+				else {
+					undoButton.setDisabled(true);
+				}
+				System.out.println("UNDO DISABLED: " + undoButton.isDisabled());
+			}
+			
+			if(resetButton != null) {
+				if(!test(context, WFConfigEntryTextBox.this) || !context.isDefault()) {
+					resetButton.setColor(invalidColor);
+					resetButton.setDisabled(false);
+				}
+				else {
+					resetButton.setColor(Color.WHITE);
+					resetButton.setDisabled(true);
+				}
+			}
 		}
 	};
 	
@@ -98,33 +135,90 @@ public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<C
 		dropdown.adjustLayoutVars(backgroundDisabled.getParent(), scalar);
 	}
 	
-	public WFConfigEntryTextBox setValidator(BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> testFunc) {
+	public WFConfigEntryTextBox<T> setValidator(BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>> testFunc) {
 		this.validator = testFunc;
 		return this;
 	}
 	
-	public WFConfigEntryTextBox setBuilder(Function<String, Object> valBuilder) {
+	public WFConfigEntryTextBox<T> setBuilder(BiFunction<ConfigurationUIEntryContext, String, T> valBuilder) {
 		this.valueBuilder = valBuilder;
 		return this;
 	}
 	
+	public WFConfigEntryTextBox<T> setStringConverter(BiFunction<ConfigurationUIEntryContext, T, String> stringConverter) {
+		this.stringConverter = stringConverter;
+		return this;
+	}
+	
+	public WFConfigEntryTextBox<T> setUndoButton(FancyImageButton<Runnable> undoButton) {
+		this.undoButton = undoButton;
+		return this;
+	}
+	
+	public WFConfigEntryTextBox<T> setResetButton(FancyImageButton<Runnable> resetButton) {
+		this.resetButton = resetButton;
+		return this;
+	}
+	
+	public void update() {
+		keyListener.handle(new Update());
+	}
+	
 	@Override
-	public boolean test(ConfigurationUIEntryContext obj, WFConfigEntryTextBox thiz) {
+	public boolean test(ConfigurationUIEntryContext obj, WFConfigEntryTextBox<T> thiz) {
 		if(validator == null || valueBuilder == null) {
 			return false;
 		}
 		return validator.test(obj, thiz);
 	}
 	
-	public Object buildFromString(ConfigurationUIEntryContext obj, WFConfigEntryTextBox thiz) {
+	public Object buildFromString(ConfigurationUIEntryContext obj, WFConfigEntryTextBox<T> thiz) {
 		if(test(obj, thiz) && valueBuilder != null) {
-			return valueBuilder.apply(thiz.getText());
+			return valueBuilder.apply(obj, thiz.getText());
 		}
 		throw new IllegalStateException();
 	}
 	
-	public void setNewValue(Object o) {
-		context.setNewVal(o);
+	public String convertToString(ConfigurationUIEntryContext obj, T val) throws Throwable {
+		return stringConverter.apply(obj, val);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public String convertToString(ConfigurationUIEntryContext obj, WFConfigEntryTextBox<T> thiz) {
+		if(stringConverter != null) {
+			String ret;
+			try {
+				ret = convertToString(obj, (T)obj.obtainVal());
+				setText(ret);
+				return ret;
+			}
+			catch(Throwable t) {
+				LOGGER.warn("Falling back to default value. Couldn't obtain string for field " + obj.getField().getName() + " in " + obj.getField().getDeclaringClass().getCanonicalName());
+				LOGGER.catching(t);
+				try {
+					ret = convertToString(obj, (T)obj.getDefaultVal());
+					setText(ret);
+					return ret;
+				}
+				catch(Throwable t2) {
+					LOGGER.fatal("Falling back to default value failed!");
+					throw new ConfigurationError("Falling back to default value failed! Couldn't build string for field " + obj.getField().getName() + " in " + obj.getField().getDeclaringClass().getCanonicalName() , t2);
+				}
+			}
+		}
+		return "NOT_READY";
+	}
+	
+	public void setNewValue(ConfigurationUIEntryContext obj, T val) {
+		context.setNewVal(val);
+		if(stringConverter != null) {
+			setText(stringConverter.apply(obj, val));
+		}
+	}
+	
+	@Override
+	public void setText(String text) {
+		super.setText(text);
 	}
 	
 	private void addDrawables(String textureName) {
@@ -159,7 +253,7 @@ public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<C
 		
 		Boolean isValid;
 		
-		BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator = this.validator;
+		BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>> validator = this.validator;
 		if(validator == null) {
 			isValid = null;
 		}
@@ -183,5 +277,7 @@ public class WFConfigEntryTextBox extends NiceTextField implements BiPredicate<C
 		drawable.removeTint();
 		setColor(prevColor);
 	}
+	
+	private static final class Update extends Event {}
 	
 }

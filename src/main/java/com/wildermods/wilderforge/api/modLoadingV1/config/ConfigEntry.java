@@ -595,9 +595,13 @@ public @interface ConfigEntry {
 	 *
 	 * <p>Use this annotation for configuration values where {@code null} is an acceptable
 	 * or meaningful state, and no automatic correction should be attempted.
+	 * 
+	 * @deprecated Not yet implemented, might be removed. Not yet considered API.
 	 */
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
+	@Deprecated
+	@InternalOnly
 	public static @interface Nullable {}
 	
 	/**

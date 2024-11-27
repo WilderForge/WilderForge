@@ -3,18 +3,21 @@ package com.wildermods.wilderforge.api.modLoadingV1.config;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
@@ -34,11 +37,16 @@ import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.ui.ModConfigurationPopup;
 import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryTextBox;
+
 import com.worldwalkergames.legacy.context.ClientDataContext;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
+import com.worldwalkergames.legacy.context.LegacyViewDependencies.ScreenInfo;
 import com.worldwalkergames.legacy.controller.NiceSlider;
 import com.worldwalkergames.ui.AutoSwapDrawable;
+import com.worldwalkergames.ui.FancyImageButton;
 import com.worldwalkergames.ui.FancySliderStyle;
+import com.worldwalkergames.ui.NiceButtonBase.ButtonStyle;
+import com.worldwalkergames.ui.NiceButtonBase.FancyButtonStyle;
 import com.worldwalkergames.ui.NiceLabel;
 
 @SuppressWarnings("rawtypes")
@@ -61,7 +69,9 @@ public class ModConfigurationEntryBuilder {
 		
 		try {
 			Cell inputField = buildInputField(context);
-			applyInputField(context, inputField);
+			FancyImageButton<Runnable> undoButton = buildUndo(context, inputField.getActor());
+			FancyImageButton<Runnable> resetButton = buildReset(context, inputField.getActor());
+			applyInputField(context, inputField, undoButton, resetButton);
 		}
 		catch(ConfigElementException e) {
 			LOGGER.catching(e);
@@ -143,18 +153,86 @@ public class ModConfigurationEntryBuilder {
 				throw new AssertionError();
 			}
 		}
+		else if(f.getType() == String.class) {
+			return buildString(context);
+		}
 		
 		return fieldTable.add();
 	}
 	
-	public void applyInputField(ConfigurationUIEntryContext context, Cell cell) {
+	public void applyInputField(ConfigurationUIEntryContext context, Cell cell, FancyImageButton<Runnable> undoButton, FancyImageButton<Runnable> resetButton) {		
 		cell.width(Value.percentWidth(0.333f, context.popup.getFrame())).align(Align.left);
 		buildTooltip(cell.getActor(), context);
+		Actor actor = cell.getActor();
+		if(actor instanceof WFConfigEntryTextBox) {
+			WFConfigEntryTextBox<?> box = Cast.from(actor);
+			box.setUndoButton(undoButton);
+			box.setResetButton(resetButton);
+			ClickListener uiUpdater = new ClickListener () {
+				@Override
+				public void clicked(InputEvent event, float x, float y) {
+					box.update();
+				}
+			};
+			undoButton.addListener(uiUpdater);
+			resetButton.addListener(uiUpdater);
+		}
 		context.fieldTable.row();
 	}
 	
+	public FancyImageButton<Runnable> buildUndo(ConfigurationUIEntryContext context, Actor actor) {
+		ScreenInfo screenInfo = context.popup.getDependencies().screenInfo;
+		RuntimeSkin skin = context.popup.getDependencies().skin.getSisterSkin(ClientDataContext.Skins.SCALE_UI);
+		FancyImageButton<Runnable> undoButton = new FancyImageButton<>(skin, screenInfo.scale(6f), "icon_hudTop_undo", "icon_hudTop_undo2x");
+		undoButton.setStyle(ButtonStyle.fancy(FancyButtonStyle.dark));
+		
+		@SuppressWarnings("unchecked")
+		Runnable exec = () -> {
+			context.undo();
+			if(actor instanceof WFConfigEntryTextBox) {
+				WFConfigEntryTextBox box = Cast.from(actor);
+				box.convertToString(context, box);
+			}
+		};
+		
+		undoButton.setUserData(exec);
+		undoButton.clicked.add(this, () -> {
+			undoButton.getUserData().run();
+		});
+		context.fieldTable.add(undoButton).expandY().fillY().width(Value.percentWidth(1f / 16f, context.fieldTable));
+		undoButton.setDisabled(!context.changed());
+		return undoButton;
+
+	}
+	
+	public FancyImageButton<Runnable> buildReset(ConfigurationUIEntryContext context, Actor actor) {
+		ScreenInfo screenInfo = context.popup.getDependencies().screenInfo;
+		RuntimeSkin skin = context.popup.getDependencies().skin.getSisterSkin(ClientDataContext.Skins.SCALE_UI);
+		FancyImageButton<Runnable> resetButton = new FancyImageButton<>(skin, screenInfo.scale(6f), "icon_x", "icon_x2x");
+		
+		@SuppressWarnings("unchecked")
+		Runnable exec = () -> {
+			context.resetToDefault();
+			if(actor instanceof WFConfigEntryTextBox) {
+				WFConfigEntryTextBox box = Cast.from(actor);
+				box.convertToString(context, box);
+			}
+		};
+		
+		resetButton.setUserData(exec);
+		resetButton.clicked.add(this, () -> {
+			resetButton.getUserData().run();
+		});
+		context.fieldTable.add(resetButton).expandY().fillY().width(Value.percentWidth(1f / 16f, context.fieldTable));
+		System.out.println("RESET BUTTON IS DISABLED:" + context.isDefault());
+		resetButton.setDisabled(context.isDefault());
+		return resetButton;
+
+	}
+	
 	public Cell buildBoolean(ConfigurationUIEntryContext context) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		
+		Cell<WFConfigEntryTextBox<Boolean>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				boolean val;
 				
@@ -169,8 +247,11 @@ public class ModConfigurationEntryBuilder {
 				
 				return ("true".equals(text) || "false".equals(text));
 			},
-			(input) -> {
+			(c, input) -> {
 				return Boolean.parseBoolean(input);
+			}, 
+			(c, bool) -> {
+				return bool.toString();
 			}
 		);
 		
@@ -197,7 +278,7 @@ public class ModConfigurationEntryBuilder {
 				throw new ConfigurationError("Slider @Range out of bounds or not present. Slider @Range boundaries must be between -1000 and 1000");
 			}
 		}
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Float>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				float val;
 				if(textBox == null) {
@@ -219,8 +300,11 @@ public class ModConfigurationEntryBuilder {
 				}
 				return range.contains(val);
 			},
-			(input) -> {
+			(c, input) -> {
 				return Float.parseFloat(input);
+			},
+			(c, floatVal) -> {
+				return floatVal.toString();
 			}
 		);
 		
@@ -242,7 +326,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildDouble(ConfigurationUIEntryContext context, DecimalRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Double>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				double val;
 				
@@ -264,8 +348,11 @@ public class ModConfigurationEntryBuilder {
 				return range.contains(val);
 				
 			},
-			(input) -> {
+			(c, input) -> {
 				return Double.parseDouble(input);
+			},
+			(c, doubleVal) -> {
+				return doubleVal.toString();
 			}
 		);
 		
@@ -287,7 +374,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildLong(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Long>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				long val;
 				
@@ -308,8 +395,11 @@ public class ModConfigurationEntryBuilder {
 				}
 				return range.contains(val);
 			},
-			(input) -> {
+			(c, input) -> {
 				return Long.parseLong(input);
+			},
+			(c, longVal) -> {
+				return longVal.toString();
 			}
 		);
 		
@@ -331,7 +421,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildInt(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Integer>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				int val;
 				
@@ -352,8 +442,11 @@ public class ModConfigurationEntryBuilder {
 				}
 				return range.contains(val);
 			},
-			(input) -> {
+			(c, input) -> {
 				return Integer.parseInt(input);
+			},
+			(c, intVal) -> {
+				return intVal.toString();
 			}
 		);
 		
@@ -375,7 +468,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildChar(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Character>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				int val;
 				
@@ -396,13 +489,17 @@ public class ModConfigurationEntryBuilder {
 				}
 				return range.contains(val) && Ranges.CHAR.contains(val);
 			},
-			(input) -> {
+			(c, input) -> {
 				int val = Integer.parseInt(input);
 				IntegralRange charRange = Ranges.CHAR;
 				if(charRange.contains(val)) {
 					return (char)val;
 				}
 				throw new NumberFormatException(val + "");
+			},
+			(c, charVal) -> {
+				int val = (int) charVal;
+				return val + "";
 			}
 		);
 		
@@ -424,7 +521,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildShort(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Short>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				short val;
 				
@@ -445,8 +542,11 @@ public class ModConfigurationEntryBuilder {
 				}
 				return range.contains(val);
 			},
-			(input) -> {
+			(c, input) -> {
 				return Short.parseShort(input);
+			},
+			(c, shortVal) -> {
+				return shortVal.toString();
 			}
 		);
 		
@@ -468,7 +568,7 @@ public class ModConfigurationEntryBuilder {
 	}
 	
 	public Cell buildByte(ConfigurationUIEntryContext context, IntegralRange range, Step step) throws ConfigElementException {
-		Cell<WFConfigEntryTextBox> ret = buildTextInput(context, 
+		Cell<WFConfigEntryTextBox<Byte>> ret = buildTextInput(context, 
 			(c, textBox) -> {
 				byte val;
 				
@@ -489,8 +589,11 @@ public class ModConfigurationEntryBuilder {
 				}
 				return range.contains(val);
 			},
-			(input) -> {
+			(c, input) -> {
 				return Byte.parseByte(input);
+			},
+			(c, byteVal) -> {
+				return byteVal.toString();
 			}
 		);
 		
@@ -509,6 +612,32 @@ public class ModConfigurationEntryBuilder {
 			}
 		}
 		ret.getActor().setText(val + "");
+		return ret;
+	}
+	
+	public Cell buildString (ConfigurationUIEntryContext context) throws ConfigElementException {
+		Cell<WFConfigEntryTextBox<String>> ret = buildTextInput(context,
+			(c, textBox) -> {
+				if(textBox == null) {
+					return false;
+				}
+
+				return true;
+			},
+			(c, input) -> {
+				return input;
+			},
+			(c, stringVal) -> {
+				return stringVal;
+			}
+				
+		);
+		
+		String val;
+
+		val = context.getNewVal(String.class);
+
+		ret.getActor().setText(val);
 		return ret;
 	}
 	
@@ -556,15 +685,16 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public Cell<WFConfigEntryTextBox> buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox> validator, Function<String, Object> builder) {
+	public <T> Cell<WFConfigEntryTextBox<T>> buildTextInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>> validator, BiFunction<ConfigurationUIEntryContext, String, T> builder, BiFunction<ConfigurationUIEntryContext, T, String> converter) {
 		Table fieldTable = context.fieldTable;
-		final WFConfigEntryTextBox textField = new WFConfigEntryTextBox(context, "", dependencies.skin);
+		final WFConfigEntryTextBox<T> textField = new WFConfigEntryTextBox<>(context, "", dependencies.skin);
 		textField.setValidator(validator);
 		textField.setBuilder(builder);
+		textField.setStringConverter(converter);
 		textField.test(context, textField);
 		textField.setAlignment(Align.center);
 		textField.setTextFieldListener((tfield, c) -> {
-			WFConfigEntryTextBox tbox = Cast.from(tfield);
+			WFConfigEntryTextBox<T> tbox = Cast.from(tfield);
 			if(tbox.test(context, tbox)) {
 				context.setNewVal(tbox.buildFromString(context, textField));
 			}
@@ -638,25 +768,30 @@ public class ModConfigurationEntryBuilder {
 		
 		public Table fieldTable;
 		public final Field field;
+		protected final Object defaultVal;
 		protected final Object oldVal;
 		protected Object newVal;
 		public final LocalizationContext localization;
 		
-		public ConfigurationUIEntryContext(ModConfigurationPopup popup, Table fieldTable, Field f, Object configurationObj) {
+		public ConfigurationUIEntryContext(ModConfigurationPopup popup, Table fieldTable, Field f, Object configurationObj, Object defaultObj) {
 			super(popup, configurationObj);
 			this.fieldTable = fieldTable;
 			this.field = f;
 			this.localization = new LocalizationContext(this);
-			this.oldVal = obtainVal();
+			try {
+				this.defaultVal = field.get(defaultObj);
+				this.oldVal = field.get(configurationObj);
+				System.out.println("Default value is " + defaultVal);
+				System.out.println("Old value is " + oldVal);
+			}
+			catch(IllegalArgumentException | IllegalAccessException e) {
+				throw new ConfigurationError("Could not get field" + field.getName(), e);
+			}
 			this.newVal = oldVal;
 		}
 		
 		public Object obtainVal() {
-			try {
-				return field.get(configurationObj);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new ConfigurationError("Could not get field " + field.getName(), e);
-			}
+			return getNewVal(Object.class);
 		}
 		
 		public <T> T getOldVal(Class<T> type) {
@@ -671,12 +806,36 @@ public class ModConfigurationEntryBuilder {
 			return Cast.from(newVal);
 		}
 		
+		public Object getDefaultVal() {
+			return defaultVal;
+		}
+		
+		public void undo() {
+			this.newVal = oldVal;
+		}
+		
+		public void resetToDefault() {
+			this.newVal = defaultVal;
+		}
+		
 		public boolean changed() {
 			ConfigEntry entry = field.getAnnotation(ConfigEntry.class);
 			if(entry == null || !entry.strict()) {
-				return Objects.equals(oldVal, newVal);
+				boolean equals = !Objects.equals(oldVal, newVal);
+				System.out.println("Changed: " + equals + " - " + oldVal + " -> " + newVal);
+				return !Objects.equals(oldVal, newVal);
 			}
 			return oldVal == newVal;
+		}
+		
+		public boolean isDefault() {
+			ConfigEntry entry = field.getAnnotation(ConfigEntry.class);
+			if(entry == null || !entry.strict()) {
+				boolean equals = Objects.equals(defaultVal, newVal);
+				System.out.println("Is Default: " + equals + " - " + defaultVal + " -> " + newVal);
+				return Objects.equals(defaultVal, newVal);
+			}
+			return defaultVal == newVal;
 		}
 		
 		public Field getField() {
