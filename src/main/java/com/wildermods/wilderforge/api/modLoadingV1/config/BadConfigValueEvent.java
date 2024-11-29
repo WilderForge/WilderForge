@@ -9,16 +9,19 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 
 /**
- * Represents an event triggered when there is an issue with a configuration value.
+ * Represents an event triggered when there is an issue when reading a config value
+ * from a configuration file.
+ * 
  * This can occur when a configuration value is out of range, incompatible, missing,
  * or otherwise invalid.
  * 
  * If the value is not corrected, then a {@link ConfigurationError} will occur unless
  * otherwise specified.
  */
-public class BadConfigValueEvent extends Event {
+public class BadConfigValueEvent<T> extends Event {
 
 	private final Config configAnnotation;
+	private final ConfigEntry configEntry;
 
 	private final Object configuration;
 
@@ -26,7 +29,7 @@ public class BadConfigValueEvent extends Event {
 	protected Field fieldToSet;
 
 
-	protected Object valueToInsert;
+	protected T valueToInsert;
 
 	/**
 	 * Constructs a new {@code BadConfigValueEvent}.
@@ -37,9 +40,10 @@ public class BadConfigValueEvent extends Event {
 	 * but there is no corresponding field in the configuration object.
 	 * @param valueToInsert	The value that was attempted to be set in the field, which may be null.
 	 */
-	public BadConfigValueEvent(Config configAnnotation, Object configuration, Field fieldToSet, @Nullable Object valueToInsert) {
+	public BadConfigValueEvent(Config configAnnotation, ConfigEntry configEntry, Object configuration, Field fieldToSet, @Nullable T valueToInsert) {
 		super(false);
 		this.configAnnotation = configAnnotation;
+		this.configEntry = configEntry;
 		this.configuration = configuration;
 		this.fieldToSet = fieldToSet;
 		this.valueToInsert = valueToInsert;
@@ -50,6 +54,13 @@ public class BadConfigValueEvent extends Event {
 	 */
 	public final Config getConfigAnnotation() {
 		return configAnnotation;
+	}
+	
+	/**
+	 * @return the configuration entry annotation associated with this event.
+	 */
+	public final ConfigEntry getConfigEntry() {
+		return configEntry;
 	}
 	
 	/**
@@ -71,7 +82,7 @@ public class BadConfigValueEvent extends Event {
 	 * @return The value that was attempted to be inserted into the field.
 	 * This may be null in the case of a missing configuration value.
 	 */
-	public final @Nullable Object getValue() {
+	public final @Nullable T getValue() {
 		return valueToInsert;
 	}
 	
@@ -89,7 +100,7 @@ public class BadConfigValueEvent extends Event {
 	/**
 	 * @param valueToInsert the corrected value to insert. Overwrites the bad value.
 	 */
-	protected void setValue(Object valueToInsert) {
+	protected void setValue(T valueToInsert) {
 		this.valueToInsert = valueToInsert;
 	}
 
@@ -102,7 +113,7 @@ public class BadConfigValueEvent extends Event {
 	 * If you do not want this behavior, modify {@link ConfigEntry#valueCorrectors()} to not
 	 * have the mod ID "wilderforge".
 	 */
-	public static class ConfigValueOutOfRangeEvent extends BadConfigValueEvent {
+	public static class ConfigValueOutOfRangeEvent<T> extends BadConfigValueEvent<T> {
 
 		/**
 		 * The valid range that the configuration value must fall within.
@@ -118,8 +129,8 @@ public class BadConfigValueEvent extends Event {
 		 * @param valueToInsert	The out-of-range value attempted to be set.
 		 * @param range			The acceptable range for the configuration value.
 		 */
-		public ConfigValueOutOfRangeEvent(Config configAnnotation, Object configuration, Field fieldToSet, Number valueToInsert, Range range) {
-			super(configAnnotation, configuration, fieldToSet, valueToInsert);
+		public ConfigValueOutOfRangeEvent(Config configAnnotation, ConfigEntry entry, Object configuration, Field fieldToSet, T valueToInsert, Range range) {
+			super(configAnnotation, entry, configuration, fieldToSet, valueToInsert);
 			this.range = range;
 		}
 		
@@ -129,7 +140,7 @@ public class BadConfigValueEvent extends Event {
 		}
 		
 		@Override
-		public void setValue(Object valueToInsert) {
+		public void setValue(T valueToInsert) {
 			super.setValue(valueToInsert);
 		}
 	}
@@ -137,6 +148,7 @@ public class BadConfigValueEvent extends Event {
 	/**
 	 * Represents an event triggered when a configuration value is of an incompatible type.
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static class ConfigValueOfIncompatibleTypeEvent extends BadConfigValueEvent {
 
 		/**
@@ -147,8 +159,8 @@ public class BadConfigValueEvent extends Event {
 		 * @param fieldToSet	   The field that was attempted to be set.
 		 * @param valueToInsert	The value with an incompatible type attempted to be set.
 		 */
-		public ConfigValueOfIncompatibleTypeEvent(Config configAnnotation, Object configuration, Field fieldToSet, Object valueToInsert) {
-			super(configAnnotation, configuration, fieldToSet, valueToInsert);
+		public ConfigValueOfIncompatibleTypeEvent(Config configAnnotation, ConfigEntry entry, Object configuration, Field fieldToSet, Object valueToInsert) {
+			super(configAnnotation, entry, configuration, fieldToSet, valueToInsert);
 		}
 		
 		@Override
@@ -160,6 +172,7 @@ public class BadConfigValueEvent extends Event {
 	/**
 	 * Represents an event triggered when a required configuration value is missing.
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static class MissingConfigValueEvent extends BadConfigValueEvent {
 
 		/**
@@ -169,8 +182,8 @@ public class BadConfigValueEvent extends Event {
 		 * @param configuration	The configuration object where the field exists.
 		 * @param fieldToSet	   The field that was missing a required value.
 		 */
-		public MissingConfigValueEvent(Config configAnnotation, Object configuration, Field fieldToSet) {
-			super(configAnnotation, configuration, fieldToSet, null);
+		public MissingConfigValueEvent(Config configAnnotation, ConfigEntry entry, Object configuration, Field fieldToSet) {
+			super(configAnnotation, entry, configuration, fieldToSet, null);
 		}
 		
 		@Override
@@ -185,6 +198,7 @@ public class BadConfigValueEvent extends Event {
 	 * 
 	 * If this problem is not corrected, a warning message is logged instead of throwing a ConfigurationError.
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static class MissingConfigFieldEvent extends BadConfigValueEvent {
 
 		/**
@@ -200,8 +214,8 @@ public class BadConfigValueEvent extends Event {
 		 * @param valueName		The name of the value in the configuration file.
 		 * @param valueToInsert	The value to be inserted into the configuration.
 		 */
-		public MissingConfigFieldEvent(Config configAnnotation, Object configuration, String valueName, Object valueToInsert) {
-			super(configAnnotation, configuration, null, valueToInsert);
+		public MissingConfigFieldEvent(Config configAnnotation, ConfigEntry entry, Object configuration, String valueName, Object valueToInsert) {
+			super(configAnnotation, entry, configuration, null, valueToInsert);
 			this.valueName = valueName;
 		}
 

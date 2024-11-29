@@ -9,7 +9,9 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,6 +27,8 @@ import com.badlogic.gdx.utils.SerializationException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSerializer;
+import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
@@ -154,7 +158,6 @@ public class Configuration {
 	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
 		Set<Field> fields = new LinkedHashSet<>();
 		fields.addAll(List.of(configClass.getDeclaredFields()));
-		ConfigStatus ret;
 		Path configFile = getConfigFile(coremod);
 		JsonValue values = null;
 		if(Files.exists(configFile)) {
@@ -182,6 +185,10 @@ public class Configuration {
 			Class<?> type = field.getType();
 			boolean isPrimitiveType = field.getType().isPrimitive() && !TypeUtil.isVoid(type);
 			ConfigEntry configEntry = field.getAnnotation(ConfigEntry.class);
+			if(configEntry == null) {
+				configEntry = new DefaultConfigEntry(config, field);
+			}
+			boolean strict = configEntry.strict();
 			Range uRange = field.getAnnotation(Range.class);
 			IntegralRange iRange;
 			DecimalRange dRange;
@@ -199,14 +206,7 @@ public class Configuration {
 			LinkedHashSet<String> valueCorrectors = new LinkedHashSet<>();
 			valueCorrectors.add(coremod.modId);
 			{
-				String[] definedCorrectors = {"wilderforge"};
-				
-				if(configEntry != null) {
-					if(!configEntry.name().isBlank()) {
-						name = configEntry.name();
-					}
-					definedCorrectors = configEntry.valueCorrectors();
-				}
+				String[] definedCorrectors = configEntry.valueCorrectors();
 				valueCorrectors.addAll(List.of(definedCorrectors));
 			}
 			
@@ -215,7 +215,7 @@ public class Configuration {
 			JsonValue jsonValue = values.get(name);
 			
 			if(jsonValue == null && nullable == null) {
-				MissingConfigValueEvent e = new MissingConfigValueEvent(config, configurationObj, field);
+				MissingConfigValueEvent e = new MissingConfigValueEvent(config, configEntry, configurationObj, field);
 				WilderForge.MAIN_BUS.fire(e);
 				value = e.getValue();
 			}
@@ -252,7 +252,7 @@ public class Configuration {
 						if(value != null) {
 							Double dval = ((Number)value).doubleValue();
 							if(dRange.contains(dval)) {
-								ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, dval, dRange);
+								ConfigValueOutOfRangeEvent<Double> e = new ConfigValueOutOfRangeEvent<>(config, configEntry, configurationObj, field, dval, dRange);
 								WilderForge.MAIN_BUS.fire(e);
 								dval = ((Number)e.getValue()).doubleValue();
 							}
@@ -296,8 +296,9 @@ public class Configuration {
 								ival = ((Number)value).longValue();
 							}
 							if(iRange.contains(ival)) {
-								ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, ival, iRange);
+								ConfigValueOutOfRangeEvent<Long> e = new ConfigValueOutOfRangeEvent<>(config, configEntry, configurationObj, field, ival, iRange);
 								WilderForge.MAIN_BUS.fire(e);
+								ival = e.getValue();
 								ival = ((Number)e.getValue()).longValue();
 							}
 						}
@@ -307,7 +308,7 @@ public class Configuration {
 							value = null;
 						}
 						else {
-							MissingConfigValueEvent e = new MissingConfigValueEvent(config, configurationObj, field);
+							MissingConfigValueEvent e = new MissingConfigValueEvent(config, configEntry, configurationObj, field);
 							WilderForge.MAIN_BUS.fire(e);
 							value = e.getValue();
 						}
@@ -324,7 +325,7 @@ public class Configuration {
 			}
 			
 			if(previousConfig != null) {
-				if(!Objects.equals(prevValue,  value)) {
+				if((!strict && !Objects.equals(prevValue,  value)) || (strict && (prevValue != value))) {
 					changed = true;
 					if(restart != null) {
 						restartInfo.process(restart);
@@ -401,6 +402,16 @@ public class Configuration {
 		
 	}
 	
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void handleOutOfRangeValues(ConfigValueOutOfRangeEvent e) {
+		ConfigEntry entry = e.getConfigEntry();
+		HashSet<String> valueCorrectors = new HashSet<String>();
+		valueCorrectors.addAll(Arrays.asList(entry.valueCorrectors()));
+		if(valueCorrectors.contains("wilderforge")) {
+			
+		}
+	}
+	
 	@InternalOnly
 	public static Function<LegacyViewDependencies, ? extends PopUp> getCustomConfigPopUp(CoremodInfo c) {
 		return customConfigurations.get(c);
@@ -415,6 +426,14 @@ public class Configuration {
 			return Cast.from(c);
 		}
 		return Coremods.getCoremod(c.modid());
+	}
+	
+	public static ConfigEntry getConfigEntry(Config config, Field f) {
+		ConfigEntry entry = f.getAnnotation(ConfigEntry.class);
+		if(entry == null) {
+			entry = new DefaultConfigEntry(config, f);
+		}
+		return entry;
 	}
 	
 	private static JsonValue readConfigFile(Path path) throws IOException {
@@ -453,6 +472,38 @@ public class Configuration {
 		@Override
 		public boolean prompt() {
 			return restart != null && restart.prompt();
+		}
+		
+	}
+	
+	public static final class DefaultConfigEntry implements ConfigEntry {
+
+		private final String name;
+		private final String[] valueCorrectors;
+		
+		public DefaultConfigEntry(Config config, Field f) {
+			this.name = f.getName();
+			this.valueCorrectors = new String[] {config.modid(), WilderForge.modid};
+		}
+		
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return null;
+		}
+
+		@Override
+		public String name() {
+			return name;
+		}
+
+		@Override
+		public String[] valueCorrectors() {
+			return valueCorrectors;
+		}
+
+		@Override
+		public boolean strict() {
+			return false;
 		}
 		
 	}

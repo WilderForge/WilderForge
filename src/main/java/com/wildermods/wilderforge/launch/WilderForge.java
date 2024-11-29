@@ -36,12 +36,14 @@ import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.CustomValue.CvType;
 
-@Mod(modid = "wilderforge", version = "@WILDERFORGE_VERSION@")
+@Mod(modid = WilderForge.modid, version = "@WILDERFORGE_VERSION@")
 @CustomConfig(modid = "wildermyth", popup = WildermythOptions.class)
 public final class WilderForge {
 	
 	@InternalOnly
 	public static final Logger LOGGER = new Logger("WilderForge");
+	
+	public static final String modid = "wilderforge";
 	
 	@InternalOnly
 	private static ReflectionsHelper reflectionsHelper;

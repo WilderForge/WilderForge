@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.NiceTextField;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
+import com.wildermods.wilderforge.api.modLoadingV1.config.EntryValue;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIEntryContext;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.Logger;
@@ -21,7 +22,7 @@ import com.worldwalkergames.ui.AutoSwapDrawable;
 import com.worldwalkergames.ui.Dropdown;
 import com.worldwalkergames.ui.FancyImageButton;
 
-public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>> {
+public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicate<ConfigurationUIEntryContext, WFConfigEntryTextBox<T>>, EntryValue<T> {
 
 	private static final Logger LOGGER = new Logger(WFConfigEntryTextBox.class);
 	private final ConfigurationUIEntryContext context;
@@ -148,6 +149,11 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 	public WFConfigEntryTextBox<T> setStringConverter(BiFunction<ConfigurationUIEntryContext, T, String> stringConverter) {
 		this.stringConverter = stringConverter;
 		return this;
+	}
+	
+	@Override
+	public BiFunction<ConfigurationUIEntryContext, T, String> getStringConverter() {
+		return stringConverter;
 	}
 	
 	public WFConfigEntryTextBox<T> setUndoButton(FancyImageButton<Runnable> undoButton) {

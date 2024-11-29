@@ -21,6 +21,7 @@ import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
@@ -79,7 +80,7 @@ public class ModConfigurationPopup extends PopUp {
 			throw new AssertionError();
 		}
 		
-		context = new ConfigurationUIContext(this, configuration);
+		context = new ConfigurationUIContext(coremod, this, configuration);
 		builder = getBuilder(configuration.getClass().getAnnotation(CustomBuilder.class), context);
 		
 		configFields.addAll(List.of(configuration.getClass().getDeclaredFields()));
@@ -139,9 +140,10 @@ public class ModConfigurationPopup extends PopUp {
 		Table fieldTable = new Table().padLeft(padLeft).padRight(padRight);
 		
 		for(Field f : configFields) {
+			ConfigEntry configEntry = Configuration.getConfigEntry(coremod, f);
 			Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> builderObtainer = getBuilder(f.getAnnotation(CustomBuilder.class), context);
 			ModConfigurationEntryBuilder builder = builderObtainer.apply(context);
-			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(this, fieldTable, f, configuration, defaultConfiguration);
+			ConfigurationUIEntryContext entryContext = new ConfigurationUIEntryContext(coremod, configEntry, this, fieldTable, f, configuration, defaultConfiguration);
 			values.putIfAbsent(entryContext, entryContext);
 			entryContext = values.get(entryContext);
 			entryContext.fieldTable = fieldTable;

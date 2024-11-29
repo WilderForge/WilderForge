@@ -9,14 +9,12 @@ import java.util.function.BiPredicate;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.RuntimeSkin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
 
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step;
@@ -39,31 +37,36 @@ import com.wildermods.wilderforge.launch.ui.ModConfigurationPopup;
 import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryTextBox;
 
 import com.worldwalkergames.legacy.context.ClientDataContext;
+import com.worldwalkergames.legacy.context.GameStrings;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies.ScreenInfo;
 import com.worldwalkergames.legacy.controller.NiceSlider;
-import com.worldwalkergames.ui.AutoSwapDrawable;
 import com.worldwalkergames.ui.FancyImageButton;
 import com.worldwalkergames.ui.FancySliderStyle;
 import com.worldwalkergames.ui.NiceButtonBase.ButtonStyle;
 import com.worldwalkergames.ui.NiceButtonBase.FancyButtonStyle;
 import com.worldwalkergames.ui.NiceLabel;
+import com.worldwalkergames.ui.tooltips.TooltipManager;
 
 @SuppressWarnings("rawtypes")
 public class ModConfigurationEntryBuilder {
-	
 	protected final Logger LOGGER;
 	protected final ConfigurationUIContext context;
 	protected final ModConfigurationPopup popup;
 	protected final LegacyViewDependencies dependencies;
+	protected final GameStrings gameStrings;
+	protected final TooltipManager tooltipManager;
 	
 	public ModConfigurationEntryBuilder(ConfigurationUIContext context) {
 		this.LOGGER = new Logger(toString());
 		this.context = context;
 		this.popup = context.popup;
 		this.dependencies = context.popup.getDependencies();
+		this.gameStrings = dependencies.gameStrings;
+		this.tooltipManager = dependencies.tooltipManager;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void buildValueSpan(ConfigurationUIEntryContext context) {
 		buildNameLabel(context);
 		
@@ -71,6 +74,26 @@ public class ModConfigurationEntryBuilder {
 			Cell inputField = buildInputField(context);
 			FancyImageButton<Runnable> undoButton = buildUndo(context, inputField.getActor());
 			FancyImageButton<Runnable> resetButton = buildReset(context, inputField.getActor());
+			String undoLocalization = "wilderforge.ui.coremods.configure.entry.button.undo.tooltip";
+			String resetLocalization = "wilderforge.ui.coremods.configure.entry.button.reset.tooltip";
+			
+			if(!(inputField.getActor() instanceof EntryValue)) {
+				undoLocalization = undoLocalization + ".fallback";
+				resetLocalization = resetLocalization + ".fallback";
+				tooltipManager.autoTooltip(undoButton, gameStrings.ui(undoLocalization));
+				tooltipManager.autoTooltip(resetButton, gameStrings.ui(resetLocalization));
+			}
+			else {
+				EntryValue entryValue = (EntryValue) inputField.getActor();
+				try {
+					tooltipManager.autoTooltip(undoButton, gameStrings.ui(undoLocalization, entryValue.convertToString(context, context.oldVal)));
+					tooltipManager.autoTooltip(resetButton, gameStrings.ui(resetLocalization, entryValue.convertToString(context, context.defaultVal)));
+				}
+				catch(Throwable t) {
+					//The errors should have already been thrown way before now.
+					throw new AssertionError(t);
+				}
+			}
 			applyInputField(context, inputField, undoButton, resetButton);
 		}
 		catch(ConfigElementException e) {
@@ -85,15 +108,6 @@ public class ModConfigurationEntryBuilder {
 		final NiceLabel nameLabel = new NiceLabel(name, dependencies.skin, "darkInteractive");
 		buildTooltip(nameLabel, context);
 		return fieldTable.add(nameLabel).align(Align.right);
-	}
-	
-	public Cell buildHorizontalRule(ConfigurationUIEntryContext context) {
-		final Table fieldTable = context.fieldTable;
-		final AutoSwapDrawable dividerDrawer = new AutoSwapDrawable(dependencies.skin.getSisterSkin(ClientDataContext.Skins.SCALE_UI));
-		dividerDrawer.addOption("dividerBar");
-		dividerDrawer.addOption("dividerBar2x");
-		final Image image = new Image(dividerDrawer, Scaling.stretch);
-		return fieldTable.add(image).expandX().fillX();
 	}
 	
 	public Cell buildInputField(ConfigurationUIEntryContext context) throws ConfigElementException {
@@ -224,7 +238,6 @@ public class ModConfigurationEntryBuilder {
 			resetButton.getUserData().run();
 		});
 		context.fieldTable.add(resetButton).expandY().fillY().width(Value.percentWidth(1f / 16f, context.fieldTable));
-		System.out.println("RESET BUTTON IS DISABLED:" + context.isDefault());
 		resetButton.setDisabled(context.isDefault());
 		return resetButton;
 
@@ -670,9 +683,7 @@ public class ModConfigurationEntryBuilder {
 					
 				});
 				
-				LOGGER.log("Min range: " + range.minDecimal());
-				LOGGER.log("Current value: " + slider.getValue());
-				LOGGER.log("Max range: " + range.maxDecimal());
+
 				return fieldTable.add(slider).expandX().fillX();
 			}
 			throw new AssertionError("Unreachable code reached");
@@ -716,7 +727,7 @@ public class ModConfigurationEntryBuilder {
 			if(!s.toString().isBlank()) {
 				s.append("\n\n");
 			}
-			s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.range.tooltip", Ranges.getMinimum(range).toString(), Ranges.getMaximum(range).toString()));
+			s.append(gameStrings.ui("wilderforge.ui.coremods.configure.range.tooltip", Ranges.getMinimum(range).toString(), Ranges.getMaximum(range).toString()));
 		}
 		
 		Nullable nullable = field.getAnnotation(Nullable.class);
@@ -724,7 +735,14 @@ public class ModConfigurationEntryBuilder {
 			if(!s.toString().isBlank()) {
 				s.append("\n\n");
 			}
-			s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.nullable.tooltip"));
+			s.append(gameStrings.ui("wilderforge.ui.coremods.configure.nullable.tooltip"));
+		}
+		
+		if(TypeUtil.isBoolean(field)) {
+			if(!s.toString().isBlank()) {
+				s.append("\n\n");
+			}
+			s.append(gameStrings.ui("wilderforge.ui.coremods.configure.boolean.tooltip"));
 		}
 		
 		Restart restart = field.getAnnotation(Restart.class);
@@ -736,28 +754,30 @@ public class ModConfigurationEntryBuilder {
 			
 			if(restart.immediate()) {
 				if(!restart.prompt()) {
-					s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.immediate"));
+					s.append(gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.immediate"));
 				}
 				else {
-					s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.hard"));
+					s.append(gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.hard"));
 				}
 			}
 			else {
-				s.append(dependencies.gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.soft"));
+				s.append(gameStrings.ui("wilderforge.ui.coremods.configure.restart.tooltip.soft"));
 			}
 		}
 		
 		String tooltip = s.toString();
 		if(!tooltip.isBlank()) {
-			dependencies.tooltipManager.autoTooltip(actor, tooltip);
+			tooltipManager.autoTooltip(actor, tooltip);
 		}
 	}
 	
 	public static class ConfigurationUIContext {
+		public final Config config;
 		public final ModConfigurationPopup popup;
 		public final Object configurationObj;
 		
-		public ConfigurationUIContext(ModConfigurationPopup popup, Object configurationObj) {
+		public ConfigurationUIContext(Config config, ModConfigurationPopup popup, Object configurationObj) {
+			this.config = config;
 			this.popup = popup;
 			this.configurationObj = configurationObj;
 		}
@@ -766,6 +786,7 @@ public class ModConfigurationEntryBuilder {
 	
 	public static class ConfigurationUIEntryContext extends ConfigurationUIContext implements ConfigurationFieldContext {
 		
+		public ConfigEntry entry;
 		public Table fieldTable;
 		public final Field field;
 		protected final Object defaultVal;
@@ -773,23 +794,22 @@ public class ModConfigurationEntryBuilder {
 		protected Object newVal;
 		public final LocalizationContext localization;
 		
-		public ConfigurationUIEntryContext(ModConfigurationPopup popup, Table fieldTable, Field f, Object configurationObj, Object defaultObj) {
-			super(popup, configurationObj);
+		public ConfigurationUIEntryContext(Config config, ConfigEntry entry, ModConfigurationPopup popup, Table fieldTable, Field f, Object configurationObj, Object defaultObj) {
+			super(config, popup, configurationObj);
+			this.entry = entry;
 			this.fieldTable = fieldTable;
 			this.field = f;
 			this.localization = new LocalizationContext(this);
 			try {
 				this.defaultVal = field.get(defaultObj);
 				this.oldVal = field.get(configurationObj);
-				System.out.println("Default value is " + defaultVal);
-				System.out.println("Old value is " + oldVal);
 			}
 			catch(IllegalArgumentException | IllegalAccessException e) {
 				throw new ConfigurationError("Could not get field" + field.getName(), e);
 			}
 			this.newVal = oldVal;
 		}
-		
+
 		public Object obtainVal() {
 			return getNewVal(Object.class);
 		}
@@ -822,7 +842,6 @@ public class ModConfigurationEntryBuilder {
 			ConfigEntry entry = field.getAnnotation(ConfigEntry.class);
 			if(entry == null || !entry.strict()) {
 				boolean equals = !Objects.equals(oldVal, newVal);
-				System.out.println("Changed: " + equals + " - " + oldVal + " -> " + newVal);
 				return !Objects.equals(oldVal, newVal);
 			}
 			return oldVal == newVal;
@@ -832,7 +851,6 @@ public class ModConfigurationEntryBuilder {
 			ConfigEntry entry = field.getAnnotation(ConfigEntry.class);
 			if(entry == null || !entry.strict()) {
 				boolean equals = Objects.equals(defaultVal, newVal);
-				System.out.println("Is Default: " + equals + " - " + defaultVal + " -> " + newVal);
 				return Objects.equals(defaultVal, newVal);
 			}
 			return defaultVal == newVal;

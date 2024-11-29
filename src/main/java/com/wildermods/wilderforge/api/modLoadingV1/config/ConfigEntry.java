@@ -19,9 +19,10 @@ import com.wildermods.wilderforge.launch.WilderForge;
 
 /**
  * The {@code ConfigEntry} annotation is used to designate a field in a configuration
- * class as a configuration entry. This annotation allows for customization of 
- * how configuration entries are handled, named, and displayed in the GUI, 
- * as well as the application of any constraints on the configuration values.
+ * class as a configuration entry. The other 
+ * annotations defined herein allow for customization of how configuration entries are
+ * handled, named, and displayed in the GUI, as well as the application of any 
+ * constraints on the configuration values.
  * 
  * If the annotated field is incorrectly defined, a {@link ConfigurationError} will be thrown
  * when attempting to process the {@link Config}.
@@ -35,8 +36,8 @@ import com.wildermods.wilderforge.launch.WilderForge;
  * 
  * <p>WilderForge processes value correction at two priorities, first at {@link EventPriority#HIGH}
  * then at {@link EventPriority#HIGHER}.
- * <p>If the value is still invalid when Wilderforge receives the event at {@link EventPriority#HIGH},
- * then it will attempt to correct the value if possible.
+ * <p>If the value is invalid when Wilderforge receives the event at {@link EventPriority#HIGH},
+ * then it will attempt to correct the value if it is in the {@link valueCorrectors()}.
  * <p>If the value is still invalid when Wilderforge recevies the event at {@link EventPriority#HIGHER},
  * then a {@link ConfigurationError} will occur.
  *
@@ -73,7 +74,7 @@ public @interface ConfigEntry {
      * The mod ID defined in the enclosing {@link Config} annotation is always a
      * valid value corrector, even if not supplied here.
      * 
-     * By default, the mod ID "wilderforge" is allowed to correct the value. To
+     * By default, wilderforge is allowed to correct the value. To
      * prevent this behavior, you may supply an empty array. 
      * 
      * If you want to add another value corrector while retaining the default 
@@ -82,11 +83,12 @@ public @interface ConfigEntry {
      * 
      * The mod that owns the configuration will be presented to configure the
      * value first, then value correctors are processed in the order supplied
-     * here.
+     * here. If you override this value, you should typically keep wilderforge
+     * as the last value in the array.
      *
      * @return An array of mod IDs permitted to correct the configuration value.
      */
-	public String[] valueCorrectors() default "wilderforge";
+	public String[] valueCorrectors() default WilderForge.modid;
 	
 	/**
 	 * Determines if the values is considered to be changed if the reference has
@@ -631,9 +633,13 @@ public @interface ConfigEntry {
 	 * <p>Use this annotation for configuration options that necessitate restarting the
 	 * application or system to take effect, ensuring the user is aware and can confirm the
 	 * restart if prompted.
+	 * 
+	 * @deprecated Not yet implemented, might be removed. Not yet considered API.
 	 */
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
+	@Deprecated
+	@InternalOnly
 	public static @interface Restart {
 		/**
 		 * Indicates whether the restart should be immediate when the field is changed,
