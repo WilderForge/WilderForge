@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import org.jetbrains.annotations.Nullable;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
-import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 
 /**
@@ -113,12 +113,12 @@ public class BadConfigValueEvent<T> extends Event {
 	 * If you do not want this behavior, modify {@link ConfigEntry#valueCorrectors()} to not
 	 * have the mod ID "wilderforge".
 	 */
-	public static class ConfigValueOutOfRangeEvent<T> extends BadConfigValueEvent<T> {
+	public static class ConfigValueOutOfRangeEvent extends BadConfigValueEvent<Number> {
 
 		/**
 		 * The valid range that the configuration value must fall within.
 		 */
-		private final Range range;
+		private final RangeInstance range;
 
 		/**
 		 * Constructs a new {@code ConfigValueOutOfRangeEvent}.
@@ -129,18 +129,18 @@ public class BadConfigValueEvent<T> extends Event {
 		 * @param valueToInsert	The out-of-range value attempted to be set.
 		 * @param range			The acceptable range for the configuration value.
 		 */
-		public ConfigValueOutOfRangeEvent(Config configAnnotation, ConfigEntry entry, Object configuration, Field fieldToSet, T valueToInsert, Range range) {
+		public ConfigValueOutOfRangeEvent(Config configAnnotation, ConfigEntry entry, Object configuration, Field fieldToSet, Number valueToInsert, RangeInstance range) {
 			super(configAnnotation, entry, configuration, fieldToSet, valueToInsert);
 			this.range = range;
 		}
 		
 		
-		public Range getRange() {
+		public RangeInstance getRange() {
 			return range;
 		}
 		
 		@Override
-		public void setValue(T valueToInsert) {
+		public void setValue(Number valueToInsert) {
 			super.setValue(valueToInsert);
 		}
 	}

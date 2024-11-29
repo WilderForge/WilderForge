@@ -190,6 +190,7 @@ public class ModConfigurationEntryBuilder {
 			};
 			undoButton.addListener(uiUpdater);
 			resetButton.addListener(uiUpdater);
+			box.update();
 		}
 		context.fieldTable.row();
 	}

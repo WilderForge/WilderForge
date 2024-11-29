@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.config.EntryValue;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIEntryContext;
-import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.worldwalkergames.legacy.context.ClientDataContext.Skins;
@@ -67,10 +66,8 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 		}
 		
 		private void update() {
-			WilderForge.LOGGER.log("Key event");
 			if(test(context, WFConfigEntryTextBox.this)) {
 				Object val = buildFromString(context, WFConfigEntryTextBox.this);
-				WilderForge.LOGGER.log("set value to " + val);
 				context.setNewVal(val);
 			}
 			
@@ -81,7 +78,6 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 				else {
 					undoButton.setDisabled(true);
 				}
-				System.out.println("UNDO DISABLED: " + undoButton.isDisabled());
 			}
 			
 			if(resetButton != null) {

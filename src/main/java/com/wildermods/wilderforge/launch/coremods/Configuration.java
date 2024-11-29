@@ -40,6 +40,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
@@ -155,7 +156,7 @@ public class Configuration {
 		}
 	}
 	
-	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
+	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws Exception {
 		Set<Field> fields = new LinkedHashSet<>();
 		fields.addAll(List.of(configClass.getDeclaredFields()));
 		Path configFile = getConfigFile(coremod);
@@ -189,6 +190,7 @@ public class Configuration {
 				configEntry = new DefaultConfigEntry(config, field);
 			}
 			boolean strict = configEntry.strict();
+			RangeInstance typeRange;
 			Range uRange = field.getAnnotation(Range.class);
 			IntegralRange iRange;
 			DecimalRange dRange;
@@ -232,74 +234,95 @@ public class Configuration {
 						value = jsonValue.asBoolean();
 						break;
 					case doubleValue:
-						
-						if(TypeUtil.isDouble(field)) {
-							value = jsonValue.asDouble();
-						}
-						else if(TypeUtil.isFloat(field)) {
-							value = jsonValue.asFloat();
-						}
-						
-						if(uRange == null) {
-							uRange = Ranges.getRangeOfType(type);
-						}
-						try {
-							dRange = new DecimalRange(uRange);
-						}
-						catch(Throwable t) {
-							throw new ConfigurationError("Invalid @Range", t);
-						}
-						if(value != null) {
-							Double dval = ((Number)value).doubleValue();
-							if(dRange.contains(dval)) {
-								ConfigValueOutOfRangeEvent<Double> e = new ConfigValueOutOfRangeEvent<>(config, configEntry, configurationObj, field, dval, dRange);
-								WilderForge.MAIN_BUS.fire(e);
-								dval = ((Number)e.getValue()).doubleValue();
+						{
+							typeRange = Ranges.getRangeOfType(type);
+							double rawVal = jsonValue.asDouble();
+							
+							if(TypeUtil.isDouble(field)) {
+								value = jsonValue.asDouble();
+							}
+							else if(TypeUtil.isFloat(field)) {
+								value = jsonValue.asFloat();
+							}
+							
+							if(uRange == null) {
+								uRange = typeRange;
+							}
+							try {
+								dRange = new DecimalRange(uRange);
+								if(!typeRange.contains(dRange.minDecimal())) {
+									throw new ConfigurationError("minDecimal definition (" + dRange.minDecimal() + ") is out of range for type " + type);
+								}
+								if(!typeRange.contains(dRange.maxDecimal())) {
+									throw new ConfigurationError("maxDecimal definition (" + dRange.maxDecimal() + ") is out of range for type " + type);
+								}
+							}
+							catch(Throwable t) {
+								throw new ConfigurationError("Invalid @Range for field " + field.getName(), t);
+							}
+							if(value != null) {
+								Double dval = ((Number)value).doubleValue();
+								if(!dRange.contains(rawVal)) {
+									ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configEntry, configurationObj, field, rawVal, dRange);
+									WilderForge.MAIN_BUS.fire(e);
+									dval = ((Number)e.getValue()).doubleValue();
+								}
+								value = dval;
 							}
 						}
 						break;
 					case longValue:
-						
-						if(TypeUtil.isLong(field)) {
-							value = jsonValue.asLong();
-						}
-						else if(TypeUtil.isInt(field)) {
-							value = jsonValue.asInt();
-						}
-						if(TypeUtil.isChar(field)) {
-							value = jsonValue.asChar();
-						}
-						else if(TypeUtil.isShort(field)) {
-							value = jsonValue.asShort();
-						}
-						else if(TypeUtil.isByte(field)) {
-							value = jsonValue.asByte();
-						}
-						
-						
-						if(uRange == null) {
-							uRange = Ranges.getRangeOfType(type);
-						}
-						try {
-							iRange = new IntegralRange(uRange);
-						}
-						catch(Throwable t) {
-							throw new ConfigurationError("Invalid @Range", t);
-						}
-						
-						if(value != null) {
-							Long ival;
+						{
+							typeRange = Ranges.getRangeOfType(type);
+							long rawVal = jsonValue.asLong();
+							
+							if(TypeUtil.isLong(field)) {
+								value = jsonValue.asLong();
+							}
+							else if(TypeUtil.isInt(field)) {
+								value = jsonValue.asInt();
+							}
 							if(TypeUtil.isChar(field)) {
-								ival = (long) ((Character)value).charValue();
+								value = jsonValue.asChar();
 							}
-							else {
-								ival = ((Number)value).longValue();
+							else if(TypeUtil.isShort(field)) {
+								value = jsonValue.asShort();
 							}
-							if(iRange.contains(ival)) {
-								ConfigValueOutOfRangeEvent<Long> e = new ConfigValueOutOfRangeEvent<>(config, configEntry, configurationObj, field, ival, iRange);
-								WilderForge.MAIN_BUS.fire(e);
-								ival = e.getValue();
-								ival = ((Number)e.getValue()).longValue();
+							else if(TypeUtil.isByte(field)) {
+								value = jsonValue.asByte();
+							}
+							
+							
+							if(uRange == null) {
+								uRange = typeRange;
+							}
+							try {
+								iRange = new IntegralRange(uRange);
+								if(!typeRange.contains(iRange.min())) {
+									throw new ConfigurationError("min definition (" + iRange.min() + ") is out of range for type " + type);
+								}
+								if(!typeRange.contains(iRange.max())) {
+									throw new ConfigurationError("max definition (" + iRange.max() + ") is out of range for type " + type);
+								}
+							}
+							catch(Throwable t) {
+								throw new ConfigurationError("Invalid @Range for field " + field.getName(), t);
+							}
+							
+							if(value != null) {
+								Long ival;
+								if(TypeUtil.isChar(field)) {
+									ival = (long) ((Character)value).charValue();
+								}
+								else {
+									ival = ((Number)value).longValue();
+								}
+								if(!iRange.contains(rawVal)) {
+									ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configEntry, configurationObj, field, rawVal, iRange);
+									WilderForge.MAIN_BUS.fire(e);
+									ival = ((Number)e.getValue()).longValue();
+								}
+								value = ival;
 							}
 						}
 						break;
@@ -333,11 +356,49 @@ public class Configuration {
 				}
 			}
 			
-			field.set(configurationObj, value);
+			if(TypeUtil.isIntegral(type)) {
+				setIntegralField(configurationObj, field, (long)value);
+			}
+			else if(TypeUtil.isDecimal(type)) {
+				setDecimalField(configurationObj, field, (double)value);
+			}
+			else {
+				field.set(configurationObj, value);
+			}
+			
 			LOGGER.log("Set " + field.getName() + " to " + value);
 		}
 		
 		return new ConfigStatus(changed, restartInfo);
+	}
+	
+	private static void setIntegralField(Object target, Field field, long value) throws Exception {
+
+        if (TypeUtil.isByte(field)) {
+            field.setByte(target, (byte) value);
+        } else if (TypeUtil.isShort(field)) {
+            field.setShort(target, (short) value);
+        } else if (TypeUtil.isInt(field)) {
+            field.setInt(target, (int) value);
+        } else if (TypeUtil.isChar(field)) {
+            field.setChar(target, (char) value); 
+        } else if (TypeUtil.isLong(field)) {
+            field.setLong(target, value);
+        } else {
+            throw new IllegalArgumentException("Field is not an integral type: " + field);
+        }
+    }
+	
+	private static void setDecimalField(Object target, Field field, double value) throws Exception {
+		if(TypeUtil.isFloat(field)) {
+			field.setFloat(target, (float)value);
+		}
+		else if(TypeUtil.isDouble(field)){
+			field.setDouble(target, value);
+		}
+		else {
+			throw new IllegalArgumentException("Field is not a decimal type: " + field);
+		}
 	}
 	
 	@InternalOnly

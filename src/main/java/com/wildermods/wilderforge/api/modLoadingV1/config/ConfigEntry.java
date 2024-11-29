@@ -6,9 +6,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
@@ -99,6 +104,36 @@ public @interface ConfigEntry {
 	 * {@code Objects.equals} should be used.
 	 */
 	public boolean strict() default false;
+	
+	public static final class ValueCorrectors {
+		
+		private LinkedHashSet<String> valueCorrectors = new LinkedHashSet<String>();
+		
+		private ValueCorrectors(ConfigEntry entry) {
+			valueCorrectors.addAll(List.of(entry.valueCorrectors()));
+		}
+		
+		public Set<String> getValueCorrectors() {
+			return Collections.unmodifiableSet(valueCorrectors);
+		}
+		
+		public boolean contains(String modid) {
+			return valueCorrectors.contains(modid);
+		}
+		
+		public boolean contains(Mod mod) {
+			return contains(mod.modid());
+		}
+		
+		public boolean contains(Config config) {
+			return contains(config.modid());
+		}
+		
+		public static ValueCorrectors of(ConfigEntry entry) {
+			return new ValueCorrectors(entry);
+		}
+		
+	}
 	
 	public static class GUI {
 		
@@ -282,7 +317,7 @@ public @interface ConfigEntry {
 			public static final DecimalRange SLIDER = new DecimalRange(-1000f, 1000f);
 			
 			@SuppressWarnings("rawtypes")
-			public static Range getRangeOfType(Class c) {
+			public static RangeInstance getRangeOfType(Class c) {
 				if(TypeUtil.isInt(c)) {
 					return INT;
 				}
@@ -309,6 +344,31 @@ public @interface ConfigEntry {
 			
 			public static Range getRangeOfType(Field f) {
 				return getRangeOfType(f.getType());
+			}
+			
+			public static Range getRange(Field f, Number min, Number max) {
+				if(TypeUtil.isIntegral(f)) {
+					return new IntegralRange(min.longValue(), max.longValue());
+				}
+				else if(TypeUtil.isDecimal(f)) {
+					return new DecimalRange(min.doubleValue(), max.doubleValue());
+				}
+				throw new IllegalArgumentException(f + "");
+			}
+			
+			public static Range getRange(Field f) {
+				Range range = f.getAnnotation(Range.class);
+				if(range == null) {
+					range = getRangeOfType(f);
+					return range;
+				}
+				if(TypeUtil.isIntegral(f)) {
+					return new IntegralRange(range.min(), range.max());
+				}
+				else if(TypeUtil.isDecimal(f)) {
+					return new DecimalRange(range.minDecimal(), range.maxDecimal());
+				}
+				throw new IllegalArgumentException(f + "");
 			}
 			
 			public static void validateBounds(Range range) {
@@ -361,7 +421,11 @@ public @interface ConfigEntry {
 			}
 		}
 		
-		public static final class DecimalRange implements Range {
+		public static interface RangeInstance extends Range {
+			public boolean contains(Number number);
+		}
+		
+		public static final class DecimalRange implements RangeInstance {
 			
 			private final Range parent;
 			
@@ -445,7 +509,7 @@ public @interface ConfigEntry {
 
 		}
 		
-		public static final class IntegralRange implements Range {
+		public static final class IntegralRange implements RangeInstance {
 
 			private final Range parent;
 			
@@ -528,6 +592,7 @@ public @interface ConfigEntry {
 			}
 			
 		}
+		
 	}
 	
 	public static @interface Step {
