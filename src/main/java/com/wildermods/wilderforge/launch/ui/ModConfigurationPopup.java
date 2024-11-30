@@ -147,7 +147,7 @@ public class ModConfigurationPopup extends PopUp {
 			values.putIfAbsent(entryContext, entryContext);
 			entryContext = values.get(entryContext);
 			entryContext.fieldTable = fieldTable;
-			builder.buildValueSpan(entryContext);
+			builder.delegateBuildValueSpan(entryContext);
 
 		}
 		

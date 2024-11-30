@@ -272,7 +272,6 @@ public final class WilderForge {
 			Field field = e.getFieldToSet();
 			try {
 				Object defaultConfig = Configuration.getDefaultConfig(e.getConfigAnnotation());
-				Object config = Configuration.getConfig(e.getConfigAnnotation());
 				if(defaultConfig == null) {
 					throw new AssertionError();
 				}

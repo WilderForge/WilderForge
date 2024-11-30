@@ -1,10 +1,12 @@
 package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -25,6 +27,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Localized;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Slider;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
@@ -66,11 +69,32 @@ public class ModConfigurationEntryBuilder {
 		this.tooltipManager = dependencies.tooltipManager;
 	}
 	
-	@SuppressWarnings("unchecked")
+	public final void delegateBuildValueSpan(ConfigurationUIEntryContext context) {
+		CustomBuilder builder = context.field.getAnnotation(CustomBuilder.class);
+		if(builder != null) {
+			try {
+				Class<Function<ConfigurationUIEntryContext, ? extends ModConfigurationEntryBuilder>> clazz = Cast.from(builder.value());
+				Constructor<Function<ConfigurationUIEntryContext, ? extends ModConfigurationEntryBuilder>> constructor = clazz.getDeclaredConstructor();
+				constructor.setAccessible(true);
+				Function<? extends ConfigurationUIContext, ? extends ModConfigurationEntryBuilder> func = constructor.newInstance();
+				ModConfigurationEntryBuilder customBuilder = func.apply(Cast.from(context));
+				customBuilder.buildValueSpan(context);
+			}
+			catch(Throwable t) {
+				LOGGER.catching(t);
+			}
+			return;
+		}
+		buildValueSpan(context);
+	}
+	
+	@SuppressWarnings({ "unchecked" })
 	public void buildValueSpan(ConfigurationUIEntryContext context) {
-		buildNameLabel(context);
-		
 		try {
+			
+			buildNameLabel(context);
+		
+
 			Cell inputField = buildInputField(context);
 			FancyImageButton<Runnable> undoButton = buildUndo(context, inputField.getActor());
 			FancyImageButton<Runnable> resetButton = buildReset(context, inputField.getActor());
