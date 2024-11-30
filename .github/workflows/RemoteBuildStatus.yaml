@@ -53,3 +53,4 @@ jobs:
           else
             echo "Approval validation failed - status: $status"
             exit 1;
+          fi
