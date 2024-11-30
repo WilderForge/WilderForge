@@ -13,8 +13,8 @@ jobs:
       (
         github.event.comment.user.login == 'Gamebuster19901' &&
         startsWith(github.event.review.body, 'approved') &&
-        github.event.issue.pull_request != null &&
-        github.event.issue.user.login == 'Gamebuster19901'
+        github.event.review.pull_request != null &&
+        github.event.review.user.login == 'Gamebuster19901'
       )
     steps:
       - name: Checkout code
