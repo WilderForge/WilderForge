@@ -1,0 +1,18 @@
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  approve_and_run:
+    if: github.event.review.state == 'approved' && github.event.review.user.login = 'Gamebuster19901'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Validate Commit SHA
+        run: |
+          if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.sha }}" ]; then
+            echo "Commit SHA does not match approved version. Exiting."
+            exit 1
+          fi
+      - name: Running
+        run: echo "Running approved workflow!"
