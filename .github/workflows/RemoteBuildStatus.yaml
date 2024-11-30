@@ -60,6 +60,6 @@ jobs:
           if [ "$conclusion" == "success" ]; then
             exit 0;
           else
-            echo "Approval validation failed - status: $status - conclusion: $concluion"
+            echo "Approval validation failed - status: $status - conclusion: $conclusion"
             exit 1;
           fi
