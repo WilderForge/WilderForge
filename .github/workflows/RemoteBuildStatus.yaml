@@ -10,18 +10,26 @@ jobs:
   checkApprovalJob:
     runs-on: ubuntu-latest
     steps:
-      - name: Set PR Status to Pending
-        id: set_pending_status
+      - name: Post Pending Status to Pull Request
+        id: post_pending_status
         run: |
-          PR_URL=$(echo "${{ github.event.workflow_run.pull_requests }}" | jq -r '.[0].url')
-          HEAD_SHA=$(echo "${{ github.event.workflow_run.head_sha }}")
+          echo "Checking for associated pull request..."
+          PR_JSON='${{ toJson(github.event.workflow_run.pull_requests) }}'
 
-          if [ -z "$PR_URL" ] || [ "$PR_URL" == "null" ]; then
+          if [ "$PR_JSON" == "[]" ]; then
             echo "No pull request associated with this workflow run. Exiting."
             exit 1
           fi
 
-          # Post pending status to the pull request commit
+          PR_URL=$(echo "$PR_JSON" | jq -r '.[0].url')
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+
+          if [ -z "$PR_URL" ] || [ "$PR_URL" == "null" ]; then
+            echo "No pull request URL found. Exiting."
+            exit 1
+          fi
+
+          echo "Posting pending status to the commit..."
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
@@ -84,31 +92,3 @@ jobs:
             echo "Approval validation failed - status: $status - conclusion: $conclusion"
             exit 1;
           fi
-      - name: Update PR Status
-        if: ${{ always() }} # Always run to ensure a status is set even on failure
-        run: |
-          PR_URL=$(echo "${{ github.event.workflow_run.pull_requests }}" | jq -r '.[0].url')
-          HEAD_SHA=$(echo "${{ github.event.workflow_run.head_sha }}")
-
-          if [ -z "$PR_URL" ] || [ "$PR_URL" == "null" ]; then
-            echo "No pull request associated with this workflow run. Exiting."
-            exit 1
-          fi
-
-          STATUS="in_progress"
-          if [ "${{ steps.wait_for_validation.outputs.conclusion }}" == "success" ]; then
-            STATUS="success"
-          elif [ "${{ steps.wait_for_validation.outputs.conclusion }}" == "failure" ]; then
-            STATUS="failure"
-          fi
-
-          # Post status to the pull request commit
-          curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"state\": \"$STATUS\",
-              \"description\": \"Remote Build Status workflow completed.\",
-              \"context\": \"Remote Build Status\"
-            }" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/$HEAD_SHA"
