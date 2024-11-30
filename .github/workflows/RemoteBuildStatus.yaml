@@ -18,6 +18,9 @@ jobs:
           # Define the API URL to get workflow run status
           WORKFLOW_RUN_URL="https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
 
+          max_attempts=60
+          attempt=0
+
           # Loop to check the status of the workflow run
           while true; do
             # Make an API request to get the status of the workflow run
@@ -30,8 +33,14 @@ jobs:
             if [[ "$status" == "completed" ]]; then
               echo "Validate Approval workflow completed with conclusion: $conclusion"
               break
+            elif [[ $attempt -ge $max_attempts ]]; then
+              echo "Reached maximum number of attempts ($max_attempts). Exiting."
+              status="timed_out"
+              conclusion="failure"
+              break
             else
               echo "Validate Approval workflow is still in progress..."
+              echo "Attempt $attempt/$max_attempts"
               echo "status: $status"
               echo "conclusion: $conclusion"
               sleep 10  # Sleep for 10 seconds and retry
