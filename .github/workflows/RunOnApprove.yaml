@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR's head branch
       - name: Validate Commit SHA
         run: |
           if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.sha }}" ]; then
