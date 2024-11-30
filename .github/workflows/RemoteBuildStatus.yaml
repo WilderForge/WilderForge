@@ -10,11 +10,30 @@ jobs:
   checkApprovalJob:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Completed
+      - name: Wait for Validation to complete
+        run: |
+          # Polling for completion of "Validate Approval"
+          echo "Waiting for Validate Approval workflow to complete..."
+
+          # Loop to check the status
+          while true; do
+            # Get the status of the workflow run
+            status=${{ github.event.workflow_run.status }}
+            conclusion=${{ github.event.workflow_run.conclusion }}
+
+            if [[ "$status" == "completed" ]]; then
+              echo "Validate Approval workflow completed with conclusion: $conclusion"
+              break
+            else
+              echo "Validate Approval workflow is still in progress..."
+              sleep 10  # Sleep for 10 seconds and retry
+            fi
+          done
+      - name: Checking Validation Job
         run: |
           status=${{ github.event.workflow_run.conclusion }}
-
-          echo "Validate Approval Workflow Status: $status"
+          conclusion=${{ github.event.workflow_run.conclusion }}
+          while true; 
 
           if ["$status" == "success"]; then
             exit 0;
