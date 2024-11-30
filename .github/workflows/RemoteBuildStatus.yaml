@@ -9,15 +9,15 @@ on:
 jobs:
   checkApprovalJob:
     runs-on: ubuntu-latest
-    outputs:
-      -name: "Check Completed"
-      run: |
-        status=${{ github.event.workflow_run.conclusion }}
+    steps:
+      - name: Check Completed
+        run: |
+          status=${{ github.event.workflow_run.conclusion }}
 
-        echo "Validate Approval Workflow Status: $status"
+          echo "Validate Approval Workflow Status: $status"
 
-        if ["$status" == "success"]; then
-          exit 0;
-        else
-          echo "Approval validation failed - status: $status"
-          exit 1;
+          if ["$status" == "success"]; then
+            exit 0;
+          else
+            echo "Approval validation failed - status: $status"
+            exit 1;
