@@ -45,12 +45,12 @@ jobs:
           status=${{ steps.wait_for_validation.outputs.status }}
           conclusion=${{ steps.wait_for_validation.outputs.conclusion }}
 
-          echo "Validate Approval Workflow Status: $status"
+          echo "Status: $status"
           echo "Conclusion: $conclusion"
 
           if [ "$conclusion" == "success" ]; then
             exit 0;
           else
-            echo "Approval validation failed - status: $status"
+            echo "Approval validation failed - status: $status - conclusion: $concluion"
             exit 1;
           fi
