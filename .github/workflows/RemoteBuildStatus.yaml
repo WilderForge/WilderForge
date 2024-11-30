@@ -96,3 +96,29 @@ jobs:
             echo "Approval validation failed - status: $status - conclusion: $conclusion"
             exit 1;
           fi
+      - name: Post Final Status to Pull Request
+        if: always()
+        run: |
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Determine the final state
+          if [ "${{ steps.check_validation.conclusion }}" == "success" ]; then
+            final_state="success"
+            description="Remote Build Status completed successfully."
+          else
+            final_state="failure"
+            description="Remote Build Status failed."
+          fi
+
+          # Post the final status to the pull request commit
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$final_state\",
+              \"description\": \"$description\",
+              \"context\": \"Remote Build Status\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$HEAD_SHA"
