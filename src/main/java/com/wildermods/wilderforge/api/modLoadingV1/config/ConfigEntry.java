@@ -1,20 +1,33 @@
 package com.wildermods.wilderforge.api.modLoadingV1.config;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
+import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
+import com.wildermods.wilderforge.launch.exception.ConfigurationError.InvalidRangeError;
+import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 
 /**
  * The {@code ConfigEntry} annotation is used to designate a field in a configuration
- * class as a configuration entry. This annotation allows for customization of 
- * how configuration entries are handled, named, and displayed in the GUI, 
- * as well as the application of any constraints on the configuration values.
+ * class as a configuration entry. The other 
+ * annotations defined herein allow for customization of how configuration entries are
+ * handled, named, and displayed in the GUI, as well as the application of any 
+ * constraints on the configuration values.
  * 
  * If the annotated field is incorrectly defined, a {@link ConfigurationError} will be thrown
  * when attempting to process the {@link Config}.
@@ -28,8 +41,8 @@ import com.wildermods.wilderforge.launch.WilderForge;
  * 
  * <p>WilderForge processes value correction at two priorities, first at {@link EventPriority#HIGH}
  * then at {@link EventPriority#HIGHER}.
- * <p>If the value is still invalid when Wilderforge receives the event at {@link EventPriority#HIGH},
- * then it will attempt to correct the value if possible.
+ * <p>If the value is invalid when Wilderforge receives the event at {@link EventPriority#HIGH},
+ * then it will attempt to correct the value if it is in the {@link valueCorrectors()}.
  * <p>If the value is still invalid when Wilderforge recevies the event at {@link EventPriority#HIGHER},
  * then a {@link ConfigurationError} will occur.
  *
@@ -38,7 +51,8 @@ import com.wildermods.wilderforge.launch.WilderForge;
  * provided in the {@link #valueCorrectors()} method. It is a violation of the 
  * specification for any mod not listed as a value corrector to attempt to 
  * modify the configuration value. This specification may be enforced via
- * relevant language constructs in the future.
+ * relevant language constructs in the future. Enforcement of this specification
+ * will not be considered a breaking change.
  *
  * @see Config
  * @see BadConfigValueEvent
@@ -65,7 +79,7 @@ public @interface ConfigEntry {
      * The mod ID defined in the enclosing {@link Config} annotation is always a
      * valid value corrector, even if not supplied here.
      * 
-     * By default, the mod ID "wilderforge" is allowed to correct the value. To
+     * By default, wilderforge is allowed to correct the value. To
      * prevent this behavior, you may supply an empty array. 
      * 
      * If you want to add another value corrector while retaining the default 
@@ -74,11 +88,52 @@ public @interface ConfigEntry {
      * 
      * The mod that owns the configuration will be presented to configure the
      * value first, then value correctors are processed in the order supplied
-     * here.
+     * here. If you override this value, you should typically keep wilderforge
+     * as the last value in the array.
      *
      * @return An array of mod IDs permitted to correct the configuration value.
      */
-	public String[] valueCorrectors() default "wilderforge";
+	public String[] valueCorrectors() default WilderForge.modid;
+	
+	/**
+	 * Determines if the values is considered to be changed if the reference has
+	 * changed, or the value has changed.
+	 * Defaults to {@code false}
+	 * 
+	 * @return {@code true} if {@code == }should be used to compare, or {@code false} if
+	 * {@code Objects.equals} should be used.
+	 */
+	public boolean strict() default false;
+	
+	public static final class ValueCorrectors {
+		
+		private LinkedHashSet<String> valueCorrectors = new LinkedHashSet<String>();
+		
+		private ValueCorrectors(ConfigEntry entry) {
+			valueCorrectors.addAll(List.of(entry.valueCorrectors()));
+		}
+		
+		public Set<String> getValueCorrectors() {
+			return Collections.unmodifiableSet(valueCorrectors);
+		}
+		
+		public boolean contains(String modid) {
+			return valueCorrectors.contains(modid);
+		}
+		
+		public boolean contains(Mod mod) {
+			return contains(mod.modid());
+		}
+		
+		public boolean contains(Config config) {
+			return contains(config.modid());
+		}
+		
+		public static ValueCorrectors of(ConfigEntry entry) {
+			return new ValueCorrectors(entry);
+		}
+		
+	}
 	
 	public static class GUI {
 		
@@ -133,6 +188,26 @@ public @interface ConfigEntry {
 		    boolean expanded() default false;
 		}
 		
+		@Target(ElementType.FIELD)
+		@Retention(RetentionPolicy.RUNTIME)
+		public @interface Slider{
+			float step();
+		}
+		
+		@Target({ElementType.TYPE, ElementType.FIELD})
+		@Retention(RetentionPolicy.RUNTIME)
+		public @interface CustomBuilder {
+			public static final class DefaultConfigurationBuilder implements Function<ConfigurationUIContext, ModConfigurationEntryBuilder> {
+				@Override
+				public ModConfigurationEntryBuilder apply(ConfigurationUIContext context) {
+					return new ModConfigurationEntryBuilder(context);
+				}
+			};
+			
+			Class<? extends Function<ConfigurationUIContext, ? extends ModConfigurationEntryBuilder>> value();
+		}
+		
+		
 		/**
 		 * An annotation used to provide localized names and tooltips for configuration fields.
 		 * This annotation allows fields to be displayed with a user-friendly name and a
@@ -160,19 +235,19 @@ public @interface ConfigEntry {
 		@Retention(RetentionPolicy.RUNTIME)
 		public @interface Localized {
 		    /**
-		     * The localized display name of the field, shown in the GUI.
+		     * The translation string to derive the name of the field, shown in the GUI.
 		     * 
-		     * @return The translated name for the field to be displayed in the GUI.
+		     * @return The translation string for the field
 		     */
-		    String localizedName();
+		    String nameLocalizer();
 
 		    /**
 		     * The localized tooltip text displayed when the user hovers over the field in the GUI.
 		     * This is optional and defaults to an empty string if not provided.
 		     * 
-		     * @return The translated tooltip text, or an empty string if no tooltip is provided.
+		     * @return The translation string for tooltip text, or an empty string if no tooltip is provided.
 		     */
-		    String localizedTooltip() default "";
+		    String tooltipLocalizer() default "";
 		}
 	}
 	
@@ -227,6 +302,336 @@ public @interface ConfigEntry {
 		public long max() default Long.MAX_VALUE;
 		public double minDecimal() default Double.MIN_VALUE;
 		public double maxDecimal() default Double.MAX_VALUE;
+		
+		public static class Ranges {
+		
+			public static final IntegralRange BYTE = new IntegralRange(Byte.MIN_VALUE, Byte.MAX_VALUE);
+			public static final IntegralRange SHORT = new IntegralRange(Short.MIN_VALUE, Short.MAX_VALUE);
+			public static final IntegralRange CHAR = new IntegralRange(Character.MIN_VALUE, Character.MAX_VALUE);
+			public static final IntegralRange INT = new IntegralRange(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			public static final IntegralRange LONG = new IntegralRange(Long.MIN_VALUE, Long.MAX_VALUE);
+			public static final DecimalRange FLOAT = new DecimalRange(Float.MIN_VALUE, Float.MAX_VALUE);
+			public static final DecimalRange DOUBLE = new DecimalRange(Double.MIN_VALUE, Double.MAX_VALUE);
+			
+			@InternalOnly 
+			public static final DecimalRange SLIDER = new DecimalRange(-1000f, 1000f);
+			
+			@SuppressWarnings("rawtypes")
+			public static RangeInstance getRangeOfType(Class c) {
+				if(TypeUtil.isInt(c)) {
+					return INT;
+				}
+				else if(TypeUtil.isLong(c)) {
+					return LONG;
+				}
+				else if(TypeUtil.isFloat(c)) {
+					return FLOAT;
+				}
+				else if(TypeUtil.isDouble(c)) {
+					return DOUBLE;
+				}
+				else if(TypeUtil.isShort(c)) {
+					return SHORT;
+				}
+				else if(TypeUtil.isByte(c)) {
+					return BYTE;
+				}
+				else if(TypeUtil.isChar(c)) {
+					return CHAR;
+				}
+				return null;
+			}
+			
+			public static Range getRangeOfType(Field f) {
+				return getRangeOfType(f.getType());
+			}
+			
+			public static Range getRange(Field f, Number min, Number max) {
+				if(TypeUtil.isIntegral(f)) {
+					return new IntegralRange(min.longValue(), max.longValue());
+				}
+				else if(TypeUtil.isDecimal(f)) {
+					return new DecimalRange(min.doubleValue(), max.doubleValue());
+				}
+				throw new IllegalArgumentException(f + "");
+			}
+			
+			public static Range getRange(Field f) {
+				Range range = f.getAnnotation(Range.class);
+				if(range == null) {
+					range = getRangeOfType(f);
+					return range;
+				}
+				if(TypeUtil.isIntegral(f)) {
+					return new IntegralRange(range.min(), range.max());
+				}
+				else if(TypeUtil.isDecimal(f)) {
+					return new DecimalRange(range.minDecimal(), range.maxDecimal());
+				}
+				throw new IllegalArgumentException(f + "");
+			}
+			
+			public static void validateBounds(Range range) {
+				if(!(range instanceof DecimalRange)) {
+					if(range.min() >= range.max()) {
+						throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
+					}
+				}
+				if(!(range instanceof IntegralRange)) {
+					if(range.minDecimal() >= range.maxDecimal()) {
+						throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
+					}
+				}
+			}
+			
+			public static Number getMinimum(Range range) {
+				if(range instanceof IntegralRange) {
+					return range.min();
+				}
+				else if(range instanceof DecimalRange) {
+					return range.minDecimal();
+				}
+				else {
+					if(range.min() != Long.MIN_VALUE || range.max() != Long.MAX_VALUE) {
+						return range.min();
+					}
+					if(range.minDecimal() != Double.MIN_VALUE || range.maxDecimal() != Double.MAX_VALUE) {
+						return range.minDecimal();
+					}
+				}
+				throw new IllegalStateException();
+			}
+			
+			public static Number getMaximum(Range range) {
+				if(range instanceof IntegralRange) {
+					return range.max();
+				}
+				else if(range instanceof DecimalRange) {
+					return range.maxDecimal();
+				}
+				else {
+					if(range.min() != Long.MIN_VALUE || range.max() != Long.MAX_VALUE) {
+						return range.max();
+					}
+					if(range.minDecimal() != Double.MIN_VALUE || range.maxDecimal() != Double.MAX_VALUE) {
+						return range.maxDecimal();
+					}
+				}
+				throw new IllegalStateException();
+			}
+		}
+		
+		public static interface RangeInstance extends Range {
+			public boolean contains(Number number);
+		}
+		
+		public static final class DecimalRange implements RangeInstance {
+			
+			private final Range parent;
+			
+			public DecimalRange(double minDecimal, double maxDecimal) {
+				this(new Range() {
+
+					@Override
+					public Class<? extends Annotation> annotationType() {
+						return null;
+					}
+
+					@Override
+					@Deprecated
+					public long min() {
+						return Long.MIN_VALUE;
+					}
+
+					@Override
+					@Deprecated
+					public long max() {
+						return Long.MAX_VALUE;
+					}
+
+					@Override
+					public double minDecimal() {
+						return minDecimal;
+					}
+
+					@Override
+					public double maxDecimal() {
+						return maxDecimal;
+					}
+					
+				});
+			}
+			
+			public DecimalRange(Range parent) {
+				if(parent instanceof IntegralRange) {
+					throw new IllegalArgumentException("Parent of decimal range cannot be an instance of IntegralRage");
+				}
+				if(!(parent instanceof DecimalRange)) {
+					if(parent.min() != Long.MIN_VALUE || parent.max() != Long.MAX_VALUE) {
+						throw new IllegalArgumentException("Parent of decimal range cannot have integral bounds set!");
+					}
+				}
+				Ranges.validateBounds(parent);
+				this.parent = parent;
+			}
+
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			@Deprecated
+			public long min() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call min() on a decimal range! Use minDecimal() instead!");
+			}
+
+			@Override
+			@Deprecated
+			public long max() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call max() on a decimal range! Use maxDecimal() instead!");
+			}
+
+			@Override
+			public double minDecimal() {
+				return parent.minDecimal();
+			}
+
+			@Override
+			public double maxDecimal() {
+				return parent.maxDecimal();
+			}
+			
+			public boolean contains(Number number) {
+				double val = number.doubleValue();
+				return val >= minDecimal() && val <= maxDecimal();
+			}
+
+		}
+		
+		public static final class IntegralRange implements RangeInstance {
+
+			private final Range parent;
+			
+			public IntegralRange(long min, long max) {
+				this(new Range() {
+
+					@Override
+					public Class<? extends Annotation> annotationType() {
+						return null;
+					}
+
+					@Override
+					public long min() {
+						return min;
+					}
+
+					@Override
+					public long max() {
+						return max;
+					}
+
+					@Override
+					@Deprecated
+					public double minDecimal() {
+						return Double.MIN_VALUE;
+					}
+
+					@Override
+					@Deprecated
+					public double maxDecimal() {
+						return Double.MAX_VALUE;
+					}
+						
+				});
+			}
+			
+			public IntegralRange(Range parent) {
+				if(parent instanceof DecimalRange) {
+					throw new IllegalArgumentException("Parent of integral range cannot be an instance of DecimalRange");
+				}
+				if(!(parent instanceof IntegralRange)) {
+					if(parent.minDecimal() != Double.MIN_VALUE || parent.maxDecimal() != Double.MAX_VALUE) {
+						throw new IllegalArgumentException("Parent of integral range cannot have decimal bounds set!");
+					}
+				}
+				Ranges.validateBounds(parent);
+				this.parent = parent;
+			}
+			
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			public long min() {
+				return parent.min();
+			}
+
+			@Override
+			public long max() {
+				return parent.max();
+			}
+
+			@Override
+			@Deprecated
+			public double minDecimal() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call minDecimal() on a integral range! Use min() instead!");
+			}
+
+			@Override
+			@Deprecated
+			public double maxDecimal() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException("Should not call maxDecimal() on a integral range! Use max() instead!");
+			}
+			
+			public boolean contains(Number number) {
+				double val = number.longValue();
+				return val >= min() && val <= max();
+			}
+			
+		}
+		
+	}
+	
+	public static @interface Step {
+		public double value();
+		
+		public static enum Steps implements Step {
+			INTEGRAL(1d),
+			DECIMAL(0.01d);
+
+			private final double step;
+			
+			private Steps(double step) {
+				this.step = step;
+			}
+			
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return null;
+			}
+
+			@Override
+			public double value() {
+				return step;
+			}
+			
+			public static Steps getStepOfType(Class c) {
+				if(TypeUtil.isInt(c) || TypeUtil.isLong(c) || TypeUtil.isShort(c) || TypeUtil.isByte(c) || TypeUtil.isChar(c)) {
+					return INTEGRAL;
+				}
+				else if(TypeUtil.isFloat(c) || TypeUtil.isDouble(c)) {
+					return DECIMAL;
+				}
+				throw new IllegalArgumentException(c.getCanonicalName());
+			}
+			
+			public static Steps getStepOfType(Field f) {
+				return getStepOfType(f.getType());
+			}
+		}
 	}
 	
 	/**
@@ -257,9 +662,13 @@ public @interface ConfigEntry {
 	 *
 	 * <p>Use this annotation for configuration values where {@code null} is an acceptable
 	 * or meaningful state, and no automatic correction should be attempted.
+	 * 
+	 * @deprecated Not yet implemented, might be removed. Not yet considered API.
 	 */
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
+	@Deprecated
+	@InternalOnly
 	public static @interface Nullable {}
 	
 	/**
@@ -289,9 +698,13 @@ public @interface ConfigEntry {
 	 * <p>Use this annotation for configuration options that necessitate restarting the
 	 * application or system to take effect, ensuring the user is aware and can confirm the
 	 * restart if prompted.
+	 * 
+	 * @deprecated Not yet implemented, might be removed. Not yet considered API.
 	 */
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
+	@Deprecated
+	@InternalOnly
 	public static @interface Restart {
 		/**
 		 * Indicates whether the restart should be immediate when the field is changed,
@@ -310,16 +723,6 @@ public @interface ConfigEntry {
 		 * @return {@code true} if the user should be prompted, {@code false} otherwise
 		 */
 		public boolean prompt() default true;
-		
-		/**
-		 * Determines if the values is considered to be changed if the reference has
-		 * changed, or the value has changed.
-		 * Defaults to {@code false}
-		 * 
-		 * @return {@code true} if {@code == }should be used to compare, or {@code false} if
-		 * {@code Objects.equals} should be used.
-		 */
-		public boolean strict() default false;
 	}
 	
 }

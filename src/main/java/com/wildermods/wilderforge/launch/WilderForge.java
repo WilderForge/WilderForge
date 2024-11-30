@@ -1,11 +1,12 @@
 package com.wildermods.wilderforge.launch;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-
+import com.badlogic.gdx.math.MathUtils;
 import com.wildermods.provider.services.CrashLogService;
 import com.wildermods.wilderforge.launch.WilderForge.WildermythOptions;
 import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
@@ -14,6 +15,13 @@ import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
+import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.ValueCorrectors;
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
@@ -21,8 +29,10 @@ import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerBirthEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerDeathEvent;
 import com.wildermods.wilderforge.api.netV1.server.ServerEvent;
+
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
+import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
 
@@ -36,12 +46,14 @@ import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.CustomValue.CvType;
 
-@Mod(modid = "wilderforge", version = "@WILDERFORGE_VERSION@")
+@Mod(modid = WilderForge.modid, version = "@WILDERFORGE_VERSION@")
 @CustomConfig(modid = "wildermyth", popup = WildermythOptions.class)
 public final class WilderForge {
 	
 	@InternalOnly
 	public static final Logger LOGGER = new Logger("WilderForge");
+	
+	public static final String modid = "wilderforge";
 	
 	@InternalOnly
 	private static ReflectionsHelper reflectionsHelper;
@@ -215,6 +227,69 @@ public final class WilderForge {
 			e.setHandled();
 		}
 	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void onConfigValueOutOfRange(ConfigValueOutOfRangeEvent e) {
+		if(ValueCorrectors.of(e.getConfigEntry()).contains(modid)) {
+			RangeInstance range = e.getRange();
+			
+			Number minimum = Ranges.getMinimum(range);
+			Number maximum = Ranges.getMaximum(range);
+			
+			if(range.contains(e.getValue())) {
+				return;
+			}
+			
+			if(range instanceof IntegralRange) {
+				e.setValue(MathUtils.clamp(e.getValue().doubleValue(), minimum.doubleValue(), maximum.doubleValue()));
+			}
+			else if(range instanceof DecimalRange) {
+				e.setValue(MathUtils.clamp(e.getValue().longValue(), minimum.longValue(), maximum.longValue()));
+			}
+			else {
+				throw new AssertionError();
+			}
+		}
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGHER)
+	public static void onConfigValueStillOutOfRange(ConfigValueOutOfRangeEvent e) {
+		RangeInstance range = e.getRange();
+		
+		Number minimum = Ranges.getMinimum(range);
+		Number maximum = Ranges.getMaximum(range);
+		
+		if(range.contains(e.getValue())) {
+			return;
+		}
+		
+		throw new ConfigurationError(e.getValue() + " is out of range for field " + e.getFieldToSet().getName() + " in mod configuration for " + e.getConfigAnnotation().modid() + ". Range is " + minimum + " to " + maximum + ", inclusive.");
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void onConfigValueMissing(MissingConfigValueEvent e) {
+		if(e.getValue() == null && ValueCorrectors.of(e.getConfigEntry()).contains(modid)) {
+			Field field = e.getFieldToSet();
+			try {
+				Object defaultConfig = Configuration.getDefaultConfig(e.getConfigAnnotation());
+				if(defaultConfig == null) {
+					throw new AssertionError();
+				}
+				Object defaultValue = e.getFieldToSet().get(Configuration.getDefaultConfig(e.getConfigAnnotation()));
+				e.setValue(defaultValue);
+			} catch (Throwable t) {
+				throw new ConfigurationError("Value " + field.getName() + " in mod " + e.getConfigAnnotation().modid() + " was not set, and wilderforge could not set it to the default value.", t);
+			}
+		}
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGHER)
+	public static void onConfigValueStillMissing(MissingConfigValueEvent e) {
+		if(e.getValue() == null) {
+			throw new ConfigurationError("Value " + e.getFieldToSet().getName() + " in mod " + e.getConfigAnnotation().modid() + " is not set but is required to be set.");
+		}
+	}
+	
 	
 	public static LegacyViewDependencies getViewDependencies() {
 		return dependencies;

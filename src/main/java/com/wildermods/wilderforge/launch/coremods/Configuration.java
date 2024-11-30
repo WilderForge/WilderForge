@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.launch.coremods;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -7,16 +8,28 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+
 import com.badlogic.gdx.utils.SerializationException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSerializer;
+import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
@@ -26,20 +39,41 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.Co
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationFieldContext;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
+
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
-import com.wildermods.wilderforge.launch.exception.ConfigurationError.InvalidRangeError;
+import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
 
 public class Configuration {
+	public static final Gson gson;
+	private static final Logger LOGGER = new Logger(Configuration.class);
 	private static final Path CONFIG_FOLDER = Path.of(".").resolve("mods").resolve("configs");
 	private static final HashMap<CoremodInfo, Function<LegacyViewDependencies, ? extends PopUp>> customConfigurations = new HashMap<>();;
 	private static final HashMap<CoremodInfo, ?> configurations = new HashMap<>();
+	private static final HashMap<CoremodInfo, ?> defaults = new HashMap<>();
+	static {
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(Character.class, (JsonSerializer<Character>)(src, typeOfSrc, context) -> {
+			if(src == null) {
+				return null;
+			}
+			return context.serialize((int) src.charValue());
+		});
+		gsonBuilder.setPrettyPrinting();
+		gson = gsonBuilder.create();
+	}
 	
 	@InternalOnly
 	@SuppressWarnings("unchecked")
@@ -68,22 +102,40 @@ public class Configuration {
 			
 			for(Class<?> c : configClasses) {
 				Config config = c.getAnnotation(Config.class);
-				final String logTag = "Configuration/" + config.modId();
+				CustomBuilder builder = c.getAnnotation(CustomBuilder.class);
+				final String logTag = "Configuration/" + config.modid();
 				WilderForge.LOGGER.log("Found configuration class " + c.getCanonicalName(), logTag);
-				CoremodInfo coremod = Coremods.getCoremod(config.modId());
+				CoremodInfo coremod = Coremods.getCoremod(config.modid());
 				if(coremod instanceof MissingCoremod) {
-					throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @Config for the mod " + config.modId() + ", but that mod is missing!");
+					throw new ConfigurationError("Class " + c.getCanonicalName() + " is defined as a @Config for the mod " + config.modid() + ", but that mod is missing!");
 				}
 				try {
 					if(customConfigs.contains(c)) {
-						throw new ConfigurationError("Mod " + config.modId() + " cannot have @Config and @CustomConfig definitions!");
+						throw new ConfigurationError("Mod " + config.modid() + " cannot have @Config and @CustomConfig definitions!");
 					}
 					Constructor<?> constructor = c.getDeclaredConstructor();
 					constructor.setAccessible(true);
+					Object defaultConfig = constructor.newInstance();
 					Object configuration = constructor.newInstance();
-					ConfigStatus status = populate(config, coremod, c, Cast.from(configuration));
+					defaults.put(coremod, Cast.from(defaultConfig));
+					ConfigStatus status = populate(config, coremod, c, Cast.from(configuration), Cast.from(defaultConfig));
 					if(status.changed()) {
 						throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
+					}
+					
+					if(builder != null) {
+						Constructor builderFuncConstructor;
+						try {
+							builderFuncConstructor = c.getDeclaredConstructor();
+							builderFuncConstructor.setAccessible(true);
+							builderFuncConstructor.newInstance();
+						}
+						catch(NoSuchMethodException e) {
+							throw new ConfigurationError("Custom builder function " + c.getCanonicalName() + " must have a nullary constructor!", e);
+						}
+						catch(IllegalAccessException e) {
+							throw new ConfigurationError("Nullary constructor for builder " + c.getCanonicalName() + " is not accessable.", e);
+						}
 					}
 					
 					configurations.put(coremod, Cast.from(configuration));
@@ -91,9 +143,9 @@ public class Configuration {
 				} catch (NoSuchMethodException e) {
 					throw new ConfigurationError("Class " + c.getCanonicalName() + "is a @Config, but it doesn't have a nullary constructor!", e);
 				} catch (IllegalAccessException e) {
-					throw new ConfigurationError("Nullary constructor for mod " + config.modId() + " is not accessable.", e);
+					throw new ConfigurationError("Nullary constructor for mod " + config.modid() + " is not accessable.", e);
 				} catch (Throwable t) {
-					throw new ConfigurationError("Couldn't construct configuration object for mod " + config.modId(), t);
+					throw new ConfigurationError("Couldn't construct configuration object for mod " + config.modid(), t);
 				}
 			}
 		}
@@ -105,9 +157,9 @@ public class Configuration {
 		}
 	}
 	
-	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws IOException, IllegalArgumentException, IllegalAccessException {
-		Set<Field> fields = WilderForge.getReflectionsHelper().getAllFieldsInAnnotatedWith(configClass, ConfigEntry.class);
-		ConfigStatus ret;
+	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj, C defaultConfigurationObj) throws Exception {
+		Set<Field> fields = new LinkedHashSet<>();
+		fields.addAll(List.of(configClass.getDeclaredFields()));
 		Path configFile = getConfigFile(coremod);
 		JsonValue values = null;
 		if(Files.exists(configFile)) {
@@ -133,9 +185,16 @@ public class Configuration {
 			field.setAccessible(true);
 			
 			Class<?> type = field.getType();
-			boolean isPrimitiveType = field.getType().isPrimitive() && !TypeUtil.isVoid(type);
+			boolean isPrimitiveType = TypeUtil.representsPrimitive(type) && !TypeUtil.isVoid(type);
 			ConfigEntry configEntry = field.getAnnotation(ConfigEntry.class);
-			Range range = field.getAnnotation(Range.class);
+			if(configEntry == null) {
+				configEntry = new DefaultConfigEntry(config, field);
+			}
+			boolean strict = configEntry.strict();
+			RangeInstance typeRange;
+			Range uRange = field.getAnnotation(Range.class);
+			IntegralRange iRange;
+			DecimalRange dRange;
 			Nullable nullable = field.getAnnotation(Nullable.class);
 			Restart restart = field.getAnnotation(Restart.class);
 			if(restartInfo == null && restart != null) {
@@ -145,19 +204,18 @@ public class Configuration {
 			if(isPrimitiveType && nullable != null) {
 				throw new ConfigurationError("@Nullable annotation placed on primitive field \"" + field.getName() + "\"");
 			}
+			if(nullable == null) {
+				Object defaultValue = field.get(defaultConfigurationObj);
+				if(defaultValue == null) {
+					throw new NullPointerException("Default value for field " + field.getName() + " in config for " + config.modid() + " is null and is not @Nullable");
+				}
+			}
 			
 			String name = field.getName();
 			LinkedHashSet<String> valueCorrectors = new LinkedHashSet<>();
 			valueCorrectors.add(coremod.modId);
 			{
-				String[] definedCorrectors = {"wilderforge"};
-				
-				if(configEntry != null) {
-					if(!configEntry.name().isBlank()) {
-						name = configEntry.name();
-					}
-					definedCorrectors = configEntry.valueCorrectors();
-				}
+				String[] definedCorrectors = configEntry.valueCorrectors();
 				valueCorrectors.addAll(List.of(definedCorrectors));
 			}
 			
@@ -166,7 +224,7 @@ public class Configuration {
 			JsonValue jsonValue = values.get(name);
 			
 			if(jsonValue == null && nullable == null) {
-				MissingConfigValueEvent e = new MissingConfigValueEvent(config, configurationObj, field);
+				MissingConfigValueEvent e = new MissingConfigValueEvent(config, configEntry, configurationObj, field);
 				WilderForge.MAIN_BUS.fire(e);
 				value = e.getValue();
 			}
@@ -183,33 +241,96 @@ public class Configuration {
 						value = jsonValue.asBoolean();
 						break;
 					case doubleValue:
-						value = jsonValue.asDouble();
-						if(range == null) {
-							range = Ranges.getRangeOfType(type);
-						}
-						if(range.min() != Long.MIN_VALUE || range.max() != Long.MAX_VALUE) {
-							throw new ConfigurationError("Integeral range specified on a floating point type");
-						}
-						Double dval = Cast.from(value);
-						if(!Ranges.within(dval, range)) {
-							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, dval, range);
-							WilderForge.MAIN_BUS.fire(e);
-							dval = ((Number)e.getValue()).doubleValue();
+						{
+							typeRange = Ranges.getRangeOfType(type);
+							double rawVal = jsonValue.asDouble();
+							
+							if(TypeUtil.isDouble(field)) {
+								value = jsonValue.asDouble();
+							}
+							else if(TypeUtil.isFloat(field)) {
+								value = jsonValue.asFloat();
+							}
+							
+							if(uRange == null) {
+								uRange = typeRange;
+							}
+							try {
+								dRange = new DecimalRange(uRange);
+								if(!typeRange.contains(dRange.minDecimal())) {
+									throw new ConfigurationError("minDecimal definition (" + dRange.minDecimal() + ") is out of range for type " + type);
+								}
+								if(!typeRange.contains(dRange.maxDecimal())) {
+									throw new ConfigurationError("maxDecimal definition (" + dRange.maxDecimal() + ") is out of range for type " + type);
+								}
+							}
+							catch(Throwable t) {
+								throw new ConfigurationError("Invalid @Range for field " + field.getName(), t);
+							}
+							if(value != null) {
+								Double dval = ((Number)value).doubleValue();
+								if(!dRange.contains(rawVal)) {
+									ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configEntry, configurationObj, field, rawVal, dRange);
+									WilderForge.MAIN_BUS.fire(e);
+									dval = ((Number)e.getValue()).doubleValue();
+								}
+								value = dval;
+							}
 						}
 						break;
 					case longValue:
-						value = jsonValue.asLong();
-						if(range == null) {
-							range = Ranges.getRangeOfType(type);
-						}
-						if(range.minDecimal() != Double.MIN_VALUE || range.maxDecimal() != Double.MAX_VALUE) {
-							throw new ConfigurationError("Decimal range specified on integral type");
-						}
-						Long ival = Cast.from(value);
-						if(!Ranges.within(ival, range)) {
-							ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configurationObj, field, ival, range);
-							WilderForge.MAIN_BUS.fire(e);
-							ival = ((Number)e.getValue()).longValue();
+						{
+							typeRange = Ranges.getRangeOfType(type);
+							long rawVal = jsonValue.asLong();
+							
+							if(TypeUtil.isLong(field)) {
+								value = jsonValue.asLong();
+							}
+							else if(TypeUtil.isInt(field)) {
+								value = jsonValue.asInt();
+							}
+							if(TypeUtil.isChar(field)) {
+								value = jsonValue.asChar();
+							}
+							else if(TypeUtil.isShort(field)) {
+								value = jsonValue.asShort();
+							}
+							else if(TypeUtil.isByte(field)) {
+								value = jsonValue.asByte();
+							}
+							
+							
+							if(uRange == null) {
+								uRange = typeRange;
+							}
+							try {
+								iRange = new IntegralRange(uRange);
+								if(!typeRange.contains(iRange.min())) {
+									throw new ConfigurationError("min definition (" + iRange.min() + ") is out of range for type " + type);
+								}
+								if(!typeRange.contains(iRange.max())) {
+									throw new ConfigurationError("max definition (" + iRange.max() + ") is out of range for type " + type);
+								}
+							}
+							catch(Throwable t) {
+								throw new ConfigurationError("Invalid @Range for field " + field.getName(), t);
+							}
+							
+							if(value != null) {
+								Long ival;
+								if(TypeUtil.isChar(field)) {
+									ival = (long) ((Character)value).charValue();
+								}
+								else {
+									ival = ((Number)value).longValue();
+								}
+								if(!iRange.contains(rawVal)) {
+									ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configEntry, configurationObj, field, rawVal, iRange);
+									WilderForge.MAIN_BUS.fire(e);
+									ival = ((Number)e.getValue()).longValue();
+								}
+								value = ival;
+							}
 						}
 						break;
 					case nullValue:
@@ -217,7 +338,7 @@ public class Configuration {
 							value = null;
 						}
 						else {
-							MissingConfigValueEvent e = new MissingConfigValueEvent(config, configurationObj, field);
+							MissingConfigValueEvent e = new MissingConfigValueEvent(config, configEntry, configurationObj, field);
 							WilderForge.MAIN_BUS.fire(e);
 							value = e.getValue();
 						}
@@ -234,7 +355,7 @@ public class Configuration {
 			}
 			
 			if(previousConfig != null) {
-				if(!Objects.equals(prevValue,  value)) {
+				if((!strict && !Objects.equals(prevValue,  value)) || (strict && (prevValue != value))) {
 					changed = true;
 					if(restart != null) {
 						restartInfo.process(restart);
@@ -242,16 +363,161 @@ public class Configuration {
 				}
 			}
 			
-			field.set(configurationObj, value);
+			if(TypeUtil.isIntegral(type)) {
+				setIntegralField(configurationObj, field, TypeUtil.asIntegralPrimitive(value));
+			}
+			else if(TypeUtil.isDecimal(type)) {
+				setDecimalField(configurationObj, field, TypeUtil.asDecimalPrimitive(value));
+			}
+			else {
+				field.set(configurationObj, value);
+			}
 			
+			LOGGER.log("Set " + field.getName() + " to " + value, config.modid());
 		}
 		
 		return new ConfigStatus(changed, restartInfo);
 	}
 	
+	private static void setIntegralField(Object target, Field field, long value) throws Exception {
+
+	    Class<?> fieldType = field.getType();
+
+	    if (fieldType == byte.class) {
+	        field.set(target, (byte) value);
+	    }
+	    else if (fieldType == Byte.class) {
+	        field.set(target, Byte.valueOf((byte) value)); // Explicit boxing
+	    }
+	    else if (fieldType == short.class) {
+	        field.set(target, (short) value);
+	    }
+	    else if (fieldType == Short.class) {
+	        field.set(target, Short.valueOf((short) value)); // Explicit boxing
+	    }
+	    else if (fieldType == int.class) {
+	        field.set(target, (int) value);
+	    }
+	    else if (fieldType == Integer.class) {
+	        field.set(target, Integer.valueOf((int) value)); // Explicit boxing
+	    }
+	    else if (fieldType == char.class) {
+	        field.set(target, (char) value);
+	    }
+	    else if (fieldType == Character.class) {
+	        field.set(target, Character.valueOf((char) value)); // Explicit boxing
+	    }
+	    else if (fieldType == long.class) {
+	        field.set(target, value);
+	    }
+	    else if (fieldType == Long.class) {
+	        field.set(target, Long.valueOf(value)); // Explicit boxing
+	    }
+	    else {
+	        throw new IllegalArgumentException("Field is not an integral type: " + fieldType);
+	    }
+    }
+	
+	public static void setDecimalField(Object target, Field field, Number value) throws Exception {
+		setDecimalField(target, field, value.doubleValue());
+	}
+	
+	private static void setDecimalField(Object target, Field field, double value) throws Exception {
+		
+		Class<?> fieldType = field.getType();
+		
+		if(fieldType == float.class) {
+			field.set(target, (float)value);
+		}
+		else if(fieldType == Float.class) {
+			field.set(field, Float.valueOf((float) value)); // Explicit Boxing
+		}
+		else if(fieldType == double.class) {
+			field.set(target, value);
+		}
+		else if(fieldType == Double.class) {
+			field.set(field, Double.valueOf(value)); //Explicit Boxing
+		}
+		else {
+			throw new IllegalArgumentException("Field is not a decimal type: " + field);
+		}
+	}
+	
 	@InternalOnly
-	public static <C> C getConfig(CoremodInfo c) {
-		return Cast.from(configurations.get(c));
+	public static Object getDefaultConfig(Config c) {
+		CoremodInfo coremod = getCoremod(c);
+		if(coremod instanceof MissingCoremod) {
+			return null;
+		}
+		for(Entry<CoremodInfo, ?> entry : defaults.entrySet()) {
+			System.out.println("Hash of default entry " + entry.getKey() + ": " + entry.getKey().hashCode());
+			System.out.println("Equals: " + Objects.equals(entry.getKey(), coremod));
+		}
+		System.out.println("Hash we are looking for: " + coremod.hashCode());
+		Object config = defaults.get(coremod);
+		return config;
+	}
+	
+	@InternalOnly
+	public static Object getConfig(Config c) {
+		CoremodInfo coremod = getCoremod(c);
+		if(coremod instanceof MissingCoremod) {
+			return null;
+		}
+		Object config = configurations.get(coremod);
+		return config;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static void saveConfig(Config c, Object configObject, HashMap<ConfigurationFieldContext, ConfigurationFieldContext> fields) throws IOException {
+		
+		try {
+		
+			Path configFile = getConfigFile(c);
+			Files.createDirectories(configFile.getParent());
+			Object newConfigObject;
+			
+			try {
+				Constructor configConstructor = configObject.getClass().getDeclaredConstructor();
+				configConstructor.setAccessible(true);
+				newConfigObject = configConstructor.newInstance();
+			} catch (Throwable t) {
+				throw new ConfigurationError("Unable to create configuration object for mod " + c.modid(), t);
+			}
+			
+			try (BufferedWriter writer = Files.newBufferedWriter(configFile, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+				
+				LinkedHashMap<String, Object> jsonMap = new LinkedHashMap<>();
+				for(ConfigurationFieldContext context : fields.keySet()) {
+					jsonMap.put(context.getField().getName(), context.obtainVal());
+					context.getField().set(newConfigObject, context.obtainVal());
+				}
+				writer.append(gson.toJson(jsonMap));
+			}
+			
+			
+			
+			if(configurations.put(getCoremod(c), Cast.from(newConfigObject)) == null) {
+				if(getConfig(c) != newConfigObject) {
+					throw new AssertionError("wtf");
+				}
+				throw new AssertionError();
+			}
+		}
+		catch(Throwable t) {
+			throw new ConfigurationError("Unable to save configuration for mod " + c.modid());
+		}
+		
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void handleOutOfRangeValues(ConfigValueOutOfRangeEvent e) {
+		ConfigEntry entry = e.getConfigEntry();
+		HashSet<String> valueCorrectors = new HashSet<String>();
+		valueCorrectors.addAll(Arrays.asList(entry.valueCorrectors()));
+		if(valueCorrectors.contains("wilderforge")) {
+			
+		}
 	}
 	
 	@InternalOnly
@@ -259,8 +525,23 @@ public class Configuration {
 		return customConfigurations.get(c);
 	}
 	
-	private static Path getConfigFile(CoremodInfo c) {
-		return CONFIG_FOLDER.resolve(c.modId + ".config.json");
+	private static Path getConfigFile(Config c) {
+		return CONFIG_FOLDER.resolve(c.modid() + ".config.json");
+	}
+	
+	private static CoremodInfo getCoremod(Config c) {
+		if(c instanceof CoremodInfo) {
+			return Cast.from(c);
+		}
+		return Coremods.getCoremod(c.modid());
+	}
+	
+	public static ConfigEntry getConfigEntry(Config config, Field f) {
+		ConfigEntry entry = f.getAnnotation(ConfigEntry.class);
+		if(entry == null) {
+			entry = new DefaultConfigEntry(config, f);
+		}
+		return entry;
 	}
 	
 	private static JsonValue readConfigFile(Path path) throws IOException {
@@ -300,10 +581,37 @@ public class Configuration {
 		public boolean prompt() {
 			return restart != null && restart.prompt();
 		}
+		
+	}
+	
+	public static final class DefaultConfigEntry implements ConfigEntry {
+
+		private final String name;
+		private final String[] valueCorrectors;
+		
+		public DefaultConfigEntry(Config config, Field f) {
+			this.name = f.getName();
+			this.valueCorrectors = new String[] {config.modid(), WilderForge.modid};
+		}
+		
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return null;
+		}
+
+		@Override
+		public String name() {
+			return name;
+		}
+
+		@Override
+		public String[] valueCorrectors() {
+			return valueCorrectors;
+		}
 
 		@Override
 		public boolean strict() {
-			return restart != null && restart.strict();
+			return false;
 		}
 		
 	}
@@ -326,11 +634,6 @@ public class Configuration {
 		public Class<? extends Annotation> annotationType() {
 			return null;
 		}
-		
-		@Override
-		public boolean strict() {
-			throw new UnsupportedOperationException();
-		}
 
 		@Override
 		public boolean immediate() {
@@ -340,103 +643,6 @@ public class Configuration {
 		@Override
 		public boolean prompt() {
 			return prompt;
-		}
-		
-	}
-	
-	private static enum Ranges implements Range {
-		
-		BYTE(Byte.MIN_VALUE, Byte.MAX_VALUE),
-		SHORT(Short.MIN_VALUE, Short.MAX_VALUE),
-		CHAR(Character.MIN_VALUE, Character.MAX_VALUE),
-		INT(Integer.MIN_VALUE, Integer.MAX_VALUE),
-		LONG(Long.MIN_VALUE, Long.MAX_VALUE),
-		FLOAT(Float.MIN_VALUE, Float.MAX_VALUE),
-		DOUBLE(Double.MIN_VALUE, Double.MAX_VALUE);
-
-		private long min = Long.MIN_VALUE;
-		private long max = Long.MAX_VALUE;
-		private double minDecimal = Double.MIN_VALUE;
-		private double maxDecimal = Double.MAX_VALUE;
-		
-		private Ranges(long min, long max) {
-			this.min = min;
-			this.max = max;
-		}
-		
-		private Ranges(double minDecimal, double maxDecimal) {
-			this.minDecimal = minDecimal;
-			this.maxDecimal = maxDecimal;
-		}
-		
-		@Override
-		public Class<? extends Annotation> annotationType() {
-			return null;
-		}
-
-		@Override
-		public long min() {
-			return min;
-		}
-
-		@Override
-		public long max() {
-			return max;
-		}
-
-		@Override
-		public double minDecimal() {
-			return minDecimal;
-		}
-
-		@Override
-		public double maxDecimal() {
-			return maxDecimal;
-		}
-		
-		public static boolean within(Number number, Range range) {
-			if(number instanceof Float || number instanceof Double) {
-				double dval = number.doubleValue();
-				return dval >= range.minDecimal() && dval <= range.maxDecimal();
-			}
-			else {
-				long ival = number.longValue();
-				return ival >= range.min() && ival <= range.max();
-			}
-		}
-		
-		public static void validateRange(Range range) {
-			if(range.min() >= range.max()) {
-				throw new InvalidRangeError("Integer range minimum is larger than or equal to it's maximum");
-			}
-			if(range.minDecimal() >= range.maxDecimal()) {
-				throw new InvalidRangeError("Decimal range minimum is larger than or equal to it's maximum");
-			}
-		}
-		
-		public static Ranges getRangeOfType(Class c) {
-			if(TypeUtil.isInt(c)) {
-				return INT;
-			}
-			else if(TypeUtil.isLong(c)) {
-				return LONG;
-			}
-			else if(TypeUtil.isFloat(c)) {
-				return FLOAT;
-			}
-			else if(TypeUtil.isDouble(c)) {
-				return DOUBLE;
-			}
-			else if(TypeUtil.isShort(c)) {
-				return SHORT;
-			}
-			else if(TypeUtil.isByte(c)) {
-				return BYTE;
-			}
-			else if(TypeUtil.isChar(c)) {
-				return CHAR;
-			}
-			throw new IllegalArgumentException(c.getCanonicalName());
 		}
 		
 	}
