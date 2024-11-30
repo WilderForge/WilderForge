@@ -6,6 +6,7 @@ on:
 
 jobs:
   approve_and_run:
+    runs-on: ubuntu-latest
     if: |
       (
         github.event_name == 'pull_request_review' &&
