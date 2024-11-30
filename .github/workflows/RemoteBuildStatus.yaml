@@ -1,0 +1,23 @@
+name: Remote Build Status
+
+on:
+  workflow_run:
+    workflows: ["Validate Approval"]
+    types:
+      - completed
+
+jobs:
+  checkApprovalJob:
+    runs-on: ubuntu-latest
+    outputs:
+      -name: "Check Completed"
+      run: |
+        status=${{ github.event.workflow_run.conclusion }}
+
+        echo "Validate Approval Workflow Status: $status"
+
+        if ["$status" == "success"]; then
+          exit 0;
+        else
+          echo "Approval validation failed - status: $status"
+          exit 1;
