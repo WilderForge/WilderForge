@@ -18,6 +18,7 @@ jobs:
           # Loop to check the status
           while true; do
             # Get the status of the workflow run
+            name=${{ github.event.workflow_run.name }}
             status=${{ github.event.workflow_run.status }}
             conclusion=${{ github.event.workflow_run.conclusion }}
 
@@ -25,7 +26,7 @@ jobs:
               echo "Validate Approval workflow completed with conclusion: $conclusion"
               break
             else
-              echo "Validate Approval workflow is still in progress..."
+              echo "$name workflow is still in progress..."
               echo "status:$status"
               echo "conclusion:$conclusion"
               sleep 10  # Sleep for 10 seconds and retry
