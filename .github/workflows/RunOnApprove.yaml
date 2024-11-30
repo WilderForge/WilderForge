@@ -16,9 +16,9 @@ jobs:
       (
         github.event_name == 'issue_comment' &&
         github.event.comment.user.login == 'Gamebuster19901' &&
-        startsWith(github.event.comment.body, 'approved') &&
-        github.event.issue.pull_request != null &&
-        github.event.issue.user.login == 'Gamebuster19901'
+#        startsWith(github.event.comment.body, 'approved') &&
+#        github.event.issue.pull_request != null &&
+#        github.event.issue.user.login == 'Gamebuster19901'
       )
     steps:
       - name: Checkout code
