@@ -10,25 +10,29 @@ jobs:
   checkApprovalJob:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for Validation to complete
+      - name: Wait for Validate Approval workflow to complete
         run: |
-          # Polling for completion of "Validate Approval"
           echo "Waiting for Validate Approval workflow to complete..."
+          
+          # Define the API URL to get workflow run status
+          WORKFLOW_RUN_URL="https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
 
-          # Loop to check the status
+          # Loop to check the status of the workflow run
           while true; do
-            # Get the status of the workflow run
-            name=${{ github.event.workflow_run.name }}
-            status=${{ github.event.workflow_run.status }}
-            conclusion=${{ github.event.workflow_run.conclusion }}
+            # Make an API request to get the status of the workflow run
+            response=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $WORKFLOW_RUN_URL)
+
+            # Extract the status and conclusion from the API response
+            status=$(echo "$response" | jq -r '.status')
+            conclusion=$(echo "$response" | jq -r '.conclusion')
 
             if [[ "$status" == "completed" ]]; then
               echo "Validate Approval workflow completed with conclusion: $conclusion"
               break
             else
-              echo "$name workflow is still in progress..."
-              echo "status:$status"
-              echo "conclusion:$conclusion"
+              echo "Validate Approval workflow is still in progress..."
+              echo "status: $status"
+              echo "conclusion: $conclusion"
               sleep 10  # Sleep for 10 seconds and retry
             fi
           done
