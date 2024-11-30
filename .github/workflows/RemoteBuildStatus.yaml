@@ -48,7 +48,7 @@ jobs:
           echo "Validate Approval Workflow Status: $status"
           echo "Conclusion: $conclusion"
 
-          if [ "$status" == "success" ]; then
+          if [ "$conclusion" == "success" ]; then
             exit 0;
           else
             echo "Approval validation failed - status: $status"
