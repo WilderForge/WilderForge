@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["Validate Approval"]
     types:
-      - completed
+      - requested
 
 jobs:
   checkApprovalJob:
