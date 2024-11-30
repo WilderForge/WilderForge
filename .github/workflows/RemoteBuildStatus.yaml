@@ -40,9 +40,8 @@ jobs:
         run: |
           status=${{ github.event.workflow_run.conclusion }}
           conclusion=${{ github.event.workflow_run.conclusion }}
-          while true; 
 
-          if ["$status" == "success"]; then
+          if [ "$status" == "success" ]; then
             exit 0;
           else
             echo "Approval validation failed - status: $status"
