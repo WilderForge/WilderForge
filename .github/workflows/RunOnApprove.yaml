@@ -5,6 +5,8 @@ on:
 jobs:
   approve_and_run:
     runs-on: ubuntu-latest
+    outputs:
+      pr_sha: ${{ steps.approve_sha.outputs.approved_sha }}
     if: |
       (
         github.event.review.state == 'approved' &&
@@ -14,19 +16,15 @@ jobs:
         github.event.pull_request != null &&
         github.event.sender.login == 'Gamebuster19901' &&
         github.event.pull_request.user.login == 'Gamebuster19901' &&
-        startsWith(github.event.review.body, 'approved') &&
-        github.event.pull_request.head.sha == github.event.review.commit_id
+        startsWith(github.event.review.body, 'approved')
       )
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR's head branch
       - name: Validate Commit SHA
         run: |
-          if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.sha }}" ]; then
-            echo "Commit SHA does not match approved version. Exiting."
+          if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.event.review.commit_id }}" ]; then
+            echo "Latest SHA in PR does not match approved version. Exiting."
             exit 1
           fi
-      - name: Running
-        run: echo "Running approved workflow!"
+      - name: Setting Approved SHA
+        id: "approve_sha"
+        run: echo "approved_sha=${{ github.event.review.commit_id }}" >> $GITHUB_ENV
