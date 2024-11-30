@@ -1,6 +1,8 @@
 on:
   pull_request_review:
     types: [submitted]
+  issue_comment:
+    types: [created]
 
 jobs:
   approve_and_run:
