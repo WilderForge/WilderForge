@@ -11,6 +11,7 @@ jobs:
         github.event.review.user.login == 'Gamebuster19901'
       ) ||
       (
+        github.event.sender.login == 'Gamebuster19901'
         startsWith(github.event.review.body, 'approved') &&
         github.event.pull_request != null
       )
