@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wait for Validate Approval workflow to complete
+        id: wait_for_validation
         run: |
           echo "Waiting for Validate Approval workflow to complete..."
           
