@@ -16,8 +16,7 @@ jobs:
       (
         github.event_name == 'issue_comment' &&
         github.event.comment.user.login == 'your-username' &&
-        to_lowercase(github.event.comment.body) == 'approved' &&
-        length(trim(github.event.comment.body)) == 8 &&
+        startsWith(github.event.comment.body, 'approved') &&
         github.event.issue.pull_request != null &&
         github.event.issue.user.login == 'your-username'
       )
