@@ -4,26 +4,122 @@ on:
   workflow_run:
     workflows: ["Validate Approval"]
     types:
-      - completed
+      - requested
 
 jobs:
   checkApprovalJob:
     runs-on: ubuntu-latest
     steps:
-      - name: Checking Validation Job
+      - name: Post Pending Status to Pull Request
+        id: post_pending_status
         run: |
-          # Extract status and conclusion from the workflow_run context
-          status="${{ github.event.workflow_run.status }}"
-          conclusion="${{ github.event.workflow_run.conclusion }}"
+          echo "Checking for associated pull request..."
+          PR_JSON='${{ toJson(github.event.workflow_run.pull_requests) }}'
+      
+          if [ "$PR_JSON" == "[]" ]; then
+            echo "No pull request associated with this workflow run. Exiting."
+            exit 1
+          fi
+      
+          PR_URL=$(echo "$PR_JSON" | jq -r '.[0].url')
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+      
+          if [ -z "$PR_URL" ] || [ "$PR_URL" == "null" ]; then
+            echo "No pull request URL found. Exiting."
+            exit 1
+          fi
+      
+          # Construct the target URL to link to this workflow run
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+          echo "Posting pending status to the commit..."
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"pending\",
+              \"description\": \"Remote Build Status is running.\",
+              \"context\": \"Remote Build Status\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$HEAD_SHA"
+      - name: Wait for Validate Approval workflow to complete
+        id: wait_for_validation
+        run: |
+          echo "Waiting for Validate Approval workflow to complete..."
+          
+          # Define the API URL to get workflow run status
+          WORKFLOW_RUN_URL="https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
+
+          max_attempts=60
+          attempt=0
+
+          # Loop to check the status of the workflow run
+          while true; do
+            # Make an API request to get the status of the workflow run
+            response=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $WORKFLOW_RUN_URL)
+
+            # Extract the status and conclusion from the API response
+            status=$(echo "$response" | jq -r '.status')
+            conclusion=$(echo "$response" | jq -r '.conclusion')
+
+            if [[ "$status" == "completed" ]]; then
+              echo "Validate Approval workflow completed with conclusion: $conclusion"
+              break
+            elif [[ $attempt -ge $max_attempts ]]; then
+              echo "Reached maximum number of attempts ($max_attempts). Exiting."
+              status="timed_out"
+              conclusion="failure"
+              break
+            else
+              echo "Validate Approval workflow is still in progress..."
+              echo "Attempt $attempt/$max_attempts"
+              echo "status: $status"
+              echo "conclusion: $conclusion"
+              sleep 10  # Sleep for 10 seconds and retry
+            fi
+          done
+          echo "status=$status" >> $GITHUB_OUTPUT
+          echo "conclusion=$conclusion" >> $GITHUB_OUTPUT
+      - name: Checking Validation Job
+        id: check_validation
+        run: |
+          # Access the outputs from the previous step
+          status=${{ steps.wait_for_validation.outputs.status }}
+          conclusion=${{ steps.wait_for_validation.outputs.conclusion }}
 
           echo "Status: $status"
           echo "Conclusion: $conclusion"
 
-          # Check if the validation succeeded or failed
           if [ "$conclusion" == "success" ]; then
-            echo "Approval validation passed."
-            exit 0
+            exit 0;
           else
             echo "Approval validation failed - status: $status - conclusion: $conclusion"
-            exit 1
+            exit 1;
           fi
+      - name: Post Final Status to Pull Request
+        if: always()
+        run: |
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Determine the final state
+          if [ "${{ steps.check_validation.conclusion }}" == "success" ]; then
+            final_state="success"
+            description="Remote Build Status completed successfully."
+          else
+            final_state="failure"
+            description="Remote Build Status failed."
+          fi
+
+          # Post the final status to the pull request commit
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$final_state\",
+              \"description\": \"$description\",
+              \"context\": \"Remote Build Status\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$HEAD_SHA"
