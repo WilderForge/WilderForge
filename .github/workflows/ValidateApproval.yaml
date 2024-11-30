@@ -9,24 +9,31 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       pr_sha: ${{ steps.approve_sha.outputs.approved_sha }}
-    if: |
-      (
-        github.event.review.state == 'approved' &&
-        github.event.review.user.login == 'Gamebuster19901'
-      ) ||
-      (
-        github.event.pull_request != null &&
-        github.event.sender.login == 'Gamebuster19901' &&
-        github.event.pull_request.user.login == 'Gamebuster19901' &&
-        startsWith(github.event.review.body, 'approved')
-      )
     steps:
+      - name: Check Approver
+        run: |
+          echo "Validating approver and review content..."
+          
+          if [ "${{ github.event.review.state }}" == "approved" ] && [ "${{ github.event.review.user.login }}" == "Gamebuster19901" ]; then
+            echo "Approval by Gamebuster19901 detected."
+          
+          elif [ "${{ github.event.pull_request.user.login }}" == "Gamebuster19901" ] &&
+               [ "${{ github.event.sender.login }}" == "Gamebuster19901" ] &&
+               [[ "${{ github.event.review.body }}" == approved* ]]; then
+            echo "Self-approval by Gamebuster19901 detected."
+          
+          else
+            echo "Approval validation failed. Exiting."
+            exit 1
+          fi
+
       - name: Validate Commit SHA
         run: |
           if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.event.review.commit_id }}" ]; then
             echo "Latest SHA in PR does not match approved version. Exiting."
             exit 1
           fi
+
       - name: Setting Approved SHA
         id: "approve_sha"
         run: echo "approved_sha=${{ github.event.review.commit_id }}" >> $GITHUB_ENV
