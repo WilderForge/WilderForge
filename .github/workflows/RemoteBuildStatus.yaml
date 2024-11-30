@@ -82,6 +82,7 @@ jobs:
           echo "status=$status" >> $GITHUB_OUTPUT
           echo "conclusion=$conclusion" >> $GITHUB_OUTPUT
       - name: Checking Validation Job
+        id: check_validation
         run: |
           # Access the outputs from the previous step
           status=${{ steps.wait_for_validation.outputs.status }}
