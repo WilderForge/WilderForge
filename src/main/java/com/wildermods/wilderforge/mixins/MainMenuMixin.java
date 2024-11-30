@@ -6,6 +6,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
+
+import com.wildermods.wilderforge.api.mixins.v1.Impossible;
 import com.wildermods.wilderforge.launch.ui.CoremodListPopup;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.game.common.ui.OptionButton;
@@ -44,7 +46,7 @@ public abstract class MainMenuMixin extends RootMenuPanel {
 	 */
 	public MainMenuMixin(LegacyViewDependencies dependencies, IRootMenuNavigation navigation) {
 		super(dependencies, navigation);
-		throw new AssertionError("what the actual fuck this shouldn't ever get called");
+		Impossible.error();
 	}
 	
 }

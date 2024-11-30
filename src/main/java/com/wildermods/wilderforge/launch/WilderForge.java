@@ -25,10 +25,6 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.ValueCorre
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
-import com.wildermods.wilderforge.api.netV1.client.ClientMessageEvent;
-import com.wildermods.wilderforge.api.netV1.server.ServerBirthEvent;
-import com.wildermods.wilderforge.api.netV1.server.ServerDeathEvent;
-import com.wildermods.wilderforge.api.netV1.server.ServerEvent;
 
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
@@ -208,24 +204,6 @@ public final class WilderForge {
 			throw new IllegalStateException("Host mismatch?!");
 		}
 		WilderForge.host = null;
-	}
-	
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void onServerEvent(ServerEvent e) {
-		if(e instanceof ServerBirthEvent) {
-			initServer(e.getHost());
-		}
-		else if (e instanceof ServerDeathEvent) {
-			killServer(e.getHost());
-		}
-	}
-	
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void onUnhandledClientMessage(ClientMessageEvent.PostVanillaChecks e) {
-		if(e.getMessage().to.match("wilderforge.event.cancelled")) {
-			e.getClient().setWaiting(false);
-			e.setHandled();
-		}
 	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGH)

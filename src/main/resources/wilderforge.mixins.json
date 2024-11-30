@@ -7,22 +7,16 @@
 	"mixinPriority": 1,
 	"mixins": [
 		"AggregatorMixin",
-		"BiomeMixin",
-		"CampaignGeneratorMixin",
 		"FancyImageDrawableAccessor",
 		"FileConsumerMixin",
-		"GameKernelAccessor",
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
 		"ModAwareResourceBundleMixin",
 		"NewGameDialogMixin",
 		"NiceLwjgl3ApplicationMixin",
-		"ObservantChangeWriterAccessor",
-		"OverlandTileMapLabMixin",
 		"PopUpAccessorMixin",
 		"RootMenuMixin",
-		"ServerDataContextMixin",
-		"TileMapGenerator"
+		"ServerDataContextMixin"
 	]
 }
