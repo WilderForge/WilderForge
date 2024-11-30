@@ -26,6 +26,8 @@ jobs:
               break
             else
               echo "Validate Approval workflow is still in progress..."
+              echo "status:$status"
+              echo "conclusion:$conclusion"
               sleep 10  # Sleep for 10 seconds and retry
             fi
           done
