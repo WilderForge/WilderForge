@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.wildermods.wilderforge.api.mixins.v1.Initializer.*;
 
-import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
 
 import com.worldwalkergames.logging.ALogger.Aggregator;
@@ -17,7 +16,6 @@ import com.worldwalkergames.logging.ALogger.ILogConsumer;
 
 @Mixin(value = Aggregator.class, remap = false)
 public class AggregatorMixin {
-	public Logger logger = new Logger(this.getClass());
 	public @Shadow LinkedList<ILogConsumer> consumers;
 	
 	/*

@@ -16,14 +16,9 @@
 	},
 	
 	"mixins": [
-		"wilderforge.mixins.engine.json",
-		"wilderforge.mixins.hero.json",
 		"wilderforge.mixins.input.json",
 		"wilderforge.mixins.json",
 		"wilderforge.mixins.mechanics.json",
-		"wilderforge.mixins.net.client.json",
-		"wilderforge.mixins.net.server.json",
-		"wilderforge.mixins.overland.party.json",
 		"wilderforge.mixins.vanillafixes.json"
 	],
 	"depends":{
