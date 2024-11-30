@@ -14,7 +14,7 @@ jobs:
         github.event.pull_request != null &&
         github.event.sender.login == 'Gamebuster19901' &&
         github.event.pull_request.user.login = 'Gamebuster19901'
-        startsWith(github.event.review.body, 'approved') &&
+        startsWith(github.event.review.body, 'approved')
       )
     steps:
       - name: Checkout code
