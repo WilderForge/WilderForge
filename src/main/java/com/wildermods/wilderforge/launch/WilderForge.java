@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.launch;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -15,6 +16,7 @@ import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
@@ -262,6 +264,31 @@ public final class WilderForge {
 		}
 		
 		throw new ConfigurationError(e.getValue() + " is out of range for field " + e.getFieldToSet().getName() + " in mod configuration for " + e.getConfigAnnotation().modid() + ". Range is " + minimum + " to " + maximum + ", inclusive.");
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void onConfigValueMissing(MissingConfigValueEvent e) {
+		if(e.getValue() == null && ValueCorrectors.of(e.getConfigEntry()).contains(modid)) {
+			Field field = e.getFieldToSet();
+			try {
+				Object defaultConfig = Configuration.getDefaultConfig(e.getConfigAnnotation());
+				Object config = Configuration.getConfig(e.getConfigAnnotation());
+				if(defaultConfig == null) {
+					throw new AssertionError();
+				}
+				Object defaultValue = e.getFieldToSet().get(Configuration.getDefaultConfig(e.getConfigAnnotation()));
+				e.setValue(defaultValue);
+			} catch (Throwable t) {
+				throw new ConfigurationError("Value " + field.getName() + " in mod " + e.getConfigAnnotation().modid() + " was not set, and wilderforge could not set it to the default value.", t);
+			}
+		}
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGHER)
+	public static void onConfigValueStillMissing(MissingConfigValueEvent e) {
+		if(e.getValue() == null) {
+			throw new ConfigurationError("Value " + e.getFieldToSet().getName() + " in mod " + e.getConfigAnnotation().modid() + " is not set but is required to be set.");
+		}
 	}
 	
 	

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -117,7 +118,7 @@ public class Configuration {
 					Object defaultConfig = constructor.newInstance();
 					Object configuration = constructor.newInstance();
 					defaults.put(coremod, Cast.from(defaultConfig));
-					ConfigStatus status = populate(config, coremod, c, Cast.from(configuration));
+					ConfigStatus status = populate(config, coremod, c, Cast.from(configuration), Cast.from(defaultConfig));
 					if(status.changed()) {
 						throw new AssertionError("Configurations already initialized???? They shouldn't have been able to be changed!");
 					}
@@ -156,7 +157,7 @@ public class Configuration {
 		}
 	}
 	
-	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj) throws Exception {
+	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj, C defaultConfigurationObj) throws Exception {
 		Set<Field> fields = new LinkedHashSet<>();
 		fields.addAll(List.of(configClass.getDeclaredFields()));
 		Path configFile = getConfigFile(coremod);
@@ -184,7 +185,7 @@ public class Configuration {
 			field.setAccessible(true);
 			
 			Class<?> type = field.getType();
-			boolean isPrimitiveType = field.getType().isPrimitive() && !TypeUtil.isVoid(type);
+			boolean isPrimitiveType = TypeUtil.representsPrimitive(type) && !TypeUtil.isVoid(type);
 			ConfigEntry configEntry = field.getAnnotation(ConfigEntry.class);
 			if(configEntry == null) {
 				configEntry = new DefaultConfigEntry(config, field);
@@ -202,6 +203,12 @@ public class Configuration {
 			
 			if(isPrimitiveType && nullable != null) {
 				throw new ConfigurationError("@Nullable annotation placed on primitive field \"" + field.getName() + "\"");
+			}
+			if(nullable == null) {
+				Object defaultValue = field.get(defaultConfigurationObj);
+				if(defaultValue == null) {
+					throw new NullPointerException("Default value for field " + field.getName() + " in config for " + config.modid() + " is null and is not @Nullable");
+				}
 			}
 			
 			String name = field.getName();
@@ -357,16 +364,16 @@ public class Configuration {
 			}
 			
 			if(TypeUtil.isIntegral(type)) {
-				setIntegralField(configurationObj, field, (long)value);
+				setIntegralField(configurationObj, field, TypeUtil.asIntegralPrimitive(value));
 			}
 			else if(TypeUtil.isDecimal(type)) {
-				setDecimalField(configurationObj, field, (double)value);
+				setDecimalField(configurationObj, field, TypeUtil.asDecimalPrimitive(value));
 			}
 			else {
 				field.set(configurationObj, value);
 			}
 			
-			LOGGER.log("Set " + field.getName() + " to " + value);
+			LOGGER.log("Set " + field.getName() + " to " + value, config.modid());
 		}
 		
 		return new ConfigStatus(changed, restartInfo);
@@ -374,27 +381,62 @@ public class Configuration {
 	
 	private static void setIntegralField(Object target, Field field, long value) throws Exception {
 
-        if (TypeUtil.isByte(field)) {
-            field.setByte(target, (byte) value);
-        } else if (TypeUtil.isShort(field)) {
-            field.setShort(target, (short) value);
-        } else if (TypeUtil.isInt(field)) {
-            field.setInt(target, (int) value);
-        } else if (TypeUtil.isChar(field)) {
-            field.setChar(target, (char) value); 
-        } else if (TypeUtil.isLong(field)) {
-            field.setLong(target, value);
-        } else {
-            throw new IllegalArgumentException("Field is not an integral type: " + field);
-        }
+	    Class<?> fieldType = field.getType();
+
+	    if (fieldType == byte.class) {
+	        field.set(target, (byte) value);
+	    }
+	    else if (fieldType == Byte.class) {
+	        field.set(target, Byte.valueOf((byte) value)); // Explicit boxing
+	    }
+	    else if (fieldType == short.class) {
+	        field.set(target, (short) value);
+	    }
+	    else if (fieldType == Short.class) {
+	        field.set(target, Short.valueOf((short) value)); // Explicit boxing
+	    }
+	    else if (fieldType == int.class) {
+	        field.set(target, (int) value);
+	    }
+	    else if (fieldType == Integer.class) {
+	        field.set(target, Integer.valueOf((int) value)); // Explicit boxing
+	    }
+	    else if (fieldType == char.class) {
+	        field.set(target, (char) value);
+	    }
+	    else if (fieldType == Character.class) {
+	        field.set(target, Character.valueOf((char) value)); // Explicit boxing
+	    }
+	    else if (fieldType == long.class) {
+	        field.set(target, value);
+	    }
+	    else if (fieldType == Long.class) {
+	        field.set(target, Long.valueOf(value)); // Explicit boxing
+	    }
+	    else {
+	        throw new IllegalArgumentException("Field is not an integral type: " + fieldType);
+	    }
     }
 	
+	public static void setDecimalField(Object target, Field field, Number value) throws Exception {
+		setDecimalField(target, field, value.doubleValue());
+	}
+	
 	private static void setDecimalField(Object target, Field field, double value) throws Exception {
-		if(TypeUtil.isFloat(field)) {
-			field.setFloat(target, (float)value);
+		
+		Class<?> fieldType = field.getType();
+		
+		if(fieldType == float.class) {
+			field.set(target, (float)value);
 		}
-		else if(TypeUtil.isDouble(field)){
-			field.setDouble(target, value);
+		else if(fieldType == Float.class) {
+			field.set(field, Float.valueOf((float) value)); // Explicit Boxing
+		}
+		else if(fieldType == double.class) {
+			field.set(target, value);
+		}
+		else if(fieldType == Double.class) {
+			field.set(field, Double.valueOf(value)); //Explicit Boxing
 		}
 		else {
 			throw new IllegalArgumentException("Field is not a decimal type: " + field);
@@ -407,7 +449,12 @@ public class Configuration {
 		if(coremod instanceof MissingCoremod) {
 			return null;
 		}
-		Object config = defaults.get(c);
+		for(Entry<CoremodInfo, ?> entry : defaults.entrySet()) {
+			System.out.println("Hash of default entry " + entry.getKey() + ": " + entry.getKey().hashCode());
+			System.out.println("Equals: " + Objects.equals(entry.getKey(), coremod));
+		}
+		System.out.println("Hash we are looking for: " + coremod.hashCode());
+		Object config = defaults.get(coremod);
 		return config;
 	}
 	
@@ -417,7 +464,7 @@ public class Configuration {
 		if(coremod instanceof MissingCoremod) {
 			return null;
 		}
-		Object config = configurations.get(c);
+		Object config = configurations.get(coremod);
 		return config;
 	}
 	

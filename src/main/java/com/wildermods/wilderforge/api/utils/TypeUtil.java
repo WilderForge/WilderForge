@@ -7,9 +7,17 @@ import com.google.common.collect.Sets;
 
 public class TypeUtil {
 
-	private static final HashSet<Class<?>> boxableClasses = Sets.newHashSet(long.class, Long.class, int.class, Integer.class,
-			boolean.class, Boolean.class, double.class, Double.class, float.class, Float.class, short.class, Short.class,
-			byte.class, Byte.class, char.class, Character.class, void.class, Void.class);
+	private static final HashSet<Class<?>> boxedClasses = Sets.newHashSet(
+			Long.class, Integer.class, Boolean.class, Double.class, Float.class, Short.class, Byte.class, Character.class, Void.class);
+	
+	public static final HashSet<Class<?>> unboxedClasses = Sets.newHashSet(
+			long.class, int.class, boolean.class, double.class, float.class, short.class, byte.class, char.class, void.class);
+	
+	private static final HashSet<Class<?>> boxableClasses = Sets.newHashSet();
+	static {
+		boxableClasses.addAll(boxedClasses);
+		boxableClasses.addAll(unboxedClasses);
+	}
 	
 	public static final boolean isLong(Class<?> type) {
 		return type == long.class || type == Long.class;
@@ -95,6 +103,14 @@ public class TypeUtil {
 		return isNumeric(type) && !isDecimal(type);
 	}
 	
+	public static final boolean isBoxed(Class<?> type) {
+		return boxedClasses.contains(type);
+	}
+	
+	public static final boolean isUnboxed(Class<?> type) {
+		return unboxedClasses.contains(type);
+	}
+	
 	public static final boolean isNumeric(Field f) {
 		return isNumeric(f.getType());
 	}
@@ -105,6 +121,35 @@ public class TypeUtil {
 	
 	public static final boolean isIntegral(Field f) {
 		return isIntegral(f.getType());
+	}
+	
+	public static final boolean isBoxed(Field f) {
+		return isBoxed(f.getType());
+	}
+	
+	public static final boolean isUnboxed(Field f) {
+		return isBoxed(f.getType());
+	}
+	
+	public static final long asIntegralPrimitive(Object o) {
+		if(isIntegral(o.getClass())) {
+			if(o instanceof Number) {
+				return ((Number) o).longValue();
+			}
+			else if(o instanceof Character) {
+				return ((Character) o).charValue();
+			}
+		}
+		throw new IllegalArgumentException(o + "");
+	}
+	
+	public static final double asDecimalPrimitive(Object o) {
+		if(isDecimal(o.getClass())) {
+			if(o instanceof Number) {
+				return ((Number) o).doubleValue();
+			}
+		}
+		throw new IllegalArgumentException(o + "");
 	}
 	
 	public static boolean representsPrimitive(Class<?> type) {
