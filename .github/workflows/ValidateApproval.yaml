@@ -22,6 +22,7 @@ jobs:
       )
     steps:
       - name: Validate Commit SHA
+        id: "validate_sha"
         run: |
           if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.event.review.commit_id }}" ]; then
             echo "Latest SHA in PR does not match approved version. Exiting."
@@ -30,3 +31,27 @@ jobs:
       - name: Setting Approved SHA
         id: "approve_sha"
         run: echo "approved_sha=${{ github.event.review.commit_id }}" >> $GITHUB_ENV
+      - name: Post Status Check
+        if: always()  # Ensures this step always runs
+        run: |
+          # Check the outcome of the validation step
+          if [ "${{ steps.validate_sha.outcome }}" == "success" ]; then
+            STATUS="success"
+            DESCRIPTION="Approval validated for commit"
+          else
+            STATUS="failure"
+            DESCRIPTION="Approval validation: failed"
+          fi
+
+          CONTEXT="Approval Validation"
+
+          # Post the status using GitHub API
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$STATUS\",
+              \"description\": \"$DESCRIPTION\",
+              \"context\": \"$CONTEXT\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }}"
