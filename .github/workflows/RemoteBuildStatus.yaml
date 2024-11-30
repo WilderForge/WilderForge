@@ -36,12 +36,13 @@ jobs:
               sleep 10  # Sleep for 10 seconds and retry
             fi
           done
-          echo "::set-output name=status::$status"
-          echo "::set-output name=conclusion::$conclusion"
+          echo "status=$status" >> $GITHUB_OUTPUT
+          echo "conclusion=$conclusion" >> $GITHUB_OUTPUT
       - name: Checking Validation Job
         run: |
-          status=${{ steps.wait_for_completion.outputs.status }}
-          conclusion=${{ steps.wait_for_completion.outputs.conclusion }}
+          # Access the outputs from the previous step
+          status=${{ steps.wait_for_validation.outputs.status }}
+          conclusion=${{ steps.wait_for_validation.outputs.conclusion }}
 
           echo "Validate Approval Workflow Status: $status"
           echo "Conclusion: $conclusion"
