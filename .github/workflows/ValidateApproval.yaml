@@ -28,9 +28,11 @@ jobs:
             echo "Latest SHA in PR does not match approved version. Exiting."
             exit 1
           fi
+
       - name: Setting Approved SHA
         id: "approve_sha"
         run: echo "approved_sha=${{ github.event.review.commit_id }}" >> $GITHUB_ENV
+
       - name: Post Status Check
         if: always()  # Ensures this step always runs
         run: |
@@ -44,6 +46,7 @@ jobs:
           fi
 
           CONTEXT="Approval Validation"
+          APPROVED_SHA="${{ steps.approve_sha.outputs.approved_sha }}"
 
           # Post the status using GitHub API
           curl -s -X POST \
@@ -54,4 +57,4 @@ jobs:
               \"description\": \"$DESCRIPTION\",
               \"context\": \"$CONTEXT\"
             }" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }}"
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$APPROVED_SHA"
