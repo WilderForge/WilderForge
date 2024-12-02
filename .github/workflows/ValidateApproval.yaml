@@ -15,18 +15,29 @@ jobs:
         github.event.review.user.login == 'Gamebuster19901'
       ) ||
       (
-        github.event.pull_request != null &&
-        github.event.sender.login == 'Gamebuster19901' &&
-        github.event.pull_request.user.login == 'Gamebuster19901' &&
-        startsWith(github.event.review.body, 'approved')
+        (
+          github.event.pull_request != null &&
+          github.event.sender.login == 'Gamebuster19901' &&
+          github.event.pull_request.user.login == 'Gamebuster19901'
+        ) &&
+        (
+          startsWith(github.event.review.body, 'approved') ||
+          startsWith(github.event.review.body, 'reject')
+        )
       )
     steps:
-      - name: Validate Commit SHA
-        id: "validate_sha"
+      - name: Checking Approval
+        id: "checking_approval"
         run: |
-          if [ "${{ github.event.pull_request.head.sha }}" != "${{ github.event.review.commit_id }}" ]; then
-            echo "Latest SHA in PR does not match approved version. Exiting."
+          if [[ "${{ github.event.review.body }}" == approved* ]]; then
+            echo "${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
+            exit 0
+          elif [[ "${{ github.event.review.body }}" == reject* ]]; then
+            echo "${{ github.event.review.user.login }} REJECTED build for ${{ github.event.review.commit_id }}"
             exit 1
+          else
+            echo "Assertion Error: Review body expected start with 'approved' or 'reject'. This step should have been skipped but it ran anyway!"
+            exit -1
           fi
 
       - name: Setting Approved SHA
@@ -34,7 +45,6 @@ jobs:
         run: echo "approved_sha=${{ github.event.review.commit_id }}" >> $GITHUB_ENV
 
       - name: Post Status Check
-        if: always()  # Ensures this step always runs
         run: |
           # Check the outcome of the validation step
           if [ "${{ steps.validate_sha.outcome }}" == "success" ]; then
