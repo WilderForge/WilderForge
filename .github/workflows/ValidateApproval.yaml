@@ -1,0 +1,75 @@
+name: Validate Approval
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  approve_and_run:
+    runs-on: ubuntu-latest
+    if: |
+      (
+        github.event.review.state == 'approved' &&
+        github.event.review.user.login == 'Gamebuster19901'
+      ) ||
+      (
+        (
+          github.event.pull_request != null &&
+          github.event.sender.login == 'Gamebuster19901' &&
+          github.event.pull_request.user.login == 'Gamebuster19901'
+        ) &&
+        (
+          startsWith(github.event.review.body, 'approved') ||
+          startsWith(github.event.review.body, 'reject')
+        )
+      )
+    steps:
+      - name: Checking Approval
+        id: "checking_approval"
+        run: |
+          DESC="null"
+          if [[ "${{ github.event.review.body }}" == approved* ]]; then
+            DESC="${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
+            echo $DESC
+            echo "conclusion=success" >> "$GITHUB_ENV"
+            echo "description=$DESC" >> "$GITHUB_ENV"
+            exit 0
+          elif [[ "${{ github.event.review.body }}" == reject* ]]; then
+            DESC="${{ github.event.review.user.login }} REJECTED build for ${{ github.event.review.commit_id }}"
+            echo $DESC
+            echo "conclusion=failure" >> "$GITHUB_ENV"
+            echo "description=$DESC" >> "$GITHUB_ENV"
+            exit 1
+          else
+            DESC="Assertion Error: Review body expected start with 'approved' or 'reject'. This step should have been skipped but it ran anyway!"
+            echo $DESC
+            echo "conclusion=failure" >> "$GITHUB_ENV"
+            echo "description=$DESC" >> "$GITHUB_ENV"
+            exit 1
+          fi
+
+      - name: Post Status Check
+        if:
+          always()
+        run: |
+          echo "${{ env.approved_sha }}"
+        
+          STATUS="${{ env.conclusion }}"
+          DESCRIPTION="${{ env.description }}"
+
+          CONTEXT="Approval Validation"
+          APPROVED_SHA="${{ github.event.review.commit_id }}"
+
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
+          # Post the status using GitHub API
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$STATUS\",
+              \"description\": \"$DESCRIPTION\",
+              \"context\": \"Approval Validation\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$APPROVED_SHA"
