@@ -21,7 +21,11 @@ public class AggregatorMixin {
 	/*
 	 * Redirect Wildermyth's logging to Wilderforge's logger
 	 */
-	@Inject(at = @At("RETURN"), method = DEFAULT_CONSTRUCTOR, require = 1)
+	@Inject(
+		at = @At("RETURN"), 
+		method = DEFAULT_CONSTRUCTOR, 
+		require = 1
+	)
 	public void initTraceConsumerWilderForge(CallbackInfo c) {
 		consumers.clear();
 		consumers.add(new LoggerOverrider());
