@@ -10,6 +10,9 @@ jobs:
     runs-on: [self-hosted, linux]
 
     steps:
+      - name: Mask env.ip
+        run: echo "::add-mask::${{ env.ip }}" # Mask the environment variable at the very beginning
+
       - name: Get Public IP Address
         id: get_ip
         run: |
@@ -19,6 +22,7 @@ jobs:
             echo "Failed to retrieve public IP address."
             exit 1
           fi
+          echo "::add-mask::$PUBLIC_IP" # Mask the public IP immediately
           echo "ip=$PUBLIC_IP" >> $GITHUB_ENV
 
       - name: Update Cloudflare DNS
