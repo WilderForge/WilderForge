@@ -4,8 +4,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import static org.spongepowered.asm.mixin.injection.At.Shift.BY;
-
 import java.util.Arrays;
 
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.utils.Array;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
 import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
@@ -45,48 +45,31 @@ public abstract class ServerDataContextMixin {
 		modInfos.addAll(Coremods.getAllCoremods());
 	}
 	
-	@Inject(
-			at = @At(
-				value = "HEAD"
-			), 
-			method = "loadModInfo("
-				+ STRING
-				+ BOOLEAN
-			+ ")Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
-			require = 1)
-	/*
-	 * Always log if any mods or coremods are missing
-	 */
-	private void loadModInfoHead(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
-		logIfMissing = true;
-	}
-	
-	@Inject(
-			at = @At(
-				value = "TAIL", 
-				shift = BY,
-				by = -5
-			), 
-			method = "loadModInfo("
-				+ STRING
-				+ BOOLEAN
-			+ ")Lcom/worldwalkergames/legacy/game/mods/ModInfo;",
-			require = 1,
-			cancellable = true)
+	@WrapMethod(
+		method = "loadModInfo",
+		require = 1
+	)
 	/*
 	 * Lets Wildermyth load resources from coremods
 	 */
-	private void loadModInfoTail(String modId, boolean logIfMissing, CallbackInfoReturnable<ModInfo> c) {
-		WilderForge.LOGGER.info("Attempting to load coremod " + modId, vanillaLoader);
-		CoremodInfo coremod = Coremods.getCoremod(modId);
-		if(!(coremod instanceof MissingCoremod)) {
-			WilderForge.LOGGER.info("Coremod " + modId + " is " + coremod + " " + coremod.getMetadata().getVersion(), vanillaLoader);
-			WilderForge.LOGGER.info("Coremod " + coremod + " is loaded.", vanillaLoader);
-			c.setReturnValue(coremod);
+	private ModInfo loadModInfo(String modId, boolean logIfMissing, Operation<ModInfo> original) {
+		ModInfo found = original.call(modId, false);
+		if(found == null) {
+			WilderForge.LOGGER.info("Attempting to load coremod " + modId, vanillaLoader);
+			CoremodInfo coremod = Coremods.getCoremod(modId);
+			if(!(coremod instanceof MissingCoremod)) {
+				WilderForge.LOGGER.info("Coremod " + modId + " is " + coremod + " " + coremod.getMetadata().getVersion(), vanillaLoader);
+				WilderForge.LOGGER.info("Coremod " + coremod + " is loaded.", vanillaLoader);
+				found = coremod;
+			}
+			else {
+				WilderForge.LOGGER.warn("No coremod of modid '" + modId + "' was found.", vanillaLoader);
+			}
 		}
-		else {
-			WilderForge.LOGGER.warn("No coremod of modid '" + modId + "' was found.", vanillaLoader);
+		if(found == null) {
+			WilderForge.LOGGER.warn("unable to load mod " + modDebugName(modId), vanillaLoader);
 		}
+		return found;
 	}
 	
 	@Inject(
@@ -117,5 +100,7 @@ public abstract class ServerDataContextMixin {
 			WilderForge.LOGGER.warn("Requesting NO MODS", vanillaLoader);
 		}
 	}
+	
+	private @Shadow String modDebugName(String modid) {return null;};
 	
 }

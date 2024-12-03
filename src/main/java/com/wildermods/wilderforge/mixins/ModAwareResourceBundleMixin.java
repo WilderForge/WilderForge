@@ -34,7 +34,8 @@ public class ModAwareResourceBundleMixin implements CoremodCompatibleResourceBun
 	public @Shadow HashMap<String, HashMap<String, Object>> contentByMod;
 	
 	
-	@Inject(at = @At("RETURN"), method = 
+	@Inject(
+		at = @At("RETURN"), method = 
 			CONSTRUCTOR + "("
 				+ "Lcom/worldwalkergames/legacy/server/context/ServerDataContext;"
 				+ STRING

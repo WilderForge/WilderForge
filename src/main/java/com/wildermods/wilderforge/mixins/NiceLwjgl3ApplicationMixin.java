@@ -19,7 +19,11 @@ public class NiceLwjgl3ApplicationMixin {
 	/**
 	 * Set the game's logger to be WilderForge's logger
 	 */
-	@Inject(method = "setApplicationLogger(Lcom/badlogic/gdx/ApplicationLogger;)" + VOID, at = @At("HEAD"), cancellable = true)
+	@Inject(
+		method = "setApplicationLogger(Lcom/badlogic/gdx/ApplicationLogger;)" + VOID, 
+		at = @At("HEAD"), 
+		cancellable = true
+	)
 	private void setApplicationLogger(ApplicationLogger applicationLogger, CallbackInfo callback) {
 		this.applicationLogger = new LoggerOverrider();
 		callback.cancel();
