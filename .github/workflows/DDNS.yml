@@ -19,6 +19,7 @@ jobs:
             echo "Failed to retrieve public IP address."
             exit 1
           fi
+          echo "::add-mask::$PUBLIC_IP" # Mask the public IP immediately
           echo "ip=$PUBLIC_IP" >> $GITHUB_ENV
 
       - name: Update Cloudflare DNS
@@ -27,7 +28,7 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_RECORD_ID: ${{ secrets.CF_RECORD_ID }}
-          CF_DOMAIN: "your.domain.com" # Replace with your domain
+          CF_DOMAIN: "maven.wildermods.com"
           PUBLIC_IP: ${{ env.ip }}
         run: |
           set -e # Exit on errors
