@@ -66,11 +66,32 @@ jobs:
         env:
           LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
           PUBLIC_IP: ${{ env.ip }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Corrected: use secrets.GITHUB_TOKEN for authentication
         run: |
-          if [ "$LAST_KNOWN_IP" != "$PUBLIC_IP" ]; then
+          if [[ "${{ env.LAST_KNOWN_IP }}" != "${{ env.PUBLIC_IP }}" ]]; then
             echo "Updating LAST_KNOWN_IP secret"
-            gh secret set LAST_KNOWN_IP --body "$PUBLIC_IP"
+            
+            # GitHub API URL to update the secret for the repository
+            API_URL="https://api.github.com/repos/${{ github.repository }}/actions/secrets/LAST_KNOWN_IP"
+            
+            # Create the secret payload
+            PAYLOAD=$(jq -n --arg value "${{ env.PUBLIC_IP }}" \
+              '{"encrypted_value": $value, "key_id": "'${{ secrets.GITHUB_TOKEN }}'"}')
+
+            # Call GitHub API to update the secret
+            RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X PUT "$API_URL" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "$PAYLOAD")
+
+            # Check for successful response (HTTP 200)
+            if [ "$RESPONSE" -eq 200 ]; then
+              echo "Successfully updated LAST_KNOWN_IP secret."
+            else
+              echo "Failed to update LAST_KNOWN_IP secret. HTTP Status: $RESPONSE"
+              cat response.json
+              exit 1
+            fi
           else
             echo "IP has not changed, skipping update."
           fi
