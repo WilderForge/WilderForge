@@ -23,6 +23,12 @@ jobs:
 
       - name: Check if IP has changed
         id: check_ip
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_RECORD_ID: ${{ secrets.CF_RECORD_ID }}
+          CF_DOMAIN: "your.domain.com" # Replace with your domain
+          PUBLIC_IP: ${{ env.ip }}
         run: |
           if [ "${{ secrets.LAST_KNOWN_IP }}" == "${{ env.ip }}" ]; then
             echo "IP has not changed. Skipping DNS update."
@@ -56,5 +62,7 @@ jobs:
           echo "Cloudflare DNS record updated successfully."
 
       - name: Update LAST_KNOWN_IP secret
+        if: >
+          "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}"
         run: |
           gh secret set LAST_KNOWN_IP --body "${{ env.ip }}"
