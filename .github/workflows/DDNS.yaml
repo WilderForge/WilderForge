@@ -66,6 +66,7 @@ jobs:
         env:
           LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
           PUBLIC_IP: ${{ env.ip }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$LAST_KNOWN_IP" != "$PUBLIC_IP" ]; then
             echo "Updating LAST_KNOWN_IP secret"
