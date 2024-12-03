@@ -79,7 +79,7 @@ jobs:
       
             # Call GitHub API to update the secret
             RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X PUT "$API_URL" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Authorization: Bearer ${{ secrets.GB_SECRET_WRITER }}" \
               -H "Accept: application/vnd.github.v3+json" \
               -d "$PAYLOAD")
       
