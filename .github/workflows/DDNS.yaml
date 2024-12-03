@@ -66,23 +66,40 @@ jobs:
         env:
           LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
           PUBLIC_IP: ${{ env.ip }}
+          GB_SECRET_WRITER: ${{ secrets.GB_SECRET_WRITER }}
         run: |
           if [[ "${{ env.LAST_KNOWN_IP }}" != "${{ env.PUBLIC_IP }}" ]]; then
             echo "Updating LAST_KNOWN_IP secret"
+            
+            # GitHub API URL to get the repository's public key
+            API_URL="https://api.github.com/repos/${{ github.repository }}/actions/secrets/public-key"
+            
+            # Get the public key from GitHub
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GB_SECRET_WRITER }}" -H "Accept: application/vnd.github.v3+json" "$API_URL")
+            PUBLIC_KEY=$(echo "$RESPONSE" | jq -r .key)
+            KEY_ID=$(echo "$RESPONSE" | jq -r .key_id)
+            
+            if [[ -z "$PUBLIC_KEY" || -z "$KEY_ID" ]]; then
+              echo "Failed to retrieve public key from GitHub"
+              exit 1
+            fi
+            
+            # Encrypt the PUBLIC_IP value using the public key (using OpenSSL)
+            ENCRYPTED_IP=$(echo -n "${{ env.PUBLIC_IP }}" | openssl rsautl -encrypt -pubin -inkey <(echo "$PUBLIC_KEY" | base64 --decode) | base64)
             
             # GitHub API URL to update the secret for the repository
             API_URL="https://api.github.com/repos/${{ github.repository }}/actions/secrets/LAST_KNOWN_IP"
             
             # Create the secret payload
-            PAYLOAD=$(jq -n --arg value "${{ env.PUBLIC_IP }}" \
-              '{"encrypted_value": $value, "key_id": "'${{ secrets.GB_SECRET_WRITER }}'"}')
-      
+            PAYLOAD=$(jq -n --arg value "$ENCRYPTED_IP" --arg key_id "$KEY_ID" \
+              '{"encrypted_value": $value, "key_id": $key_id}')
+        
             # Call GitHub API to update the secret
             RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X PUT "$API_URL" \
               -H "Authorization: Bearer ${{ secrets.GB_SECRET_WRITER }}" \
               -H "Accept: application/vnd.github.v3+json" \
               -d "$PAYLOAD")
-      
+        
             # Check for successful response (HTTP 200)
             if [ "$RESPONSE" -eq 200 ]; then
               echo "Successfully updated LAST_KNOWN_IP secret."
