@@ -10,9 +10,6 @@ jobs:
     runs-on: [self-hosted, linux]
 
     steps:
-      - name: Mask env.ip
-        run: echo "::add-mask::${{ env.ip }}" # Mask the environment variable at the very beginning
-
       - name: Get Public IP Address
         id: get_ip
         run: |
