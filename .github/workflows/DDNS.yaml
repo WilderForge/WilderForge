@@ -66,7 +66,7 @@ jobs:
         env:
           LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
           PUBLIC_IP: ${{ env.ip }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Corrected: use secrets.GITHUB_TOKEN for authentication
+          GH_TOKEN: ${{ secrets.GB_SECRET_WRITER }}  # Corrected: use organization-level secret for authentication
         run: |
           if [[ "${{ env.LAST_KNOWN_IP }}" != "${{ env.PUBLIC_IP }}" ]]; then
             echo "Updating LAST_KNOWN_IP secret"
@@ -76,14 +76,14 @@ jobs:
             
             # Create the secret payload
             PAYLOAD=$(jq -n --arg value "${{ env.PUBLIC_IP }}" \
-              '{"encrypted_value": $value, "key_id": "'${{ secrets.GITHUB_TOKEN }}'"}')
-
+              '{"encrypted_value": $value, "key_id": "'${{ secrets.GB_SECRET_WRITER }}'"}')
+      
             # Call GitHub API to update the secret
             RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X PUT "$API_URL" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Authorization: Bearer ${{ secrets.GB_SECRET_WRITER }}" \
               -H "Accept: application/vnd.github.v3+json" \
               -d "$PAYLOAD")
-
+      
             # Check for successful response (HTTP 200)
             if [ "$RESPONSE" -eq 200 ]; then
               echo "Successfully updated LAST_KNOWN_IP secret."
