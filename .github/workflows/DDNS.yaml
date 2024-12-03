@@ -21,15 +21,15 @@ jobs:
           fi
           echo "ip=$PUBLIC_IP" >> $GITHUB_ENV
 
+      - name: Check if IP has changed
+        id: check_ip
+        run: |
+          if [ "${{ secrets.LAST_KNOWN_IP }}" == "${{ env.ip }}" ]; then
+            echo "IP has not changed. Skipping DNS update."
+            exit 0
+          fi
+
       - name: Update Cloudflare DNS
-        if: >
-          "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}"
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
-          CF_RECORD_ID: ${{ secrets.CF_RECORD_ID }}
-          CF_DOMAIN: "your.domain.com" # Replace with your domain
-          PUBLIC_IP: ${{ env.ip }}
         run: |
           set -e # Exit on errors
           if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ] || [ -z "$CF_RECORD_ID" ] || [ -z "$CF_DOMAIN" ]; then
@@ -56,7 +56,5 @@ jobs:
           echo "Cloudflare DNS record updated successfully."
 
       - name: Update LAST_KNOWN_IP secret
-        if: >
-          "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}"
         run: |
           gh secret set LAST_KNOWN_IP --body "${{ env.ip }}"
