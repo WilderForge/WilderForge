@@ -62,7 +62,10 @@ jobs:
           echo "Cloudflare DNS record updated successfully."
 
       - name: Update LAST_KNOWN_IP secret
-        if: >
-          "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}"
         run: |
-          gh secret set LAST_KNOWN_IP --body "${{ env.ip }}"
+          if [[ "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}" ]]; then
+            echo "Updating LAST_KNOWN_IP secret"
+            gh secret set LAST_KNOWN_IP --body "${{ env.ip }}"
+          else
+            echo "IP has not changed, skipping update."
+          fi
