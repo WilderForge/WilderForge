@@ -66,7 +66,6 @@ jobs:
         env:
           LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
           PUBLIC_IP: ${{ env.ip }}
-          GH_TOKEN: ${{ secrets.GB_SECRET_WRITER }}  # Corrected: use organization-level secret for authentication
         run: |
           if [[ "${{ env.LAST_KNOWN_IP }}" != "${{ env.PUBLIC_IP }}" ]]; then
             echo "Updating LAST_KNOWN_IP secret"
@@ -80,7 +79,7 @@ jobs:
       
             # Call GitHub API to update the secret
             RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X PUT "$API_URL" \
-              -H "Authorization: Bearer ${{ secrets.GB_SECRET_WRITER }}" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
               -d "$PAYLOAD")
       
