@@ -20,29 +20,31 @@ jobs:
             exit 1
           fi
           echo "ip=$PUBLIC_IP" >> $GITHUB_ENV
-
+          
       - name: Check if IP has changed
         id: check_ip
         env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
-          CF_RECORD_ID: ${{ secrets.CF_RECORD_ID }}
-          CF_DOMAIN: "your.domain.com" # Replace with your domain
+          LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
           PUBLIC_IP: ${{ env.ip }}
         run: |
-          if [ "${{ secrets.LAST_KNOWN_IP }}" == "${{ env.ip }}" ]; then
+          if [ "$LAST_KNOWN_IP" == "$PUBLIC_IP" ]; then
             echo "IP has not changed. Skipping DNS update."
             exit 0
           fi
 
       - name: Update Cloudflare DNS
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_RECORD_ID: ${{ secrets.CF_RECORD_ID }}
+          CF_DOMAIN: "maven.wildermods.com"
+          PUBLIC_IP: ${{ env.ip }}
         run: |
           set -e # Exit on errors
           if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ] || [ -z "$CF_RECORD_ID" ] || [ -z "$CF_DOMAIN" ]; then
             echo "Missing required environment variables for Cloudflare API."
             exit 1
           fi
-
           RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$CF_RECORD_ID" \
             -H "Authorization: Bearer $CF_API_TOKEN" \
             -H "Content-Type: application/json" \
@@ -53,7 +55,6 @@ jobs:
               "ttl": 120,
               "proxied": false
             }')
-
           if [ "$RESPONSE" -ne 200 ]; then
             echo "Cloudflare API update failed. HTTP status: $RESPONSE"
             cat response.json
@@ -62,10 +63,13 @@ jobs:
           echo "Cloudflare DNS record updated successfully."
 
       - name: Update LAST_KNOWN_IP secret
+        env:
+          LAST_KNOWN_IP: ${{ secrets.LAST_KNOWN_IP }}
+          PUBLIC_IP: ${{ env.ip }}
         run: |
-          if [[ "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}" ]]; then
+          if [ "$LAST_KNOWN_IP" != "$PUBLIC_IP" ]; then
             echo "Updating LAST_KNOWN_IP secret"
-            gh secret set LAST_KNOWN_IP --body "${{ env.ip }}"
+            gh secret set LAST_KNOWN_IP --body "$PUBLIC_IP"
           else
             echo "IP has not changed, skipping update."
           fi
