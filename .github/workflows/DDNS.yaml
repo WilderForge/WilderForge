@@ -8,18 +8,22 @@ on:
 jobs:
   update-dns:
     runs-on: [self-hosted, linux]
-    if: >
-      "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}" # Only run if the IP has changed
 
     steps:
       - name: Get Public IP Address
         id: get_ip
         run: |
-          PUBLIC_IP=$(curl -s https://api.ipify.org)
+          set -e # Exit on errors
+          PUBLIC_IP=$(curl -sf https://api.ipify.org) # -s for silent, -f to fail on non-success HTTP codes
+          if [ -z "$PUBLIC_IP" ]; then
+            echo "Failed to retrieve public IP address."
+            exit 1
+          fi
           echo "ip=$PUBLIC_IP" >> $GITHUB_ENV
-          echo "Public IP is $PUBLIC_IP"
 
       - name: Update Cloudflare DNS
+        if: >
+          "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}"
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
@@ -27,19 +31,32 @@ jobs:
           CF_DOMAIN: "your.domain.com" # Replace with your domain
           PUBLIC_IP: ${{ env.ip }}
         run: |
-          echo "Updating DNS record for $CF_DOMAIN to $PUBLIC_IP"
-          curl -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$CF_RECORD_ID" \
-          -H "Authorization: Bearer $CF_API_TOKEN" \
-          -H "Content-Type: application/json" \
-          --data '{
-            "type": "A",
-            "name": "'"$CF_DOMAIN"'",
-            "content": "'"$PUBLIC_IP"'",
-            "ttl": 120,
-            "proxied": false
-          }' | jq .
+          set -e # Exit on errors
+          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ] || [ -z "$CF_RECORD_ID" ] || [ -z "$CF_DOMAIN" ]; then
+            echo "Missing required environment variables for Cloudflare API."
+            exit 1
+          fi
+
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$CF_RECORD_ID" \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{
+              "type": "A",
+              "name": "'"$CF_DOMAIN"'",
+              "content": "'"$PUBLIC_IP"'",
+              "ttl": 120,
+              "proxied": false
+            }')
+
+          if [ "$RESPONSE" -ne 200 ]; then
+            echo "Cloudflare API update failed. HTTP status: $RESPONSE"
+            cat response.json
+            exit 1
+          fi
+          echo "Cloudflare DNS record updated successfully."
 
       - name: Update LAST_KNOWN_IP secret
+        if: >
+          "${{ secrets.LAST_KNOWN_IP }}" != "${{ env.ip }}"
         run: |
-          echo "Updating LAST_KNOWN_IP secret"
           gh secret set LAST_KNOWN_IP --body "${{ env.ip }}"
