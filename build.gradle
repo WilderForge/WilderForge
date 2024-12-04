@@ -84,11 +84,22 @@ publishing {
             groupId = project.group
             artifactId = project.archivesBaseName
             version = project.version
+
+            // Attach sources JAR to the publication
+            artifact sourceJar {
+                classifier = 'sources'
+            }
         }
     }
+
     repositories {
         maven {
             url = uri(project.hasProperty('mavenRepoUrl') ? project.mavenRepoUrl : mavenLocal().url) // Default to mavenLocal if no custom URL is provided
         }
     }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
 }
