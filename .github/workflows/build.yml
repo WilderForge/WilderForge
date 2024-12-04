@@ -7,7 +7,7 @@ on:
         description: 'The commit SHA to checkout and build'
         required: true
       publish:
-        description: 'whether to publish after building'
+        description: 'Whether to publish after building'
         required: false
   push:
     branches:
@@ -18,20 +18,21 @@ jobs:
     runs-on: [self-hosted, linux]
 
     steps:
+      - name: Determine Commit SHA
+        id: determine_sha
+        run: |
+          if [ -z "${{ github.event.inputs.sha }}" ]; then
+            echo "COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+          else
+            echo "COMMIT_SHA=${{ github.event.inputs.sha }}" >> $GITHUB_ENV
+          fi
+
       - name: Set Commit Status to Pending
         run: |
-          # Determine the commit SHA to build
-          if [ -z "${{ github.event.inputs.sha }}" ]; then
-            COMMIT_SHA="${{ github.sha }}"
-          else
-            COMMIT_SHA="${{ github.event.inputs.sha }}"
-          fi
-          
           STATUS="pending"
-          DESCRIPTION="Build in progress for commit $COMMIT_SHA"
+          DESCRIPTION="Build in progress for commit ${{ env.COMMIT_SHA }}"
           TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Post the pending status to the commit using GitHub API
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
@@ -41,12 +42,12 @@ jobs:
               \"context\": \"Build Status\",
               \"target_url\": \"$TARGET_URL\"
             }" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/$COMMIT_SHA"
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ env.COMMIT_SHA }}"
 
       - name: Checkout the repository at SHA
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.sha }}
+          ref: ${{ env.COMMIT_SHA }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4.5.0
@@ -57,7 +58,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Parse `settings.gradle` for wilderworkspace version
+      - name: Parse `settings.gradle` for WilderWorkspace version
         id: parse_version
         run: |
           # Parse settings.gradle for the version of wilderworkspace
@@ -66,22 +67,9 @@ jobs:
 
       - name: Download WilderWorkspace JAR from GitHub
         run: |
-          # Create libs directory if it doesn't exist
           mkdir -p libs
-          
-          # Construct the GitHub release URL based on the version
           RELEASE_URL="https://github.com/WilderForge/WilderWorkspace/releases/download/${{ env.WILDERWORKSPACE_VERSION }}/wilderworkspace-${{ env.WILDERWORKSPACE_VERSION }}.jar"
-          
-          # Add ?raw=true to ensure we download the raw file
-          RAW_URL="${RELEASE_URL}?raw=true"
-          
-          # Echo the URL for debugging purposes
-          echo "Downloading from URL: $RAW_URL"
-          
-          # Download the wilderworkspace JAR using curl
-          curl -L -o libs/wilderworkspace-${{ env.WILDERWORKSPACE_VERSION }}.jar $RAW_URL
-          
-          # Verify download success
+          curl -L -o libs/wilderworkspace-${{ env.WILDERWORKSPACE_VERSION }}.jar "$RELEASE_URL?raw=true"
           ls -lh libs
 
       - name: Clear Game Files
@@ -92,7 +80,7 @@ jobs:
 
       - name: Build With Gradle
         run: ./gradlew build
-        
+
       - name: Publish Build
         if: ${{ github.event.inputs.publish == 'true' }}
         run: |
@@ -100,22 +88,18 @@ jobs:
           ./gradlew publish -PmavenRepoUrl=${{ secrets.MAVEN_REPO }}
 
       - name: Post Build Status
-        if: always()  # Ensures this step runs regardless of previous step success/failure
+        if: always()
         run: |
-          COMMIT_SHA="${{ github.event.inputs.sha }}"
-          
-          # Determine status based on the build result
-          if [[ $? -eq 0 ]]; then
-            STATUS="success"
-            DESCRIPTION="Build successful"
-          else
+          STATUS="success"
+          DESCRIPTION="Build successful"
+
+          if [ ${{ job.status }} != "success" ]; then
             STATUS="failure"
             DESCRIPTION="Build failed"
           fi
 
           TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Post the status to the commit using GitHub API
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
@@ -125,4 +109,4 @@ jobs:
               \"context\": \"Build Status\",
               \"target_url\": \"$TARGET_URL\"
             }" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/$COMMIT_SHA"
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ env.COMMIT_SHA }}"
