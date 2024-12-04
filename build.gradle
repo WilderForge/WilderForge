@@ -80,13 +80,15 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java // This already includes the jar
+            from components.java
             groupId = project.group
             artifactId = project.archivesBaseName
             version = project.version
         }
     }
     repositories {
-        mavenLocal()
+        maven {
+            url = uri(project.hasProperty('mavenRepoUrl') ? project.mavenRepoUrl : mavenLocal()) // Default to mavenLocal if no custom URL is provided
+        }
     }
 }
