@@ -25,6 +25,8 @@ We accept security issues for all repositories under the `WilderForge` github ac
   
 ### Foreign components:
  - Issues in foreign software/components that directly impact the game or coremodding environment
+ - The organization's maven repository (https://maven.wildermods.com)
+ - Workflows under the @WilderForge github repository
 
 ## Not accepted
 
