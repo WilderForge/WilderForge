@@ -6,12 +6,34 @@ on:
       sha:
         description: 'The commit SHA to checkout and build'
         required: true
+      publish:
+        description: 'whether to publish after building'
+        required: false
 
 jobs:
   build_commit:
-    runs-on: [self-hosted, linux]  # Specifies a self-hosted runner
+    runs-on: [self-hosted, linux]
 
     steps:
+      - name: Set Commit Status to Pending
+        run: |
+          COMMIT_SHA="${{ github.event.inputs.sha }}"
+          STATUS="pending"
+          DESCRIPTION="Build in progress for commit $COMMIT_SHA"
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Post the pending status to the commit using GitHub API
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$STATUS\",
+              \"description\": \"$DESCRIPTION\",
+              \"context\": \"Build Status\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$COMMIT_SHA"
+
       - name: Checkout the repository at SHA
         uses: actions/checkout@v3
         with:
@@ -61,3 +83,37 @@ jobs:
 
       - name: Build With Gradle
         run: ./gradlew build
+        
+      - name: Publish Build
+        if: ${{ github.event.inputs.publish == 'true' }}
+        run: |
+          echo "Publishing build..."
+          ./gradlew publish -PmavenRepoUrl=${{ secrets.MAVEN_REPO }}
+
+      - name: Post Build Status
+        if: always()  # Ensures this step runs regardless of previous step success/failure
+        run: |
+          COMMIT_SHA="${{ github.event.inputs.sha }}"
+          
+          # Determine status based on the build result
+          if [[ $? -eq 0 ]]; then
+            STATUS="success"
+            DESCRIPTION="Build successful"
+          else
+            STATUS="failure"
+            DESCRIPTION="Build failed"
+          fi
+
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Post the status to the commit using GitHub API
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$STATUS\",
+              \"description\": \"$DESCRIPTION\",
+              \"context\": \"Build Status\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$COMMIT_SHA"
