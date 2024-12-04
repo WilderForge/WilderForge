@@ -1,27 +1,19 @@
-buildscript {
-	dependencies {
-		classpath group: 'commons-io', name: 'commons-io', version: commonsIOVersion
-		classpath files('libs/wilderworkspace-4.0.0.0.jar')
-	}
-	repositories {
-		mavenCentral()
-	}
-}
-
-
 plugins {
-	id 'java-library'
-	id 'maven-publish'
-	id 'eclipse'
+    id 'java-library'
+    id 'maven-publish'
+    id 'eclipse'
+    id 'com.wildermods.workspace' version '4.1.0.0'
 }
-apply plugin: 'com.wildermods.workspace'
 
 repositories {
-	mavenLocal()
-	mavenCentral()
-	maven {
-		url "https://maven.fabricmc.net/"
-	}
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://maven.fabricmc.net/"
+    }
+    maven {
+        url "https://maven.wildermods.com/"
+    }
 }
 
 sourceCompatibility = '17'

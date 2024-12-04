@@ -58,20 +58,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Parse `settings.gradle` for WilderWorkspace version
-        id: parse_version
-        run: |
-          # Parse settings.gradle for the version of wilderworkspace
-          VERSION=$(grep -oP "useModule\('com\.wildermods:wilderworkspace:(.*?)'\)" settings.gradle | sed -E "s/useModule\('com\.wildermods:wilderworkspace:(.*)'\)/\1/")
-          echo "WILDERWORKSPACE_VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Download WilderWorkspace JAR from GitHub
-        run: |
-          mkdir -p libs
-          RELEASE_URL="https://github.com/WilderForge/WilderWorkspace/releases/download/${{ env.WILDERWORKSPACE_VERSION }}/wilderworkspace-${{ env.WILDERWORKSPACE_VERSION }}.jar"
-          curl -L -o libs/wilderworkspace-${{ env.WILDERWORKSPACE_VERSION }}.jar "$RELEASE_URL?raw=true"
-          ls -lh libs
-
       - name: Clear Game Files
         run: ./gradlew clearLocalRuntime
 
