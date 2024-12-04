@@ -12,9 +12,28 @@ on:
 
 jobs:
   build_commit:
-    runs-on: [self-hosted, linux]  # Specifies a self-hosted runner
+    runs-on: [self-hosted, linux]
 
     steps:
+      - name: Set Commit Status to Pending
+        run: |
+          COMMIT_SHA="${{ github.event.inputs.sha }}"
+          STATUS="pending"
+          DESCRIPTION="Build in progress for commit $COMMIT_SHA"
+          TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Post the pending status to the commit using GitHub API
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"state\": \"$STATUS\",
+              \"description\": \"$DESCRIPTION\",
+              \"context\": \"Build Status\",
+              \"target_url\": \"$TARGET_URL\"
+            }" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$COMMIT_SHA"
+
       - name: Checkout the repository at SHA
         uses: actions/checkout@v3
         with:
