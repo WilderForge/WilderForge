@@ -9,6 +9,9 @@ on:
       publish:
         description: 'whether to publish after building'
         required: false
+  push:
+    branches:
+      - master
 
 jobs:
   build_commit:
@@ -17,7 +20,13 @@ jobs:
     steps:
       - name: Set Commit Status to Pending
         run: |
-          COMMIT_SHA="${{ github.event.inputs.sha }}"
+          # Determine the commit SHA to build
+          if [ -z "${{ github.event.inputs.sha }}" ]; then
+            COMMIT_SHA="${{ github.sha }}"
+          else
+            COMMIT_SHA="${{ github.event.inputs.sha }}"
+          fi
+          
           STATUS="pending"
           DESCRIPTION="Build in progress for commit $COMMIT_SHA"
           TARGET_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
