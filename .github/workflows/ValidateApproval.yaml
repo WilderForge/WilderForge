@@ -73,13 +73,14 @@ jobs:
               \"target_url\": \"$TARGET_URL\"
             }" \
             "https://api.github.com/repos/${{ github.repository }}/statuses/$APPROVED_SHA"
+            
       - name: Trigger Build Commit Workflow
         if: success()
         run: |
-          RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X POST \
+          curl -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -d '{"ref": "refs/heads/main", "inputs": {"sha": "${{ github.event.review.commit_id }}"}}' \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-specific-commit.yml/dispatches")
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/dispatches"
           
           # Check if the HTTP status code is 2xx (successful)
           if [[ "$RESPONSE" -lt 200 || "$RESPONSE" -ge 300 ]]; then
