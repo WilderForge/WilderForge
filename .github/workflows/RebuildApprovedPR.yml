@@ -72,6 +72,27 @@ jobs:
 
           echo "The head of this PR has been validated."
 
-      - name: Trigger Rebuild
+      - name: Trigger Build Commit Workflow
+        if: success()
         run: |
-          echo "Rebuilding approved PR..."
+          # Get the source branch of the PR (from the pull_request object)
+          PR_BRANCH="${{ github.event.pull_request.head.ref }}"
+          
+          # Define the API endpoint for dispatching the workflow
+          WORKFLOW_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/dispatches"
+          
+          # Trigger the workflow for the branch of the pull request
+          echo "Triggering workflow for branch: $PR_BRANCH"
+          RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"ref": "refs/heads/'${PR_BRANCH}'", "inputs": {"sha": "${{ github.event.review.commit_id }}"}}' \
+            "$WORKFLOW_URL")
+      
+          # Check if the HTTP status code is 2xx (successful)
+          if [[ "$RESPONSE" -lt 200 || "$RESPONSE" -ge 300 ]]; then
+            echo "Error triggering the workflow: HTTP $RESPONSE"
+            cat response.json
+            exit 1
+          else
+            echo "Successfully triggered the workflow."
+          fi
