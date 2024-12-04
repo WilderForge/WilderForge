@@ -65,6 +65,12 @@ jobs:
       - name: Build With Gradle
         run: ./gradlew build
         
+      - name: Publish Build
+        if: ${{ github.event.inputs.publish == 'true' }}
+        run: |
+          echo "Publishing build..."
+          ./gradlew publish -PmavenRepoUrl=${{ secrets.MAVEN_REPO }}
+
       - name: Post Build Status
         if: always()  # Ensures this step runs regardless of previous step success/failure
         run: |
