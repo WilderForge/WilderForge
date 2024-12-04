@@ -2,8 +2,13 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'eclipse'
-    id 'com.wildermods.workspace' version '4.1.0.0'
 }
+
+version = wilderForgeVersion
+group = "com.wildermods"
+archivesBaseName = "wilderforge"
+
+apply plugin: 'com.wildermods.workspace'
 
 repositories {
     mavenLocal()
@@ -18,10 +23,6 @@ repositories {
 
 sourceCompatibility = '17'
 targetCompatibility = '17'
-
-version = wilderForgeVersion
-group = "com.wildermods"
-archivesBaseName = "wilderforge"
 
 dependencies {
 

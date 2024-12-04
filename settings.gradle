@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+    	mavenLocal();
     	mavenCentral();
     	maven {
     		url "https://maven.fabricmc.net/"
@@ -8,8 +9,9 @@ pluginManagement {
             url 'https://maven.wildermods.com'
         }
     }
+    String workspaceVersion = settings.ext.find('workspaceVersion')
     plugins {
-        id 'com.wildermods.workspace' version '4.1.0.0'
+        id 'com.wildermods.workspace' version workspaceVersion
     }
 }
 plugins {
