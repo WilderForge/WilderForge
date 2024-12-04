@@ -77,6 +77,11 @@ jar {
 	}
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -86,9 +91,7 @@ publishing {
             version = project.version
 
             // Attach sources JAR to the publication
-            artifact sourceJar {
-                classifier = 'sources'
-            }
+            artifact sourceJar
         }
     }
 
@@ -97,9 +100,4 @@ publishing {
             url = uri(project.hasProperty('mavenRepoUrl') ? project.mavenRepoUrl : mavenLocal().url) // Default to mavenLocal if no custom URL is provided
         }
     }
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    archiveClassifier.set('sources')
 }
