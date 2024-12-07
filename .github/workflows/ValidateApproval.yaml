@@ -28,7 +28,7 @@ jobs:
         id: "checking_approval"
         run: |
           DESC="null"
-          if [[ "${{ github.event.review.body }}" == approved* ]]; then
+          if [[ "${{ github.event.review.state }}" == "approved" || "${{ github.event.review.body }}" == approved* ]]; then
             DESC="${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
             echo $DESC
             echo "conclusion=success" >> "$GITHUB_ENV"
