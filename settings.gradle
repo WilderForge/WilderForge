@@ -1,4 +1,30 @@
 pluginManagement {
+	def getVersionFromToml = { versionKey ->
+	    def tomlFile = file("gradle/libs.versions.toml")
+	    if (!tomlFile.exists()) {
+	        throw new GradleException("libs.versions.toml file not found!")
+	    }
+	
+	    def versionPattern = ~/^\s*${versionKey}\s*=\s*"(.*?)"$/
+	    
+	    def version = null
+	    
+	    tomlFile.eachLine { line ->
+	        //println "Checking line: ${line}" 
+	        def matcher = line =~ versionPattern
+	        if (matcher.find()) {
+	            println "Found ${versionKey}: ${matcher.group(1)}"
+	            version = matcher.group(1)
+	        }
+	    }
+	    
+	    if(version != null) {
+	    	return version;
+	    }
+
+	    println "Version '${versionKey}' not found in gradle/libs.versions.toml"
+	    throw new GradleException("Version '${versionKey}' not found in libs.versions.toml")
+	}
     repositories {
     	mavenLocal();
     	mavenCentral();
@@ -9,9 +35,8 @@ pluginManagement {
             url 'https://maven.wildermods.com'
         }
     }
-    String workspaceVersion = settings.ext.find('workspaceVersion')
     plugins {
-        id 'com.wildermods.workspace' version workspaceVersion
+        id 'com.wildermods.workspace' version getVersionFromToml('workspace_version')
     }
 }
 plugins {
