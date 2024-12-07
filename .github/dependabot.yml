@@ -11,4 +11,4 @@ updates:
     labels:
       - "Category - Enhancement"
       - "Priority - Normal ↓"
-    open-pull-requests-limit: 99
+    open-pull-requests-limit: 98
