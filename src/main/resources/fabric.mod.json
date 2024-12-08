@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id":"wilderforge",
-	"version":"@WILDERFORGE_VERSION@",
+	"version":"@wilderForgeVersion@",
 	
 	"name":"WilderForge",
 	"description": "The coremodding framework for Wildermyth.",
