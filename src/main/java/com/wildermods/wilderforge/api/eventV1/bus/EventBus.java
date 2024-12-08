@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.wildermods.wilderforge.api.eventV1.Event;
 import com.wildermods.wilderforge.launch.ReflectionsHelper;
@@ -48,7 +48,7 @@ public class EventBus {
 		BUS_REFERENCE_CLEANER.setName(threadName);
 	}
 	
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantLock lock = new ReentrantLock();
 	private final ReferenceQueue<ObjectEventListener<? extends Event>> refQueue = new ReferenceQueue<ObjectEventListener<? extends Event>>();
 	private final HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>> listeners = new HashMap<Class<? extends Event>, Set<IEventListener<? extends Event>>>();
 	private final String name;
@@ -72,12 +72,12 @@ public class EventBus {
 	 */
 	@SuppressWarnings("rawtypes")
 	public final void register(Class c) {
-		lock.writeLock().lock();
+		lock.lock();
 		try {
 			registerListeners(c);
 		}
 		finally {
-			lock.writeLock().unlock();
+			lock.unlock();
 		}
 	}
 	
@@ -114,17 +114,17 @@ public class EventBus {
 	 * instead behave as if {@link #register(Class)} was called
 	 */
 	public final void register(Object o) {
-		lock.writeLock().lock();
+		lock.lock();
 		try {
 			registerListeners(o);
 		}
 		finally {
-			lock.writeLock().unlock();
+			lock.unlock();
 		}
 	}
 	
 	/**
-	 * <p>Fires an event to all subscribers that haven't been garbage collected, in {@link conm.wildermods.wilderforge.api.event.bus.SubScribeEvent#priority() priority order}.
+	 * <p>Fires an event to all subscribers that haven't been garbage collected, in {@link com.wildermods.wilderforge.api.event.bus.SubScribeEvent#priority() priority order}.
 	 * 
 	 * <p>Note that it is still possible for subscribers which have no strong
 	 * references to receive the event.
@@ -134,7 +134,7 @@ public class EventBus {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public boolean fire(Event e) {
-		lock.readLock().lock();
+		lock.lock();
 		try {
 			Set<IEventListener<? extends Event>> foundListeners = listeners.get(e.getClass());
 			if(foundListeners == null) { //nothing is subscribing to the event
@@ -152,7 +152,7 @@ public class EventBus {
 			}
 		}
 		finally {
-			lock.readLock().unlock();
+			lock.unlock();
 		}
 		return e.isCancelled();
 	}
