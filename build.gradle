@@ -52,6 +52,12 @@ task processSource(type: Sync) {
     ])
 }
 
+processResources {
+    from "$buildDir/processedSrc"
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    dependsOn processSource
+}
+
 compileJava {
     source = fileTree(dir: "$buildDir/processedSrc", include: ['**/*'])
     dependsOn processSource
