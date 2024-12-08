@@ -53,7 +53,7 @@ task processSource(type: Sync) {
 }
 
 compileJava {
-    source = fileTree(dir: "$buildDir/processedSrc", include: ['**/*.java', "**/fabric.mod.json"])
+    source = fileTree(dir: "$buildDir/processedSrc", include: ['**/*'])
     dependsOn processSource
 }
 
