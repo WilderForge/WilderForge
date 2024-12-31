@@ -8,8 +8,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -34,12 +32,15 @@ import com.worldwalkergames.legacy.Version;
 
 public final class CrashInfo implements CrashLogService {
 
-	volatile boolean dump = false;
-	
-	File crashFolder = new File("./crashes");
+	volatile ThreadDump dump;
+	volatile boolean shouldCollectDump = false;
 	
 	@Override
 	public void logCrash(Throwable t) {
+		logCrash(t, null);
+	}
+	
+	public void logCrash(Throwable t, ThreadDump dump) {
 		StringBuilder s = new StringBuilder("---- WilderForge Crash Report----");
 		s.append('\n');
 		try {
@@ -87,7 +88,8 @@ public final class CrashInfo implements CrashLogService {
 		s.append('\n');
 		appendSystemDetails(s).append("\n\n");
 		appendCoremodDetails(s);
-		if(dump) {
+		
+		if(this.dump != null || shouldCollectDump) {
 			s.append("\n\n");
 			appendThreadDump(s);
 		}
@@ -106,11 +108,11 @@ public final class CrashInfo implements CrashLogService {
 	}
 	
 	public void doThreadDump(boolean dumpThreads) {
-		this.dump = dumpThreads;
+		this.shouldCollectDump = dumpThreads;
 	}
 	
 	public boolean isDumpingThreads() {
-		return this.dump;
+		return dump != null || shouldCollectDump;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -230,7 +232,7 @@ public final class CrashInfo implements CrashLogService {
 	}
 	
 	private void appendThreadDump(StringBuilder s) {
-		s.append(getThreadDump());
+		s.append(initializeThreadDump());
 	}
 	
 	private StringBuilder appendCoremodDetails(StringBuilder s) {
@@ -272,15 +274,11 @@ public final class CrashInfo implements CrashLogService {
 		return file;
 	}
 	
-	public static String getThreadDump() {
-		StringBuilder text = new StringBuilder();
-		ThreadMXBean threads = ManagementFactory.getThreadMXBean();
-		text.append("---- THREAD DUMP ----\n\n");
-		for (ThreadInfo dump : threads.dumpAllThreads(true, true, Integer.MAX_VALUE)) {
-			String trimmedInfo = FullThreadInfo.from(dump).toString();
-			text.append(trimmedInfo.toString());
+	public ThreadDump initializeThreadDump() {
+		if(dump == null) {
+			dump = ThreadDump.capture();
 		}
-		return text.toString();
+		return dump;
 	}
 	
 }

@@ -25,6 +25,7 @@ import com.wildermods.wilderforge.api.uiV1.TextureFilterDrawable;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
 import com.wildermods.wilderforge.api.uiV1.elements.buttons.LinkButton;
 import com.wildermods.wilderforge.launch.InternalOnly;
+import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.logging.Logger;
@@ -257,7 +258,7 @@ public class CoremodListPopup extends PopUp {
 		
 		private Image constructImage() throws IOException {
 			CoremodInfo coremodInfo = getUserData();
-			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", null, TextureFilter.Nearest)); 
+			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", WilderForge.modid, TextureFilter.Nearest)); 
 			FileHandle imageFile = null;
 			if(coremodInfo.getFolder() != null) {
 				if(coremodInfo.modId.equals("wildermyth")) {
@@ -274,7 +275,7 @@ public class CoremodListPopup extends PopUp {
 				imageFile = coremodInfo.getFolder().child(imgLoc.getAsString());
 			}
 			if(imageFile != null && imageFile.exists()) {
-				modImage = new Image(new TextureFilterDrawable(imageFile.path(), null, TextureFilter.Nearest));
+				modImage = new Image(new TextureFilterDrawable(imageFile.path(), coremodInfo.modId, TextureFilter.Nearest));
 			}
 			else {
 				LOGGER.info("Could not find " + imageFile.path() + " " + imageFile.type());

@@ -31,7 +31,6 @@ import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
-
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.control.ClientControl;
 import com.worldwalkergames.legacy.control.HostInfo;
@@ -157,13 +156,13 @@ public final class WilderForge {
 					c =  Cast.from(crashService);
 				}
 				if(Gdx.input.isKeyPressed(Input.Keys.F1) && c != null) {
-					c.doThreadDump(true);
+					c.initializeThreadDump();
 				}
 				String message = "Manually Triggered Debug Crash";
 				if(c != null && c.isDumpingThreads()) {
 					message = message + " With Thread Dump Enabled";
 				}
-				message = message + " CTRL + ALT + SHIFT +";
+				message = message + " (CTRL + ALT + SHIFT +";
 				message = message + ((c == null || !c.isDumpingThreads()) ? " C)" : " F1 + C)");
 				throw new Error(message);
 			}
