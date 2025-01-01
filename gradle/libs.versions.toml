@@ -1,6 +1,6 @@
 [versions]
 reflections8_version = "0.11.7"
-workspace_version = "4.2.1.0"
+workspace_version = "4.2.3.0"
 
 [libraries]
 reflections8 = { module = "net.oneandone.reflections8:reflections8", version.ref = "reflections8_version" }
