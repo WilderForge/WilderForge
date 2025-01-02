@@ -27,6 +27,7 @@ targetCompatibility = '17'
 dependencies {
 
 	implementation libs.reflections8
+	implementation libs.commons.lang
 	
 	/**********
 	don't alter the dependencies below

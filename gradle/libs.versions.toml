@@ -1,9 +1,11 @@
 [versions]
 reflections8_version = "0.11.7"
-workspace_version = "4.2.1.0"
+workspace_version = "4.3.0.0"
+commons_lang_version = "3.17.0"
 
 [libraries]
 reflections8 = { module = "net.oneandone.reflections8:reflections8", version.ref = "reflections8_version" }
+commons_lang = { module = "org.apache.commons:commons-lang3", version.ref = "commons_lang_version" }
 
 [plugins]
 workspace = { id = "com.wildermods.workspace", version.ref = "workspace_version" }
