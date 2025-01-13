@@ -80,7 +80,7 @@ public class OSUtilSecurityFixMixin implements TranslateForShellStatus {
 	)
 	private static final String patchShowFile(String absolutePath) throws IOException {
 		if(shouldPatchShowFile()) {
-			return checkPath(absolutePath).toASCIIString();
+			return checkPath(absolutePath).toASCIIString().substring(5);
 		}
 		else {
 			return absolutePath;
