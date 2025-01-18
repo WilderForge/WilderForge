@@ -41,16 +41,39 @@ dependencies {
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
+def dontFilterExtensions = ['**/*.png', '**/*.jpg']
+
+// Task to copy and filter files (excluding binary files)
+task filterResources(type: Sync) {
+    from(sourceSets.main.resources.srcDirs) {
+        dontFilterExtensions.each { exclude it } // Exclude binary files
+        filter(ReplaceTokens, tokens: [
+            wilderForgeVersion: wilderForgeVersion
+        ])
+    }
+    into "$buildDir/processedSrcFiltered"
+}
+
+// Task to copy binary files without filtering
+task copyUnfilteredResources(type: Sync) {
+    from(sourceSets.main.resources.srcDirs) {
+        dontFilterExtensions.each { include it } // Include only binary files
+    }
+    into "$buildDir/processedSrcUnfiltered"
+}
+
+// Combine the filtered and unfiltered resources
 task processSource(type: Sync) {
-    from sourceSets.main.java.srcDirs
-    from sourceSets.main.resources.srcDirs
+    dependsOn filterResources, copyUnfilteredResources
+
+	from(sourceSets.main.java.srcDirs) // Include Java source files
+	from(sourceSets.main.resources.srcDirs)
+    from("$buildDir/processedSrcFiltered")
+    from("$buildDir/processedSrcUnfiltered")
+
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
     into "$buildDir/processedSrc"
-    
-    inputs.property 'wilderForgeVersion', wilderForgeVersion
-    
-    filter(ReplaceTokens, tokens: [
-    	wilderForgeVersion: wilderForgeVersion
-    ])
 }
 
 processResources {
