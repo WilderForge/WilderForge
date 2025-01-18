@@ -114,6 +114,12 @@ build.dependsOn(sourceJar)
 
 tasks.register('checkArtifactExists') {
     doLast {
+    
+    	if (project.hasProperty('force')) {
+			logger.lifecycle("Skipping artifact existence check due to --force flag.")
+			return
+		}
+		
         def repoUrl = project.hasProperty('mavenRepoUrl') ? project.mavenRepoUrl : mavenLocalUrl
         def artifactPath = "${repoUrl}/${project.group.replace('.', '/')}/${project.archivesBaseName}/${project.version}/${project.archivesBaseName}-${project.version}.jar"
         logger.lifecycle("Checking if artifact exists at: $artifactPath")
