@@ -258,14 +258,15 @@ public class CoremodListPopup extends PopUp {
 		
 		private Image constructImage() throws IOException {
 			CoremodInfo coremodInfo = getUserData();
-			Image modImage = new Image(new TextureFilterDrawable("assets/wilderforge/ui/coremodlist/exampleModImage.png", WilderForge.modid, TextureFilter.Nearest)); 
-			FileHandle imageFile = null;
+			FileHandle imageFile = Gdx.files.internal("assets/wilderforge/ui/coremodlist/exampleModImage.png");
+			Image modImage = new Image(new TextureFilterDrawable(imageFile.path(), WilderForge.modid, TextureFilter.Nearest)); 
+			
 			if(coremodInfo.getFolder() != null) {
 				if(coremodInfo.modId.equals("wildermyth")) {
 					imageFile = Gdx.files.internal("assets/ui/icon/wildermythIcon_256.png"); //OFFICE ACTION #1: Assets from the base game must be pulled from the user's filesystem.
 				}
 				else {
-					imageFile = coremodInfo.getFolder().child("assets/" + coremodInfo.modId + "/icon.png");
+					imageFile = Gdx.files.internal("assets/" + coremodInfo.modId + "/icon.png");
 				}
 			}
 
