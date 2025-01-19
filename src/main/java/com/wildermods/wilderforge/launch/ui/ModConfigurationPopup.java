@@ -23,6 +23,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Excluded;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIEntryContext;
@@ -89,7 +90,7 @@ public class ModConfigurationPopup extends PopUp {
 		while(iterator.hasNext()) {
 			Field f = iterator.next();
 			int modifier = f.getModifiers();
-			if(f.isSynthetic() || Modifier.isStatic(modifier) || Modifier.isTransient(modifier)) {
+			if(f.isSynthetic() || Modifier.isStatic(modifier) || Modifier.isTransient(modifier) || f.getAnnotation(Excluded.class) != null) {
 				iterator.remove();
 			}
 			f.setAccessible(true);
