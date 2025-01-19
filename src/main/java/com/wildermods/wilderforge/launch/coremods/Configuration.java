@@ -63,7 +63,7 @@ public class Configuration {
 	private static final HashMap<CoremodInfo, Function<LegacyViewDependencies, ? extends PopUp>> customConfigurations = new HashMap<>();;
 	private static final HashMap<CoremodInfo, ?> configurations = new HashMap<>();
 	private static final HashMap<CoremodInfo, ?> defaults = new HashMap<>();
-	private static boolean initialized = false;
+	private static boolean ready = false;
 	static {
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Character.class, (JsonSerializer<Character>)(src, typeOfSrc, context) -> {
@@ -79,6 +79,7 @@ public class Configuration {
 	@InternalOnly
 	@SuppressWarnings("unchecked")
 	public static void initializeConfigurations() {
+		ready = true;
 		try {
 			Set<Class<?>> customConfigs = WilderForge.getReflectionsHelper().getAllClassesAnnotatedWith(CustomConfig.class);
 			Set<Class<?>> configClasses = WilderForge.getReflectionsHelper().getAllClassesAnnotatedWith(Config.class);
@@ -156,7 +157,6 @@ public class Configuration {
 		catch(Throwable t) {
 			throw new ConfigurationError("Couldn't initilaize configurations", t);
 		}
-		initialized = true;
 	}
 	
 	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj, C defaultConfigurationObj) throws Exception {
@@ -453,7 +453,7 @@ public class Configuration {
 	
 	@InternalOnly
 	public static Object getDefaultConfig(Config c) {
-		isInitialized();
+		isReady();
 		CoremodInfo coremod = getCoremod(c);
 		if(coremod instanceof MissingCoremod) {
 			return null;
@@ -469,7 +469,7 @@ public class Configuration {
 	
 	@InternalOnly
 	public static Object getConfig(Config c) {
-		isInitialized();
+		isReady();
 		CoremodInfo coremod = getCoremod(c);
 		if(coremod instanceof MissingCoremod) {
 			return null;
@@ -480,7 +480,7 @@ public class Configuration {
 	
 	@SuppressWarnings("rawtypes")
 	public static void saveConfig(Config c, Object configObject, HashMap<ConfigurationFieldContext, ConfigurationFieldContext> fields) throws IOException {
-		isInitialized();
+		isReady();
 		try {
 		
 			Path configFile = getConfigFile(c);
@@ -563,8 +563,8 @@ public class Configuration {
 		return configJson;
 	}
 	
-	private static void isInitialized() throws IllegalStateException {
-		if(!initialized) {
+	private static void isReady() throws IllegalStateException {
+		if(!ready) {
 			throw new IllegalStateException("Cannot access configurations until after initialization!");
 		}
 	}
