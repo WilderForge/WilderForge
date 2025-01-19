@@ -12,6 +12,7 @@
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
+		"MainScreenMixin",
 		"ModAwareResourceBundleMixin",
 		"NewGameDialogMixin",
 		"NiceLwjgl3ApplicationMixin",
