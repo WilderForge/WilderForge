@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationUIContext;
@@ -342,11 +343,11 @@ public @interface ConfigEntry {
 				return null;
 			}
 			
-			public static Range getRangeOfType(Field f) {
+			public static RangeInstance getRangeOfType(Field f) {
 				return getRangeOfType(f.getType());
 			}
 			
-			public static Range getRange(Field f, Number min, Number max) {
+			public static RangeInstance getRange(Field f, Number min, Number max) {
 				if(TypeUtil.isIntegral(f)) {
 					return new IntegralRange(min.longValue(), max.longValue());
 				}
@@ -356,11 +357,11 @@ public @interface ConfigEntry {
 				throw new IllegalArgumentException(f + "");
 			}
 			
-			public static Range getRange(Field f) {
+			public static RangeInstance getRange(Field f) {
 				Range range = f.getAnnotation(Range.class);
 				if(range == null) {
 					range = getRangeOfType(f);
-					return range;
+					return Cast.from(range);
 				}
 				if(TypeUtil.isIntegral(f)) {
 					return new IntegralRange(range.min(), range.max());
