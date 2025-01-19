@@ -51,7 +51,10 @@ task filterResources(type: Sync) {
             wilderForgeVersion: wilderForgeVersion
         ])
     }
-    into "$buildDir/processedSrcFiltered"
+    
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    
+    into("$buildDir/processedSrcFiltered")
 }
 
 // Task to copy binary files without filtering
