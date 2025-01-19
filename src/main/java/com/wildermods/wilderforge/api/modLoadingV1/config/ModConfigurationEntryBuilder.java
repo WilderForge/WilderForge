@@ -27,7 +27,6 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
-import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Localized;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Slider;
@@ -798,7 +797,7 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public static class ConfigurationContext implements Config, Mod {
+	public static class ConfigurationContext implements Config {
 		public final Config config;
 		public final Object configurationObj;
 		
@@ -814,11 +813,6 @@ public class ModConfigurationEntryBuilder {
 		@Override
 		public String modid() {
 			return config.modid();
-		}
-
-		@Override
-		public String version() {
-			return getCoremod().version();
 		}
 		
 		@Override
