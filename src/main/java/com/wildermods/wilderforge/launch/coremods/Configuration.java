@@ -35,6 +35,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigSavedEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
@@ -46,6 +47,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Rang
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationContext;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationFieldContext;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
 
@@ -518,6 +520,7 @@ public class Configuration {
 			throw new ConfigurationError("Unable to save configuration for mod " + c.modid());
 		}
 		
+		WilderForge.MAIN_BUS.fire(new ConfigSavedEvent(new ConfigurationContext(c, configObject)));
 	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGH)

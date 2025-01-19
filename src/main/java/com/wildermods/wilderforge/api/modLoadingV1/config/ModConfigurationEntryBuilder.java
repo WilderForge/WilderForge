@@ -27,12 +27,14 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Localized;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.Slider;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.WilderForge;
+import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigElementException;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.Logger;
@@ -796,15 +798,41 @@ public class ModConfigurationEntryBuilder {
 		}
 	}
 	
-	public static class ConfigurationUIContext {
+	public static class ConfigurationContext implements Config, Mod {
 		public final Config config;
-		public final ModConfigurationPopup popup;
 		public final Object configurationObj;
 		
-		public ConfigurationUIContext(Config config, ModConfigurationPopup popup, Object configurationObj) {
+		public ConfigurationContext(Config config, Object configurationObj) {
 			this.config = config;
-			this.popup = popup;
 			this.configurationObj = configurationObj;
+		}
+		
+		public CoremodInfo getCoremod() {
+			return Coremods.getCoremod(modid());
+		}
+
+		@Override
+		public String modid() {
+			return config.modid();
+		}
+
+		@Override
+		public String version() {
+			return getCoremod().version();
+		}
+		
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return null;
+		}
+	}
+	
+	public static class ConfigurationUIContext extends ConfigurationContext {
+		public final ModConfigurationPopup popup;
+		
+		public ConfigurationUIContext(Config config, ModConfigurationPopup popup, Object configurationObj) {
+			super(config, configurationObj);
+			this.popup = popup;
 		}
 		
 	}
