@@ -381,6 +381,11 @@ public class Configuration {
 	
 	private static void setIntegralField(Object target, Field field, long value) throws Exception {
 
+		RangeInstance definedRange = Ranges.getRange(field);
+		if(!definedRange.contains(value)) { //check to make sure the default range is within explicitly defined @Range
+			throw new ConfigurationError("Default config value for " + field.getName() + " is (" + value + "), which is out of range (min: " + definedRange.min() + ", max: " + definedRange.max() + ")");
+		}
+		
 	    Class<?> fieldType = field.getType();
 
 	    if (fieldType == byte.class) {
@@ -423,6 +428,11 @@ public class Configuration {
 	}
 	
 	private static void setDecimalField(Object target, Field field, double value) throws Exception {
+		
+		RangeInstance definedRange = Ranges.getRange(field);
+		if(!definedRange.contains(value)) {
+			throw new ConfigurationError("Default config value for " + field.getName() + " is (" + value + "), which is out of range (min: " + definedRange.minDecimal() + ", max: " + definedRange.maxDecimal() + ")");
+		}
 		
 		Class<?> fieldType = field.getType();
 		
