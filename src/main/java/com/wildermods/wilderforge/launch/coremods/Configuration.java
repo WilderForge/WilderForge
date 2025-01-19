@@ -423,10 +423,6 @@ public class Configuration {
 	    }
     }
 	
-	public static void setDecimalField(Object target, Field field, Number value) throws Exception {
-		setDecimalField(target, field, value.doubleValue());
-	}
-	
 	private static void setDecimalField(Object target, Field field, double value) throws Exception {
 		
 		RangeInstance definedRange = Ranges.getRange(field);
