@@ -63,6 +63,7 @@ public class Configuration {
 	private static final HashMap<CoremodInfo, Function<LegacyViewDependencies, ? extends PopUp>> customConfigurations = new HashMap<>();;
 	private static final HashMap<CoremodInfo, ?> configurations = new HashMap<>();
 	private static final HashMap<CoremodInfo, ?> defaults = new HashMap<>();
+	private static boolean initialized = false;
 	static {
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Character.class, (JsonSerializer<Character>)(src, typeOfSrc, context) -> {
@@ -155,6 +156,7 @@ public class Configuration {
 		catch(Throwable t) {
 			throw new ConfigurationError("Couldn't initilaize configurations", t);
 		}
+		initialized = true;
 	}
 	
 	private static <C> ConfigStatus populate(Config config, CoremodInfo coremod, Class<C> configClass, C configurationObj, C defaultConfigurationObj) throws Exception {
@@ -451,6 +453,7 @@ public class Configuration {
 	
 	@InternalOnly
 	public static Object getDefaultConfig(Config c) {
+		isInitialized();
 		CoremodInfo coremod = getCoremod(c);
 		if(coremod instanceof MissingCoremod) {
 			return null;
@@ -466,6 +469,7 @@ public class Configuration {
 	
 	@InternalOnly
 	public static Object getConfig(Config c) {
+		isInitialized();
 		CoremodInfo coremod = getCoremod(c);
 		if(coremod instanceof MissingCoremod) {
 			return null;
@@ -476,7 +480,7 @@ public class Configuration {
 	
 	@SuppressWarnings("rawtypes")
 	public static void saveConfig(Config c, Object configObject, HashMap<ConfigurationFieldContext, ConfigurationFieldContext> fields) throws IOException {
-		
+		isInitialized();
 		try {
 		
 			Path configFile = getConfigFile(c);
@@ -557,6 +561,12 @@ public class Configuration {
 			throw new SerializationException("Config " + path  + " is not a json object?!");
 		}
 		return configJson;
+	}
+	
+	private static void isInitialized() throws IllegalStateException {
+		if(!initialized) {
+			throw new IllegalStateException("Cannot access configurations until after initialization!");
+		}
 	}
 	
 	private record ConfigStatus(boolean changed, RestartImpl restart) implements Restart {
