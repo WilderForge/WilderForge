@@ -76,4 +76,8 @@ public class ChapterSetEvent extends Event {
 		return settings.getChapterNumber();
 	}
 	
+	public GameSettings getGameSettings() {
+		return settings;
+	}
+	
 }
