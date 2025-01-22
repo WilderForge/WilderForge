@@ -34,7 +34,7 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
 
     __Important:__ by default, WilderWorkspace assumes the base game files are located in the default directory for a steam installation on your operating system. 
 
-    Please see [WIKI PAGE TO BE CREATED] if you have the game installed in a different location, or you receive a `BUILD FAILED` with one of the following errors when building the project:
+    Please see [WIKI PAGE TO BE CREATED] if you have the game installed in a different location, or you receive a `BUILD FAILED` with one of the following errors when setting up the workspace:
     ```
       java.io.FileNotFoundException: [STEAM_DIRECTORY]/steamapps/common/Wildermyth
     ```
