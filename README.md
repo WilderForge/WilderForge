@@ -59,12 +59,17 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
     ```
     ***
 
+    You should now be able to use your IDE to make changes to WilderForge.
+
 5. Build the project:
+
     To build the project, run:
     ```shell
     ./gradlew build
     ```
     ***
+
+    This will create the mod jar file in `[project directory]/build/libs/`.
 
 ## Updating WilderWorkspace
 
