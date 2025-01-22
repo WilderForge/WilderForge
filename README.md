@@ -61,7 +61,45 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
 
 5. Build the project:
     To build the project, run:
-    ```
+    ```shell
     ./gradlew build
+    ```
+    ***
+
+## Updating WilderWorkspace
+
+The workspace plugin may occasionally receive updates. To update WilderWorkspace, you must do the following:
+
+1. Open the following file: `[project root]/gradle/libs.versions.toml`
+   ***
+2. Change the value of `workspace_version` to the desired version.
+    ***
+3. Notify your IDE of the changes:
+    ```
+    ./gradlew eclipse --refresh-dependencies
+    ```
+    ***
+## Updating Wildermyth
+
+__Extremely Important:__ Updating the base game requires deletion of the copy of the game in the workspace, including save data and legacy files. The original game (from Steam, GOG, etc.) will remain unaffected.
+
+If the base game receives an update and you wish to build against it, follow these steps:
+
+1. Ensure the base game is up to date on your system.
+    ***
+2. Execute the following command to delete the old version from the workspace:
+
+    ```shell
+    ./gradlew clearLocalRuntime
+    ```
+    ***
+3. Setup the project workspace again
+    ```
+    ./gradlew setupDecompWorkspace
+    ```
+    ***
+4. Notify your IDE of the changes:
+    ```
+    ./gradlew eclipse --refresh-dependencies
     ```
     ***
