@@ -59,7 +59,7 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
     ```
     ***
 
-    You should now be able to use your IDE to make changes to WilderForge.
+    You should now be able to import the project into your IDE and make changes to WilderForge.
 
 5. Build the project:
 
