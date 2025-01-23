@@ -45,9 +45,11 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
     ***
 4. Configure the project for your IDE:
 
-    Execute the following commands to configure the project for your IDE. If you only want to build the jar, and don't want to modify WilderForge itself, you can skip this step.
+    Configure the project for your IDE. If you only want to build the jar, and don't want to modify WilderForge itself, you can skip this step.
 
     __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Currently, WilderWorkspace only supports the Eclipse IDE. Pull Requests to add support for additional IDEs are welcome, and can be submitted at the [WilderWorkspace repository](https://wildermods.com/wilderworkspace)
+
+    If you're using Eclipse, Execute the following commands to configure the project for your IDE. If you're not using eclipse, you're going to have to figure out how to configure the project for your particular IDE yourself.
 
     * Configure the project
     ```shell
