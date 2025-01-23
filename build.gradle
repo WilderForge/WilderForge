@@ -41,79 +41,76 @@ dependencies {
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
-def dontFilterExtensions = ['**/*.png', '**/*.jpg']
 
-// Task to copy and filter files (excluding binary files)
-task filterResources(type: Sync) {
+// Define file extensions for token replacement
+def tokenReplaceExtensions = ['.java', '.json']
+
+task replaceTokensInResources(type: Sync) {
     from(sourceSets.main.resources.srcDirs) {
-        dontFilterExtensions.each { exclude it } // Exclude binary files
+        // Only include files matching the defined extensions
+        include { file -> tokenReplaceExtensions.any { file.name.endsWith(it) } }
+        // Apply token replacement
         filter(ReplaceTokens, tokens: [
-            wilderForgeVersion: wilderForgeVersion
+            wilderForgeVersion: project.version
         ])
     }
-    
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    
-    into("$buildDir/processedSrcFiltered")
-}
-
-// Task to copy binary files without filtering
-task copyUnfilteredResources(type: Sync) {
     from(sourceSets.main.resources.srcDirs) {
-        dontFilterExtensions.each { include it } // Include only binary files
+        // Ensure non-text files are passed through untouched
+        exclude { file -> tokenReplaceExtensions.any { file.name.endsWith(it) } }
     }
-    into "$buildDir/processedSrcUnfiltered"
+    into("$buildDir/processedResources")
 }
 
-// Combine the filtered and unfiltered resources
-task processSource(type: Sync) {
-    dependsOn filterResources, copyUnfilteredResources
+task replaceTokensInSource(type: Sync) {
+    doFirst {
+        project.logger.lifecycle("Starting file iteration in source files")
+        project.logger.lifecycle("Source directories being used: ${sourceSets.main.java.srcDirs}")
+    }
 
-	from(sourceSets.main.java.srcDirs) // Include Java source files
-	from(sourceSets.main.resources.srcDirs)
-    from("$buildDir/processedSrcFiltered")
-    from("$buildDir/processedSrcUnfiltered")
+    from(sourceSets.main.java.srcDirs) {
+        include '**/*'
 
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        eachFile { file ->
+            def matchesExtension = tokenReplaceExtensions.any { file.name.endsWith(it) }
+        }
 
-    into "$buildDir/processedSrc"
+        filter(ReplaceTokens, tokens: [
+            wilderForgeVersion: project.version
+        ])
+    }
+
+    into("$buildDir/processedSrc")
+
+    doLast {
+        project.logger.lifecycle("File iteration and token replacement complete")
+    }
+}
+
+
+sourceSets {
+    main {
+    	resources.srcDirs = ["$buildDir/processedResources"]
+        java.srcDirs = ["$buildDir/processedSrc"]
+    }
 }
 
 processResources {
-    from "$buildDir/processedSrc"
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    dependsOn processSource
+    dependsOn replaceTokensInResources
 }
 
 compileJava {
-    source = fileTree(dir: "$buildDir/processedSrc", include: ['**/*'])
-    dependsOn processSource
-}
-
-ext.mavenLocalUrl = repositories.mavenLocal().url.toString()
-
-jar {
-	manifest {
-		attributes(
-			'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
-			'MixinConfigs': 'mixins.json',
-			'Main-Class': 'net.fabricmc.loader.impl.launch.knot.KnotClient',
-			'Specification-Version': 8.0,
-			'Multi-Release': 'true'
-		)
-	}
+    dependsOn replaceTokensInSource
 }
 
 task sourceJar(type: Jar) {
-    from "$buildDir/processedSrc" // Use the processed source directory
+    from sourceSets.main.allSource
     archiveClassifier.set('sources')
-    
-    // Declare processSource as an input of sourceJar to ensure proper task ordering
-    inputs.files tasks.processSource.outputs.files
-    
-    dependsOn processSource
+    destinationDirectory.set(file("$buildDir/libs"))
+    dependsOn replaceTokensInSource, replaceTokensInResources
 }
 build.dependsOn(sourceJar)
+
+ext.mavenLocalUrl = repositories.mavenLocal().url.toString()
 
 tasks.register('checkArtifactExists') {
     doLast {
