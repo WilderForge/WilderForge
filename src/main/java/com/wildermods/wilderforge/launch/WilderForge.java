@@ -41,7 +41,7 @@ import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.CustomValue.CvType;
 
-@Mod(modid = WilderForge.modid, version = "@WILDERFORGE_VERSION@")
+@Mod(modid = WilderForge.modid, version = "@wilderForgeVersion@")
 @CustomConfig(modid = "wildermyth", popup = WildermythOptions.class)
 public final class WilderForge {
 	
