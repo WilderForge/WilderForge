@@ -45,7 +45,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 // Define file extensions for token replacement
 def tokenReplaceExtensions = ['.java', '.json']
 
-task replaceTokensInResources(type: Sync) {
+task replaceTokensInResources(type: Copy) {
     from(sourceSets.main.resources.srcDirs) {
         // Only include files matching the defined extensions
         include { file -> tokenReplaceExtensions.any { file.name.endsWith(it) } }
@@ -61,7 +61,7 @@ task replaceTokensInResources(type: Sync) {
     into("$buildDir/processedResources")
 }
 
-task replaceTokensInSource(type: Sync) {
+task replaceTokensInSource(type: Copy) {
     doFirst {
         project.logger.lifecycle("Starting file iteration in source files")
         project.logger.lifecycle("Source directories being used: ${sourceSets.main.java.srcDirs}")
