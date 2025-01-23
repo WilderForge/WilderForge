@@ -1,6 +1,6 @@
 [versions]
 reflections8_version = "0.11.7"
-workspace_version = "4.3.0.1"
+workspace_version = "4.3.0.2"
 commons_lang_version = "3.17.0"
 
 [libraries]
