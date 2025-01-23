@@ -49,18 +49,18 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
 
     __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Currently, WilderWorkspace only supports the Eclipse IDE. Pull Requests to add support for additional IDEs are welcome, and can be submitted at the [WilderWorkspace repository](https://wildermods.com/wilderworkspace)
 
-    Configure the project
+    * Configure the project
     ```shell
     ./gradlew eclipse --refresh-dependencies
     ```
 
-    Generate run configurations to allow your IDE to start and debug the game:
+    * Generate run configurations to allow your IDE to start and debug the game:
     ```shell
     ./gradlew genEclipseRuns
     ```
-    ***
+    * You should now be able to import the project into your IDE and make changes to WilderForge.
 
-    You should now be able to import the project into your IDE and make changes to WilderForge.
+    ***
 
 5. Build the project:
 
