@@ -113,12 +113,12 @@ public final class WilderForge {
 					}
 				}
 				catch(Throwable t) {
-					throw new Error("Error reading custom values for mod " + coremod.name + " (" + coremod.modId + ")");
+					throw new Error("Error reading custom values for mod " + coremod.name + " (" + coremod.modId + ")", t);
 				}
 			}
 		}
 		catch(Throwable t) {
-			throw new Error("Error prepping mods for PreInitialization sequence!");
+			throw new Error("Error prepping mods for PreInitialization sequence!", t);
 		}
 		
 		Set<Class<?>> modClasses = getReflectionsHelper().getAllClassesAnnotatedWith(Mod.class);
