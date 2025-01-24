@@ -59,11 +59,11 @@ public class ReflectionsHelper {
             }
         });
 		
-        
+        /*
         packageNames.forEach(pkg -> 
         	WilderForge.LOGGER.info("Discovered package: " + pkg, "ReflectionsHelper")
         );
-        
+        */
         
 		builder.forPackages(packageNames.toArray(new String[] {}));
 		
