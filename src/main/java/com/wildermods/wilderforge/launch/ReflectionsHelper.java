@@ -1,15 +1,24 @@
 package com.wildermods.wilderforge.launch;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.reflections8.Reflections;
 import org.reflections8.scanners.MethodAnnotationsScanner;
 import org.reflections8.scanners.SubTypesScanner;
 import org.reflections8.scanners.TypeAnnotationsScanner;
+import org.reflections8.util.ClasspathHelper;
 import org.reflections8.util.ConfigurationBuilder;
 
 public class ReflectionsHelper {
@@ -17,18 +26,45 @@ public class ReflectionsHelper {
 	private final Reflections reflections;
 	
 	public ReflectionsHelper(ClassLoader classLoader) {
+		
 		ConfigurationBuilder builder = new ConfigurationBuilder().addClassLoader(classLoader).addScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new SubTypesScanner());
 
-		Set<Package> packages = Set.of(classLoader.getDefinedPackages());
-		Set<String> packageNames = new HashSet<String>();
-		for(Package packag : packages) {
-			String name = packag.getName();
-			if(name.startsWith("net")) {
-				continue;
-			}
-			packageNames.add(packag.getName());
-		}
+        Set<String> packageNames = new HashSet<>();
+
+        ClasspathHelper.forClassLoader(classLoader).forEach(url -> {
+            try {
+                Path path = Path.of(url.toURI());
+
+                if (Files.isRegularFile(path) && path.toString().endsWith(".jar")) {
+                    try (JarFile jarFile = new JarFile(path.toFile())) {
+                        jarFile.stream()
+                               .filter(entry -> entry.getName().endsWith(".class") && !entry.getName().startsWith("META-INF/versions"))
+                               .map(this::extractPackageFromJarEntry)
+                               .forEach(packageNames::add);
+                    }
+                } else if (Files.isDirectory(path)) {
+                    Files.walkFileTree(path, new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                            if (file.toString().endsWith(".class")) {
+                                String packageName = extractPackageFromDirectory(file, path);
+                                packageNames.add(packageName);
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException("Error processing classpath: " + url, e);
+            }
+        });
 		
+        
+        packageNames.forEach(pkg -> 
+        	WilderForge.LOGGER.info("Discovered package: " + pkg, "ReflectionsHelper")
+        );
+        
+        
 		builder.forPackages(packageNames.toArray(new String[] {}));
 		
 		reflections = new Reflections(builder);
@@ -121,5 +157,16 @@ public class ReflectionsHelper {
 		classes.add(clazz);
 		return classes;
 	}
+	
+    private String extractPackageFromJarEntry(JarEntry entry) {
+        String name = entry.getName();
+        int lastSlash = name.lastIndexOf('/');
+        return lastSlash > 0 ? name.substring(0, lastSlash).replace('/', '.') : "";
+    }
+
+    private String extractPackageFromDirectory(Path file, Path root) {
+        Path relativePath = root.relativize(file.getParent());
+        return relativePath.toString().replace(File.separatorChar, '.');
+    }
 	
 }
