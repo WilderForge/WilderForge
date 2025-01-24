@@ -5,7 +5,7 @@ pluginManagement {
 	        throw new GradleException("libs.versions.toml file not found!")
 	    }
 	
-	    def versionPattern = ~/^\s*${versionKey}\s*=\s*"(.*?)"$/
+	    def versionPattern = ~/^\s*${versionKey}\s*=\s*"(.*?)"\s*$/
 	    
 	    def version = null
 	    
