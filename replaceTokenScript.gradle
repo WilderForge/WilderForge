@@ -1,0 +1,98 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+// Define file extensions for token replacement
+def tokenReplaceExtensions = ['.java', '.json']
+
+task replaceTokensInResources(type: Copy) {
+    doFirst {
+        delete "$buildDir/processedResources"
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        // Only include files matching the defined extensions
+        include { file -> tokenReplaceExtensions.any { file.name.endsWith(it) } }
+        // Apply token replacement
+        filter(ReplaceTokens, tokens: [
+            wilderForgeVersion: project.version
+        ])
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        // Ensure non-text files are passed through untouched
+        exclude { file -> tokenReplaceExtensions.any { file.name.endsWith(it) } }
+    }
+    into("$buildDir/processedResources")
+    
+    inputs.files(sourceSets.main.resources.srcDirs)
+    outputs.dir("$buildDir/processedResources")
+}
+
+task replaceTokensInSource(type: Copy) {
+    doFirst {
+    	delete "$buildDir/processedSrc"
+        project.logger.lifecycle("Starting file iteration in source files")
+        project.logger.lifecycle("Source directories being used: ${sourceSets.main.java.srcDirs}")
+    }
+
+    from(sourceSets.main.java.srcDirs) {
+        include '**/*'
+
+        eachFile { file ->
+            def matchesExtension = tokenReplaceExtensions.any { file.name.endsWith(it) }
+            project.logger.lifecycle("found file " + file)
+        }
+
+        filter(ReplaceTokens, tokens: [
+            wilderForgeVersion: project.version
+        ])
+    }
+
+    into("$buildDir/processedSrc")
+
+    doLast {
+        project.logger.lifecycle("File iteration and token replacement complete")
+    }
+}
+
+
+sourceSets {
+    processed {
+    	resources.srcDirs = ["$buildDir/processedResources"]
+        java.srcDirs = ["$buildDir/processedSrc"]
+    }
+    build {
+    	java.srcDirs = sourceSets.main.java.srcDirs + sourceSets.processed.java.srcDirs
+        resources.srcDirs = sourceSets.main.resources.srcDirs + sourceSets.processed.resources.srcDirs
+    }
+}
+
+configurations {
+    resolvedCompileOnly {
+        extendsFrom compileOnly
+    }
+}
+
+processResources {
+    dependsOn replaceTokensInResources
+    from(sourceSets.processed.resources)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+compileJava {
+	dependsOn replaceTokensInResources
+    source = replaceTokensInSource.outputs
+    classpath -= sourceSets.main.resources
+    classpath += sourceSets.processed.resources
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.processed.allSource
+    archiveClassifier.set('sources')
+    destinationDirectory.set(file("$buildDir/libs"))
+    dependsOn replaceTokensInSource, replaceTokensInResources
+}
+build.dependsOn(sourceJar)
+
+eclipse {
+    classpath {
+    	sourceSets -= [sourceSets.processed, sourceSets.build]
+    }
+}
