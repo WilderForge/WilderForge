@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
+import com.wildermods.wilderforge.api.mixins.v1.Initializer;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.logging.GraphicalInfo;
 import com.wildermods.wilderforge.launch.logging.LoggerOverrider;
@@ -26,6 +27,13 @@ public class LegacyDesktopMixin {
 	private static @Shadow @Final ALogger LOGGER;
 	private @Shadow MainScreen ui;
 
+	@Inject(
+		at  = @At("TAIL"), method = Initializer.DEFAULT_CONSTRUCTOR
+	)
+	private void onConstruct(CallbackInfo c) {
+		WilderForge.setup(Cast.from(this));
+	}
+	
 	/**
 	 * Set steam's logger to be WilderForge's logger
 	 */

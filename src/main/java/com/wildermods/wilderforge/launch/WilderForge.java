@@ -31,6 +31,7 @@ import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
 import com.wildermods.wilderforge.launch.logging.Logger;
+import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.control.ClientControl;
 import com.worldwalkergames.legacy.control.HostInfo;
@@ -54,6 +55,9 @@ public final class WilderForge {
 	private static ReflectionsHelper reflectionsHelper;
 	
 	@InternalOnly
+	private static LegacyDesktop mainApp;
+	
+	@InternalOnly
 	private static LegacyViewDependencies dependencies;
 	
 	@InternalOnly
@@ -75,6 +79,11 @@ public final class WilderForge {
 			reflectionsHelper = new ReflectionsHelper(WilderForge.class.getClassLoader());
 		}
 		return reflectionsHelper;
+	}
+	
+	@InternalOnly
+	public static void setup(LegacyDesktop mainApp) {
+		WilderForge.mainApp = mainApp;
 	}
 
 	@InternalOnly
@@ -132,7 +141,7 @@ public final class WilderForge {
 		NETWORK_BUS.register(WilderForge.class);
 		RENDER_BUS.register(WilderForge.class);
 		
-		MAIN_BUS.fire(new PreInitializationEvent());
+		MAIN_BUS.fire(new PreInitializationEvent(mainApp, dependencies));
 		
 		if(WilderForge.dependencies == null) {
 			WilderForge.dependencies = dependencies;
@@ -168,7 +177,7 @@ public final class WilderForge {
 			}
 		});
 		
-		MAIN_BUS.fire(new PostInitializationEvent());
+		MAIN_BUS.fire(new PostInitializationEvent(mainApp, dependencies));
 	}
 	
 	@InternalOnly
@@ -267,7 +276,7 @@ public final class WilderForge {
 		}
 	}
 	
-	
+	@InternalOnly
 	public static LegacyViewDependencies getViewDependencies() {
 		return dependencies;
 	}

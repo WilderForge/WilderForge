@@ -9,6 +9,7 @@
 		"AggregatorMixin",
 		"FancyImageDrawableAccessor",
 		"FileConsumerMixin",
+		"LegacyDesktopAccessor",
 		"LegacyDesktopMixin",
 		"LegacyUIRootMixin",
 		"MainMenuMixin",
