@@ -38,6 +38,7 @@ import com.wildermods.wilderforge.launch.exception.ConfigElementException;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.ui.ModConfigurationPopup;
+import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryBoolean;
 import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryTextBox;
 
 import com.worldwalkergames.legacy.context.ClientDataContext;
@@ -217,6 +218,12 @@ public class ModConfigurationEntryBuilder {
 			resetButton.addListener(uiUpdater);
 			box.update();
 		}
+		if(actor instanceof WFConfigEntryBoolean) {
+			WFConfigEntryBoolean<?> box = Cast.from(actor);
+			box.setUndoButton(undoButton);
+			box.setResetButton(resetButton);
+			box.setState(context.getNewVal(Boolean.class));
+		}
 		context.fieldTable.row();
 	}
 	
@@ -232,6 +239,10 @@ public class ModConfigurationEntryBuilder {
 			if(actor instanceof WFConfigEntryTextBox) {
 				WFConfigEntryTextBox box = Cast.from(actor);
 				box.convertToString(context, box);
+			}
+			else if(actor instanceof WFConfigEntryBoolean) {
+				WFConfigEntryBoolean box = Cast.from(actor);
+				box.setState(Cast.from(context.getOldVal(Boolean.class)));
 			}
 		};
 		
@@ -257,6 +268,10 @@ public class ModConfigurationEntryBuilder {
 				WFConfigEntryTextBox box = Cast.from(actor);
 				box.convertToString(context, box);
 			}
+			else if(actor instanceof WFConfigEntryBoolean) {
+				WFConfigEntryBoolean box = Cast.from(actor);
+				box.setState(Cast.from(context.getDefaultVal()));
+			}
 		};
 		
 		resetButton.setUserData(exec);
@@ -271,26 +286,9 @@ public class ModConfigurationEntryBuilder {
 	
 	public Cell buildBoolean(ConfigurationUIEntryContext context) throws ConfigElementException {
 		
-		Cell<WFConfigEntryTextBox<Boolean>> ret = buildTextInput(context, 
-			(c, textBox) -> {
-				boolean val;
-				
-				if(textBox == null) {
-					return false;
-				}
-				
-				String text = textBox.getText();
-				if(text == null) {
-					return false;
-				}
-				
-				return ("true".equals(text) || "false".equals(text));
-			},
-			(c, input) -> {
-				return Boolean.parseBoolean(input);
-			}, 
-			(c, bool) -> {
-				return bool.toString();
+		Cell<WFConfigEntryBoolean<Boolean>> ret = buildToggleInput(context, 
+			(c, boolbox) -> {
+				return boolbox != null;
 			}
 		);
 		
@@ -737,6 +735,17 @@ public class ModConfigurationEntryBuilder {
 			}
 		});
 		return fieldTable.add(textField);
+	}
+	
+	public <T> Cell<WFConfigEntryBoolean<T>> buildToggleInput(ConfigurationUIEntryContext context, BiPredicate<ConfigurationUIEntryContext, WFConfigEntryBoolean<T>> validator) {
+		Table fieldTable = context.fieldTable;
+		final WFConfigEntryBoolean<T> booleanField = new WFConfigEntryBoolean<>(context, "", dependencies.skin);
+		
+		booleanField.setValidator(validator);
+
+		booleanField.test(context, booleanField);
+		
+		return fieldTable.add(booleanField);
 	}
 	
 	public void buildTooltip(Actor actor, ConfigurationUIEntryContext context) {

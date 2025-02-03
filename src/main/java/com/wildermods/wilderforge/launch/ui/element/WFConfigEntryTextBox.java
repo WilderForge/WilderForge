@@ -31,10 +31,6 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 	volatile FancyImageButton undoButton = null;
 	volatile FancyImageButton resetButton = null;
 	
-	
-	Color invalidColor = new Color(0xFF6496FF);
-	Color validColor = new Color(0x64E664FF);
-	
 	TintedDrawable<AutoSwapDrawable> backgroundNeutral;
 	TintedDrawable<AutoSwapDrawable> backgroundOver;
 	TintedDrawable<AutoSwapDrawable> backgroundDown;
@@ -82,7 +78,7 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 			
 			if(resetButton != null) {
 				if(!test(context, WFConfigEntryTextBox.this) || !context.isDefault()) {
-					resetButton.setColor(invalidColor);
+					resetButton.setColor(UIColors.invalidColor);
 					resetButton.setDisabled(false);
 				}
 				else {
@@ -264,11 +260,11 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 		}
 		
 		if(Boolean.TRUE.equals(isValid)) {
-			drawable.setTint(validColor);
+			drawable.setTint(UIColors.validColor);
 			//setColor(Color.GREEN);
 		}
 		else if(Boolean.FALSE.equals(isValid)) {
-			drawable.setTint(invalidColor);
+			drawable.setTint(UIColors.invalidColor);
 			//setColor(Color.RED);
 		}
 		else {
@@ -279,7 +275,5 @@ public class WFConfigEntryTextBox<T> extends NiceTextField implements BiPredicat
 		drawable.removeTint();
 		setColor(prevColor);
 	}
-	
-	private static final class Update extends Event {}
 	
 }
