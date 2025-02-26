@@ -22,7 +22,8 @@
 		"wilderforge.mixins.vanillafixes.json"
 	],
 	"depends":{
-		"wildermyth": ">=1.16.0"
+		"wildermyth": ">=1.16.0",
+		"eventbus": ">=7.0.0"
 	},
 	"breaks":{
 		"wildermyth": [

@@ -1,5 +1,5 @@
 [versions]
-eventbus_version = "6.2.27"
+eventbus_version = "7.0.0"
 reflections8_version = "0.11.7"
 workspace_version = "4.4.0.0"
 commons_lang_version = "3.17.0"
