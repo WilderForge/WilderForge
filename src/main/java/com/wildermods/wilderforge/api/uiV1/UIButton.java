@@ -50,7 +50,7 @@ public class UIButton<T> extends NiceButton<T> {
 
 	@Override
 	protected final boolean tryClick() {
-		if(!WilderForge.MAIN_BUS.fire(new ButtonEvent.ButtonTryClickEvent(WilderForge.getViewDependencies(), this)) && super.tryClick()) {
+		if(!WilderForge.MAIN_BUS.post(new ButtonEvent.ButtonTryClickEvent(WilderForge.getViewDependencies(), this)) && super.tryClick()) {
 			onClick();
 			return true;
 		}
@@ -59,7 +59,7 @@ public class UIButton<T> extends NiceButton<T> {
 	
 	private final void onClick() {
 		clickImpl();
-		WilderForge.MAIN_BUS.fire(new ButtonEvent.ButtonClickEvent(WilderForge.getViewDependencies(), this));
+		WilderForge.MAIN_BUS.post(new ButtonEvent.ButtonClickEvent(WilderForge.getViewDependencies(), this));
 	}
 	
 	protected void clickImpl() {

@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.modLoadingV1.event;
 
-import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.api.eventV2.Event;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.mixins.LegacyDesktopAccessor;

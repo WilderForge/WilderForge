@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.api.eventV2.Event;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 

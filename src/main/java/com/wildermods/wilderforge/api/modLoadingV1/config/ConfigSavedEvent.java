@@ -2,7 +2,7 @@ package com.wildermods.wilderforge.api.modLoadingV1.config;
 
 import java.lang.annotation.Annotation;
 
-import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.api.eventV2.Event;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ModConfigurationEntryBuilder.ConfigurationContext;
 

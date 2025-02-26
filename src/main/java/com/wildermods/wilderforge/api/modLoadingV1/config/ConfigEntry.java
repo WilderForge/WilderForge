@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import net.minecraftforge.eventbus.api.EventPriority;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;

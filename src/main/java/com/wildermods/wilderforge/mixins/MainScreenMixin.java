@@ -23,7 +23,7 @@ public abstract class MainScreenMixin extends LegacyUIRoot {
 	@WrapMethod(method = "setContent")
 	private void onTopScreenChange(ITopLevelScreen newScreen, Operation<Void> original) {
 		TopLevelScreenChangeEvent.Pre e = new TopLevelScreenChangeEvent.Pre(Cast.from(this), content, newScreen);
-		if(WilderForge.MAIN_BUS.fire(e)) {
+		if(WilderForge.MAIN_BUS.post(e)) {
 			return;
 		}
 		original.call(e.getNewScreen());

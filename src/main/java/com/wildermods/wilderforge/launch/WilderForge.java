@@ -9,9 +9,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.wildermods.provider.services.CrashLogService;
 import com.wildermods.wilderforge.launch.WilderForge.WildermythOptions;
-import com.wildermods.wilderforge.api.eventV1.bus.EventBus;
-import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
-import com.wildermods.wilderforge.api.eventV1.bus.SubscribeEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
@@ -41,6 +38,11 @@ import com.worldwalkergames.legacy.ui.menu.OptionsDialog;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.CustomValue.CvType;
+import net.minecraftforge.eventbus.api.BusBuilder;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @Mod(modid = WilderForge.modid, version = "@wilderForgeVersion@")
 @CustomConfig(modid = "wildermyth", popup = WildermythOptions.class)
@@ -69,9 +71,9 @@ public final class WilderForge {
 	@InternalOnly
 	private static ClientControl clientControl;
 	
-	public static final EventBus MAIN_BUS = new EventBus("MAIN");
-	public static final EventBus NETWORK_BUS = new EventBus("NETWORK");
-	public static final EventBus RENDER_BUS = new EventBus("RENDER");
+	public static final IEventBus MAIN_BUS = BusBuilder.builder().build();
+	public static final IEventBus NETWORK_BUS = BusBuilder.builder().build();
+	public static final IEventBus RENDER_BUS = BusBuilder.builder().build();
 	
 	@InternalOnly
 	public static ReflectionsHelper getReflectionsHelper() {
@@ -131,6 +133,10 @@ public final class WilderForge {
 		}
 		
 		Set<Class<?>> modClasses = getReflectionsHelper().getAllClassesAnnotatedWith(Mod.class);
+		
+		WilderForge.LOGGER.log(ConfigValueOutOfRangeEvent.class.getClassLoader());
+		
+		WilderForge.LOGGER.log(Event.class == com.wildermods.wilderforge.api.eventV2.Event.class.getSuperclass());
 		
 		for(Class<?> clazz : modClasses) {
 			Mod mod = getReflectionsHelper().getAnnotation(Mod.class, clazz);
@@ -212,6 +218,11 @@ public final class WilderForge {
 			throw new IllegalStateException("Host mismatch?!");
 		}
 		WilderForge.host = null;
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void onPreInit(PreInitializationEvent e) {
+		LOGGER.fatal("PRE-INIT");
 	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGH)

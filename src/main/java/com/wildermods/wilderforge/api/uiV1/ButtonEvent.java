@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.uiV1;
 
-import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.api.eventV2.Event;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.ui.NiceButtonBase;
 

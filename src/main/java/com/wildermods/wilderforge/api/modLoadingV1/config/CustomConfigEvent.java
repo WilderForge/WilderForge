@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
-import com.wildermods.wilderforge.api.eventV1.Event;
+import com.wildermods.wilderforge.api.eventV2.Event;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 
 public class CustomConfigEvent extends Event {

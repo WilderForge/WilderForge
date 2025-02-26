@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.wildermods.wilderforge.api.eventV1.bus.EventPriority;
+import net.minecraftforge.eventbus.api.EventPriority;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
 
 /**
