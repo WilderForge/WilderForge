@@ -30,7 +30,7 @@ dependencies {
 
 	implementation libs.reflections8
 	implementation libs.commons.lang
-	implementation libs.eventbus
+	api libs.eventbus
 	
 	/**********
 	don't alter the dependencies below
