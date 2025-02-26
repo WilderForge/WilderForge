@@ -1,5 +1,9 @@
 package com.wildermods.wilderforge.api.eventV1.bus;
 
+/**
+ * Use {@link net.minecraftforge.eventbus.api.EventPriority}
+ */
+@Deprecated(forRemoval = true)
 public interface EventPriority {
 
 	public static final int LOWER = -10000;

@@ -1,34 +1,35 @@
 package com.wildermods.wilderforge.api.eventV1;
 
-import java.util.concurrent.CancellationException;
-
-public abstract class Event {
-
-	private final boolean cancellable;
-	private volatile boolean cancelled;
+/**
+ * Deprecated, use {@link com.wildermods.wilderforge.api.eventV2.Event}
+ */
+@Deprecated(forRemoval = true)
+public abstract class Event extends net.minecraftforge.eventbus.api.Event {
+	
+	private final boolean cancelable;
 	
 	public Event(boolean cancellable) {
-		this.cancellable = cancellable;
+		this.cancelable = cancellable;
 	}
 	
+	@Deprecated(forRemoval = true)
 	public boolean isCancelled() {
-		return cancelled && cancellable;
+		return this.isCanceled();
 	}
 	
-	public void setCancelled(boolean cancelled) throws CancellationException {
-		if(cancellable) {
-			this.cancelled = cancelled;
-		}
-		else {
-			CancellationException c = new CancellationException();
-			UnsupportedOperationException u = new UnsupportedOperationException("Event " + this.getClass().getCanonicalName() + " is not cancellable");
-			c.initCause(u);
-			throw c;
-		}
+	@Deprecated(forRemoval = true)
+	public void setCancelled(boolean cancelled) throws UnsupportedOperationException {
+		this.setCanceled(cancelled);
 	}
 	
+	@Deprecated
 	public boolean canBeCancelled() {
-		return cancellable;
+		return this.isCancelable();
+	}
+	
+	@Override
+	public boolean isCancelable() {
+		return cancelable;
 	}
 	
 }

@@ -1,15 +1,18 @@
-package com.wildermods.wilderforge.api.eventV1;
+package com.wildermods.wilderforge.api.eventV2;
 
-import com.wildermods.wilderforge.api.eventV2.ModEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 
 /**
- * @deprecated, use {@link com.wildermods.wilderforge.api.eventV2.ModCommunicationEvent}
- * @param <T>
+ * An event used to communicate between mods. Can store any type of data.
+ * 
+ * data is final. If you want mutable data, make your data type an array.
+ * This is to make it harder for mods to inadvertently modify data they 
+ * don't specifically intend to modify.
+ *
+ * @param <T> the type of data this communication event holds
  */
-@Deprecated(forRemoval = true)
-public class ModCommunicationEvent<T extends Object> extends ModEvent {
+public final class ModCommunicationEvent<T extends Object> extends ModEvent {
 
 	private final T data;
 	
