@@ -1,5 +1,5 @@
 [versions]
-eventbus_version = "7.0.2+WilderForge"
+eventbus_version = "7.1.0+WilderForge"
 reflections8_version = "0.11.7"
 workspace_version = "4.4.1.0"
 commons_lang_version = "3.17.0"
