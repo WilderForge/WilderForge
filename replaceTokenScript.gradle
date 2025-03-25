@@ -26,9 +26,11 @@ task replaceTokensInResources(type: Copy) {
 }
 
 task replaceTokensInSource(type: Copy) {
+    def processedDir = "$buildDir/processedSrc"
+
     doFirst {
-    	delete "$buildDir/processedSrc"
-        project.logger.lifecycle("Starting file iteration in source files")
+        delete processedDir // Ensure the directory is deleted before processing
+        project.logger.lifecycle("Starting replaceTokensInSource task execution...")
         project.logger.lifecycle("Source directories being used: ${sourceSets.main.java.srcDirs}")
     }
 
@@ -37,7 +39,7 @@ task replaceTokensInSource(type: Copy) {
 
         eachFile { file ->
             def matchesExtension = tokenReplaceExtensions.any { file.name.endsWith(it) }
-            project.logger.lifecycle("found file " + file)
+            project.logger.lifecycle("Found file: " + file)
         }
 
         filter(ReplaceTokens, tokens: [
@@ -45,7 +47,15 @@ task replaceTokensInSource(type: Copy) {
         ])
     }
 
-    into("$buildDir/processedSrc")
+    into(processedDir)
+
+    // Properly set inputs and outputs
+    inputs.files(fileTree(dir: sourceSets.main.java.srcDirs, include: '**/*'))
+    outputs.dir(processedDir)
+
+    // Ensure Gradle sees the task as out-of-date by overriding the up-to-date check
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
 
     doLast {
         project.logger.lifecycle("File iteration and token replacement complete")
