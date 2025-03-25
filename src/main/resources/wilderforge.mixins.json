@@ -18,6 +18,7 @@
 		"NewGameDialogMixin",
 		"NiceLwjgl3ApplicationMixin",
 		"PopUpAccessorMixin",
+		"PopUpManagerMixin",
 		"RootMenuMixin",
 		"ServerDataContextMixin"
 	]
