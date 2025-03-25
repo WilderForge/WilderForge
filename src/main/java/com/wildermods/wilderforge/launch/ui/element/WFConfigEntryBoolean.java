@@ -68,8 +68,6 @@ public class WFConfigEntryBoolean<T> extends NiceCheckBox<T> implements BiPredic
 		dropdown.adjustLayoutVars(backgroundDown.getParent(), scalar);
 		dropdown.adjustLayoutVars(backgroundDisabled.getParent(), scalar);
 		
-		this.debug();
-		
 		this.getImageCell().getActor().remove();
 		this.getImageCell().minWidth(0f).spaceRight(0f);
 		
