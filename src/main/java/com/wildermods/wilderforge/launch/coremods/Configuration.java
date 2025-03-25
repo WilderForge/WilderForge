@@ -9,7 +9,9 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -31,9 +33,11 @@ import com.google.gson.JsonSerializer;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.MissingCoremod;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigSavedEvent;
+import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.ConfigValueOutOfRangeEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.BadConfigValueEvent.MissingConfigValueEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Nullable;
@@ -52,11 +56,15 @@ import com.wildermods.wilderforge.api.utils.TypeUtil;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
+import com.wildermods.wilderforge.launch.exception.EventTargetError;
 import com.wildermods.wilderforge.launch.logging.Logger;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
 
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBusFireOrder;
+import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class Configuration {
@@ -230,7 +238,7 @@ public class Configuration {
 			
 			if(jsonValue == null && nullable == null) {
 				MissingConfigValueEvent e = new MissingConfigValueEvent(config, configEntry, configurationObj, field);
-				WilderForge.MAIN_BUS.fire(e);
+				fireInCorrectorOrder(e);
 				value = e.getValue();
 			}
 			
@@ -276,7 +284,7 @@ public class Configuration {
 								Double dval = ((Number)value).doubleValue();
 								if(!dRange.contains(rawVal)) {
 									ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configEntry, configurationObj, field, rawVal, dRange);
-									WilderForge.MAIN_BUS.fire(e);
+									fireInCorrectorOrder(e);
 									dval = ((Number)e.getValue()).doubleValue();
 								}
 								value = dval;
@@ -331,7 +339,7 @@ public class Configuration {
 								}
 								if(!iRange.contains(rawVal)) {
 									ConfigValueOutOfRangeEvent e = new ConfigValueOutOfRangeEvent(config, configEntry, configurationObj, field, rawVal, iRange);
-									WilderForge.MAIN_BUS.fire(e);
+									fireInCorrectorOrder(e);
 									ival = ((Number)e.getValue()).longValue();
 								}
 								value = ival;
@@ -344,7 +352,7 @@ public class Configuration {
 						}
 						else {
 							MissingConfigValueEvent e = new MissingConfigValueEvent(config, configEntry, configurationObj, field);
-							WilderForge.MAIN_BUS.fire(e);
+							fireInCorrectorOrder(e);
 							value = e.getValue();
 						}
 						break;
@@ -391,42 +399,42 @@ public class Configuration {
 			throw new ConfigurationError("Default config value for " + field.getName() + " is (" + value + "), which is out of range (min: " + definedRange.min() + ", max: " + definedRange.max() + ")");
 		}
 		
-	    Class<?> fieldType = field.getType();
+		Class<?> fieldType = field.getType();
 
-	    if (fieldType == byte.class) {
-	        field.set(target, (byte) value);
-	    }
-	    else if (fieldType == Byte.class) {
-	        field.set(target, Byte.valueOf((byte) value)); // Explicit boxing
-	    }
-	    else if (fieldType == short.class) {
-	        field.set(target, (short) value);
-	    }
-	    else if (fieldType == Short.class) {
-	        field.set(target, Short.valueOf((short) value)); // Explicit boxing
-	    }
-	    else if (fieldType == int.class) {
-	        field.set(target, (int) value);
-	    }
-	    else if (fieldType == Integer.class) {
-	        field.set(target, Integer.valueOf((int) value)); // Explicit boxing
-	    }
-	    else if (fieldType == char.class) {
-	        field.set(target, (char) value);
-	    }
-	    else if (fieldType == Character.class) {
-	        field.set(target, Character.valueOf((char) value)); // Explicit boxing
-	    }
-	    else if (fieldType == long.class) {
-	        field.set(target, value);
-	    }
-	    else if (fieldType == Long.class) {
-	        field.set(target, Long.valueOf(value)); // Explicit boxing
-	    }
-	    else {
-	        throw new IllegalArgumentException("Field is not an integral type: " + fieldType);
-	    }
-    }
+		if (fieldType == byte.class) {
+			field.set(target, (byte) value);
+		}
+		else if (fieldType == Byte.class) {
+			field.set(target, Byte.valueOf((byte) value)); // Explicit boxing
+		}
+		else if (fieldType == short.class) {
+			field.set(target, (short) value);
+		}
+		else if (fieldType == Short.class) {
+			field.set(target, Short.valueOf((short) value)); // Explicit boxing
+		}
+		else if (fieldType == int.class) {
+			field.set(target, (int) value);
+		}
+		else if (fieldType == Integer.class) {
+			field.set(target, Integer.valueOf((int) value)); // Explicit boxing
+		}
+		else if (fieldType == char.class) {
+			field.set(target, (char) value);
+		}
+		else if (fieldType == Character.class) {
+			field.set(target, Character.valueOf((char) value)); // Explicit boxing
+		}
+		else if (fieldType == long.class) {
+			field.set(target, value);
+		}
+		else if (fieldType == Long.class) {
+			field.set(target, Long.valueOf(value)); // Explicit boxing
+		}
+		else {
+			throw new IllegalArgumentException("Field is not an integral type: " + fieldType);
+		}
+	}
 	
 	private static void setDecimalField(Object target, Field field, double value) throws Exception {
 		
@@ -573,6 +581,10 @@ public class Configuration {
 		}
 	}
 	
+	private static <T extends BadConfigValueEvent> T fireInCorrectorOrder(BadConfigValueEvent e) {
+		return Cast.from(WilderForge.MAIN_BUS.fire(e, new CorrectorFiringOrder()));
+	}
+	
 	private record ConfigStatus(boolean changed, RestartImpl restart) implements Restart {
 		
 		public ConfigStatus() {
@@ -665,6 +677,65 @@ public class Configuration {
 			return prompt;
 		}
 		
+	}
+	
+	public static final class CorrectorFiringOrder implements IEventBusFireOrder {
+		
+		@Override
+		public List<IEventListener> reorder(Event event, List<IEventListener> listeners) {
+			if (event instanceof BadConfigValueEvent e) {
+				List<String> correctors = new ArrayList<>(Arrays.asList(e.getConfigEntry().valueCorrectors()));
+				boolean wilderforgeMissing = !correctors.contains("wilderforge");
+
+				// Ensure "wilderforge" is always at the end if it wasn't already present
+				if (wilderforgeMissing) {
+					correctors.add("wilderforge");
+				}
+
+				LinkedHashMap<String, List<IEventListener>> groupedListeners = new LinkedHashMap<>();
+
+				// Step 1: Group listeners by modid
+				for (IEventListener listener : listeners) {
+					Mod mod = listener.listeningMethod().getDeclaringClass().getAnnotation(Mod.class);
+					if (mod == null) {
+						throw new EventTargetError("Method " + listener.listeningMethod().getName() 
+							+ " in " + listener.listeningMethod().getDeclaringClass().getName() 
+							+ " has been registered in a class that is not annotated with @Mod!");
+					}
+					groupedListeners.computeIfAbsent(mod.modid(), k -> new ArrayList<>()).add(listener);
+				}
+
+				// Step 2: Sort each group's listeners by event priority
+				for (List<IEventListener> group : groupedListeners.values()) {
+					group.sort(Comparator.comparingInt(l -> l.subscribeInfo().priority()));
+				}
+
+				// Step 3: Merge groups based on `correctors` order
+				List<IEventListener> ret = new ArrayList<>();
+				for (String corrector : correctors) {
+					if (groupedListeners.containsKey(corrector)) {
+						if (wilderforgeMissing && corrector.equals("wilderforge")) {
+							/* Only include `wilderforge` listeners with priority HIGHER
+							 * ensures that even if "wilderforge" is not explicitly registered, 
+							 * it can still intercept uncaught events (at EventPriority.HIGHER) 
+							 * and crash the game with a detailed error message.
+							 */
+							for (IEventListener listener : groupedListeners.get(corrector)) {
+								if (listener.subscribeInfo().priority() == EventPriority.HIGHER) {
+									ret.add(listener);
+								}
+							}
+						} else {
+							// Normal behavior for all other correctors
+							ret.addAll(groupedListeners.get(corrector));
+						}
+					}
+				}
+
+				return ret;
+			}
+			return listeners;
+		}
 	}
 	
 }
