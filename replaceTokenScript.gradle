@@ -50,7 +50,7 @@ task replaceTokensInSource(type: Copy) {
     into(processedDir)
 
     // Properly set inputs and outputs
-    inputs.files(fileTree(dir: sourceSets.main.java.srcDirs, include: '**/*'))
+    inputs.files(sourceSets.main.java.srcDirs)
     outputs.dir(processedDir)
 
     // Ensure Gradle sees the task as out-of-date by overriding the up-to-date check
