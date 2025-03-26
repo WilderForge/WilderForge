@@ -23,11 +23,14 @@
 	],
 	"depends":{
 		"wildermyth": ">=1.16.0",
-		"eventbus": ">=7.0.0"
+		"eventbus": ">=7.1.0"
 	},
 	"breaks":{
 		"wildermyth": [
 			"<1.16.0"
+		],
+		"eventbus": [
+			"7.1.0"
 		],
 		"minecraft":["*"]
 	},
