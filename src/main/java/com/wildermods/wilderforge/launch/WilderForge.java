@@ -39,7 +39,6 @@ import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.CustomValue.CvArray;
 import net.fabricmc.loader.api.metadata.CustomValue.CvType;
 import net.minecraftforge.eventbus.api.BusBuilder;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -133,10 +132,6 @@ public final class WilderForge {
 		}
 		
 		Set<Class<?>> modClasses = getReflectionsHelper().getAllClassesAnnotatedWith(Mod.class);
-		
-		WilderForge.LOGGER.log(ConfigValueOutOfRangeEvent.class.getClassLoader());
-		
-		WilderForge.LOGGER.log(Event.class == com.wildermods.wilderforge.api.eventV2.Event.class.getSuperclass());
 		
 		for(Class<?> clazz : modClasses) {
 			Mod mod = getReflectionsHelper().getAnnotation(Mod.class, clazz);
