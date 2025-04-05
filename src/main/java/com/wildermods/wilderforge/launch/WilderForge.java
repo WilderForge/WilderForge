@@ -19,6 +19,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Inte
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.ValueCorrectors;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigSavedEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.config.CustomConfig;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PostInitializationEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.event.PreInitializationEvent;
@@ -280,6 +281,11 @@ public final class WilderForge {
 		if(e.getValue() == null) {
 			throw new ConfigurationError("Value " + e.getFieldToSet().getName() + " in mod " + e.getConfigAnnotation().modid() + " is not set but is required to be set.");
 		}
+	}
+	
+	@SubscribeEvent
+	public static void onConfigSave(ConfigSavedEvent e) {
+		LOGGER.log("Config for mod " + e.modid() + " Saved!");
 	}
 	
 	@InternalOnly
