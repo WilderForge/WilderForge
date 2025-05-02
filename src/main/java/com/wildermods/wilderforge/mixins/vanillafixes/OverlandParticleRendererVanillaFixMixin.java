@@ -43,8 +43,7 @@ public class OverlandParticleRendererVanillaFixMixin {
 			value = "FIELD",
 			target = "particlesToDraw",
 			opcode = Opcodes.PUTFIELD
-		),
-		require = 2
+		)
 	)
 	public void dontIncreaseParticlesToDraw(OverlandParticleRenderer thiz, int particlesToDraw) {
 		//NO-OP
