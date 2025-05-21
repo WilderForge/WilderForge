@@ -43,7 +43,8 @@ public class OverlandParticleRendererVanillaFixMixin {
 			value = "FIELD",
 			target = "particlesToDraw",
 			opcode = Opcodes.PUTFIELD
-		)
+		),
+		expect = -1 //so the game doesn't crash when mixin debugging is enabled
 	)
 	public void dontIncreaseParticlesToDraw(OverlandParticleRenderer thiz, int particlesToDraw) {
 		//NO-OP
