@@ -26,6 +26,10 @@ repositories {
 sourceCompatibility = '17'
 targetCompatibility = '17'
 
+wilderWorkspace {
+	useDependency("1.16+559")
+}
+
 dependencies {
 
 	implementation libs.reflections8
