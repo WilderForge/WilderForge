@@ -1,1 +1,3 @@
 Copyright 2021-2025 Gamebuster19901, All rights reserved
+
+All files in the `com/wildermods/wilderforge/mixins/vanillafixes` directory (and subdirectories) are licensed under MIT-0: https://github.com/aws/mit-0
