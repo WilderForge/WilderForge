@@ -94,7 +94,7 @@ public abstract class FModBinaryFixerMixin {
 			catch(Throwable t) {
 				
 				UnsatisfiedLinkError e2 = new UnsatisfiedLinkError();
-				e2.addSuppressed(t);
+				e2.addSuppressed(e);
 				e2.initCause(t);
 				throw e2;
 			}
