@@ -188,11 +188,6 @@ public abstract class FModBinaryFixerMixin {
 					} else {
 						LOGGER.warn("PF_X flag was already not set.");
 					}
-
-					// Return updated buffer as a byte[]
-					byte[] out = new byte[buf.limit()];
-					buf.rewind();
-					buf.get(out);
 					return;
 				}
 			}
