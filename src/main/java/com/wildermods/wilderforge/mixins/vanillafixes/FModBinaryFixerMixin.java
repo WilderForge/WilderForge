@@ -101,8 +101,7 @@ public abstract class FModBinaryFixerMixin {
 		}
 	}
 	
-	@Unique
-	private static void stripLibrary(String library) {
+	private static @Unique void stripLibrary(String library) {
 		LOGGER.warn("Patching " + library);
 		try {
 			try {
@@ -132,18 +131,15 @@ public abstract class FModBinaryFixerMixin {
 		}
 	}
 	
-	@Unique
-	private static boolean isFMODBinary(String libPath) {
+	private static @Unique boolean isFMODBinary(String libPath) {
 		return libPath.contains("/fmod_runtimes/");
 	}
 	
-	@Unique
-	private static boolean isLinuxBinary(String libPath) {
+	private static @Unique boolean isLinuxBinary(String libPath) {
 		return libPath.endsWith(".so");
 	}
 
-	@Unique
-	private static boolean isELFFile(ByteBuffer buf) {
+	private static @Unique boolean isELFFile(ByteBuffer buf) {
 		if (buf.limit() < 16) return false;
 
 		ByteBuffer slice = buf.duplicate(); // safe copy for inspection
@@ -152,8 +148,7 @@ public abstract class FModBinaryFixerMixin {
 		return eIdent[0] == 0x7F && eIdent[1] == 'E' && eIdent[2] == 'L' && eIdent[3] == 'F';
 	}
 
-	@Unique
-	private static void stripExecStackFlag(ByteBuffer inputBuf) throws UnsatisfiedLinkError {
+	private static @Unique void stripExecStackFlag(ByteBuffer inputBuf) throws UnsatisfiedLinkError {
 		try {
 			// Create a duplicate to avoid modifying caller's buffer state
 			ByteBuffer buf = inputBuf.duplicate().order(ByteOrder.LITTLE_ENDIAN);
@@ -201,23 +196,19 @@ public abstract class FModBinaryFixerMixin {
 	}
 
 	// Helper methods
-	@Unique
-	private static int getShortLE(ByteBuffer buf, int offset) {
+	private static @Unique int getShortLE(ByteBuffer buf, int offset) {
 		return buf.getShort(offset) & 0xFFFF;
 	}
 
-	@Unique
-	private static int getIntLE(ByteBuffer buf, int offset) {
+	private static @Unique int getIntLE(ByteBuffer buf, int offset) {
 		return buf.getInt(offset);
 	}
 
-	@Unique
-	private static long getLongLE(ByteBuffer buf, int offset) {
+	private static @Unique long getLongLE(ByteBuffer buf, int offset) {
 		return buf.getLong(offset);
 	}
 
-	@Unique
-	private static void putIntLE(ByteBuffer buf, int offset, int value) {
+	private static @Unique void putIntLE(ByteBuffer buf, int offset, int value) {
 		buf.putInt(offset, value);
 	}
 	
