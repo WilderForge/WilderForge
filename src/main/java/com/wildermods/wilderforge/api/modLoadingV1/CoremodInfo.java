@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.api.modLoadingV1;
 
+import com.worldwalkergames.legacy.game.mods.IModAware;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
 import com.worldwalkergames.legacy.server.context.ServerDataContext;
 import com.worldwalkergames.legacy.server.context.ServerDataContext.ModLocation;
@@ -33,7 +34,7 @@ import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.api.modLoadingV1.config.Config;
 
-public class CoremodInfo extends ModInfo implements ModContainer, Mod, Config {
+public class CoremodInfo extends ModInfo implements ModContainer, Mod, Config, IModAware {
 
 	public static Files files = Gdx.files;
 	
@@ -209,6 +210,15 @@ public class CoremodInfo extends ModInfo implements ModContainer, Mod, Config {
 	@Override
 	public int hashCode() {
 		return Objects.hash(modid(), version());
+	}
+
+	/**
+	 * use {@link #modid()} instead
+	 */
+	@Override
+	@Deprecated(forRemoval = false)
+	public String getModId() {
+		return modid();
 	}
 	
 }
