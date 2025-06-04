@@ -532,16 +532,6 @@ public class Configuration {
 		WilderForge.MAIN_BUS.fire(new ConfigSavedEvent(new ConfigurationContext(c, configObject)));
 	}
 	
-	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void handleOutOfRangeValues(ConfigValueOutOfRangeEvent e) {
-		ConfigEntry entry = e.getConfigEntry();
-		HashSet<String> valueCorrectors = new HashSet<String>();
-		valueCorrectors.addAll(Arrays.asList(entry.valueCorrectors()));
-		if(valueCorrectors.contains("wilderforge")) {
-			
-		}
-	}
-	
 	@InternalOnly
 	public static Function<LegacyViewDependencies, ? extends PopUp> getCustomConfigPopUp(CoremodInfo c) {
 		return customConfigurations.get(c);
