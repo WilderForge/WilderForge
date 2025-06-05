@@ -3,8 +3,9 @@ package com.wildermods.wilderforge.mixins;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
+
+import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
-import com.wildermods.wilderforge.launch.logging.Logger;
 
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

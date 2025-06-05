@@ -1,5 +1,6 @@
 package com.wildermods.wilderforge.launch.logging;
 
+import com.wildermods.provider.util.logging.LogLevel;
 import com.wildermods.wilderforge.launch.WilderForge;
 
 public class Debug extends Error {

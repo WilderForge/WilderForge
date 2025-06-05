@@ -19,11 +19,11 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.wildermods.provider.util.logging.LogLevel;
 import com.wildermods.wilderforge.api.modLoadingV1.VersionHelper;
 import com.wildermods.wilderforge.api.utils.vanillafixes.TranslateForShellStatus;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
-import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.util.OSUtil;
 

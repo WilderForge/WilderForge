@@ -7,9 +7,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
+
+import com.wildermods.provider.util.logging.LogLevel;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.launch.WilderForge;
-import com.wildermods.wilderforge.launch.logging.LogLevel;
 import com.worldwalkergames.communication.observer.signals.Signal2;
 import com.worldwalkergames.legacy.input.GlobalInputProcessor;
 

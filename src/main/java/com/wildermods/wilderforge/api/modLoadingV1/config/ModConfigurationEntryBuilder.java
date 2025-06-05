@@ -25,6 +25,7 @@ import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Inte
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
+import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.GUI.CustomBuilder;
@@ -36,7 +37,6 @@ import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigElementException;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
-import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.ui.ModConfigurationPopup;
 import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryBoolean;
 import com.wildermods.wilderforge.launch.ui.element.WFConfigEntryTextBox;

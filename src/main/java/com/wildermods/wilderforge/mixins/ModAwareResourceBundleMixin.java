@@ -16,10 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.badlogic.gdx.files.FileHandle;
 import static com.wildermods.wilderforge.api.mixins.v1.Initializer.*;
 import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
+
+import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
-import com.wildermods.wilderforge.launch.logging.Logger;
 import com.wildermods.wilderforge.launch.resources.CoremodCompatibleResourceBundle;
 
 import com.worldwalkergames.legacy.server.context.ServerDataContext;

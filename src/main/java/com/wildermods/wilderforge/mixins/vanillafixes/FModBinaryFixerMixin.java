@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.Unique;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.mixins.v1.Descriptor;
 import com.wildermods.wilderforge.api.mixins.v1.Impossible;
-import com.wildermods.wilderforge.launch.logging.Logger;
 
 /**
  * Mixin patch to native library loading failures caused by the executable stack flag

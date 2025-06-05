@@ -5,8 +5,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-
-import com.wildermods.wilderforge.launch.logging.Logger;
+import com.wildermods.provider.util.logging.Logger;
 import com.worldwalkergames.legacy.server.context.PlayerLegacy;
 
 @Mixin(PlayerLegacy.class)
