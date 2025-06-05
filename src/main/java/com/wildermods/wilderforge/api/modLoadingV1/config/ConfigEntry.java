@@ -23,6 +23,9 @@ import com.wildermods.wilderforge.launch.exception.ConfigurationError.InvalidRan
 import com.wildermods.wilderforge.launch.InternalOnly;
 import com.wildermods.wilderforge.launch.WilderForge;
 
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange.DoubleRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange.FloatRange;
+
 /**
  * The {@code ConfigEntry} annotation is used to designate a field in a configuration
  * class as a configuration entry. The other 
@@ -311,11 +314,11 @@ public @interface ConfigEntry {
 			public static final IntegralRange CHAR = new IntegralRange(Character.MIN_VALUE, Character.MAX_VALUE);
 			public static final IntegralRange INT = new IntegralRange(Integer.MIN_VALUE, Integer.MAX_VALUE);
 			public static final IntegralRange LONG = new IntegralRange(Long.MIN_VALUE, Long.MAX_VALUE);
-			public static final DecimalRange FLOAT = new DecimalRange(Float.MIN_VALUE, Float.MAX_VALUE);
-			public static final DecimalRange DOUBLE = new DecimalRange(Double.MIN_VALUE, Double.MAX_VALUE);
+			public static final DecimalRange FLOAT = new FloatRange(Float.MIN_VALUE, Float.MAX_VALUE);
+			public static final DecimalRange DOUBLE = new DoubleRange(Double.MIN_VALUE, Double.MAX_VALUE);
 			
 			@InternalOnly 
-			public static final DecimalRange SLIDER = new DecimalRange(-1000f, 1000f);
+			public static final DecimalRange SLIDER = new DoubleRange(-1000f, 1000f);
 			
 			@SuppressWarnings("rawtypes")
 			public static RangeInstance getRangeOfType(Class c) {
@@ -352,7 +355,12 @@ public @interface ConfigEntry {
 					return new IntegralRange(min.longValue(), max.longValue());
 				}
 				else if(TypeUtil.isDecimal(f)) {
-					return new DecimalRange(min.doubleValue(), max.doubleValue());
+					if(TypeUtil.isFloat(f)) {
+						return new FloatRange(min.floatValue(), max.floatValue());
+					}
+					else {
+						return new DoubleRange(min.doubleValue(), max.doubleValue());
+					}
 				}
 				throw new IllegalArgumentException(f + "");
 			}
@@ -367,7 +375,12 @@ public @interface ConfigEntry {
 					return new IntegralRange(range.min(), range.max());
 				}
 				else if(TypeUtil.isDecimal(f)) {
-					return new DecimalRange(range.minDecimal(), range.maxDecimal());
+					if(TypeUtil.isFloat(f) ) {
+						return new FloatRange((float)range.minDecimal(), (float)range.maxDecimal());
+					}
+					else {
+						return new DoubleRange(range.minDecimal(), range.maxDecimal());
+					}
 				}
 				throw new IllegalArgumentException(f + "");
 			}
@@ -426,7 +439,7 @@ public @interface ConfigEntry {
 			public boolean contains(Number number);
 		}
 		
-		public static final class DecimalRange implements RangeInstance {
+		public static abstract class DecimalRange implements RangeInstance {
 			
 			private final Range parent;
 			
@@ -503,9 +516,48 @@ public @interface ConfigEntry {
 				return parent.maxDecimal();
 			}
 			
-			public boolean contains(Number number) {
-				double val = number.doubleValue();
-				return val >= minDecimal() && val <= maxDecimal();
+			public abstract boolean contains(Number number);
+			
+			public static final class DoubleRange extends DecimalRange {
+
+				public DoubleRange(double minDecimal, double maxDecimal) {
+					super(minDecimal, maxDecimal);
+				}
+
+				@Override
+				public boolean contains(Number number) {
+					double val = number.doubleValue();
+					return val >= minDecimal() && val <= maxDecimal();
+				}
+				
+			}
+			
+			public static final class FloatRange extends DecimalRange {
+
+				private FloatRange(double minDecimal, double maxDecimal) {
+					super(minDecimal, maxDecimal);
+				}
+				
+				public FloatRange(float minDecimal, float maxDecimal) {
+					this((double)minDecimal, (double)maxDecimal);
+				}
+				
+				@Override
+				public double minDecimal() {
+					return (double)(float)super.minDecimal(); //quickly change to float for proper bounds checking
+				}
+				
+				@Override
+				public double maxDecimal() {
+					return (double)(float)super.maxDecimal(); //quickly change to float for proper bounds checking
+				}
+
+				@Override
+				public boolean contains(Number number) {
+					double val = (double)number.floatValue(); //quickly change to float for proper bounds checking
+					return val >= minDecimal() && val <= maxDecimal();
+				}
+				
 			}
 
 		}

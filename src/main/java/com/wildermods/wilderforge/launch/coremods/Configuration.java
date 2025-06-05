@@ -207,7 +207,7 @@ public class Configuration {
 			}
 			boolean strict = configEntry.strict();
 			RangeInstance typeRange;
-			Range uRange = field.getAnnotation(Range.class);
+			Range uRange = Ranges.getRange(field);
 			IntegralRange iRange;
 			DecimalRange dRange;
 			Nullable nullable = field.getAnnotation(Nullable.class);
@@ -271,7 +271,7 @@ public class Configuration {
 								uRange = typeRange;
 							}
 							try {
-								dRange = new DecimalRange(uRange);
+								dRange = (DecimalRange) uRange;
 								if(!typeRange.contains(dRange.minDecimal())) {
 									throw new ConfigurationError("minDecimal definition (" + dRange.minDecimal() + ") is out of range for type " + type);
 								}

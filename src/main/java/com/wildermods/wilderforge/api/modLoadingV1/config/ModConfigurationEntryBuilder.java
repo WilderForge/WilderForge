@@ -21,7 +21,10 @@ import com.badlogic.gdx.utils.Align;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange.DoubleRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.DecimalRange.FloatRange;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.IntegralRange;
+import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.RangeInstance;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Range.Ranges;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Restart;
 import com.wildermods.wilderforge.api.modLoadingV1.config.ConfigEntry.Step.Steps;
@@ -157,12 +160,12 @@ public class ModConfigurationEntryBuilder {
 				step = Steps.getStepOfType(f);
 			}
 			if(TypeUtil.isDecimal(f)) {
-				DecimalRange dRange = new DecimalRange(range);
+				RangeInstance dRange = Ranges.getRange(f);
 				if(TypeUtil.isFloat(f)) {
-					return buildFloat(context, dRange, step);
+					return buildFloat(context, (FloatRange)dRange, step);
 				}
 				else if (TypeUtil.isDouble(f)) {
-					return buildDouble(context, dRange, step);
+					return buildDouble(context, (DoubleRange)dRange, step);
 				}
 				else {
 					throw new AssertionError();
