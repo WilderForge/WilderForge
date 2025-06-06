@@ -3,7 +3,7 @@ name: Validate Approval
 on:
   pull_request_review:
     types: [submitted]
-	
+
 permissions:
   contents: read
   pull-requests: write
@@ -29,23 +29,23 @@ jobs:
       )
     steps:
       - name: Handle Approved Review
-	  	if: |
-		  github.event.review.state == 'approved' || startsWith(github.event.review.body, 'approved')
+        if: |
+          github.event.review.state == 'approved' || startsWith(github.event.review.body, 'approved')
         id: "checking_approval"
         run: |
-		  DESC="${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
-		  echo "$DESC"
-		  echo "conclusion=success" >> "$GITHUB_ENV"
-		  echo "description=$DESC" >> "$GITHUB_ENV"
-		  
-	  - name: Rejected Review Handling
-	    if: startsWith(github.event.review.body, 'reject')
-	    run: |
-	      DESC="${{ github.event.review.user.login }} REJECTED build for ${{ github.event.review.commit_id }}"
-	      echo "$DESC"
-	      echo "conclusion=failure" >> "$GITHUB_ENV"
-	      echo "description=$DESC" >> "$GITHUB_ENV"
-	      exit 1
+          DESC="${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
+          echo "$DESC"
+          echo "conclusion=success" >> "$GITHUB_ENV"
+          echo "description=$DESC" >> "$GITHUB_ENV"
+          
+      - name: Rejected Review Handling
+        if: startsWith(github.event.review.body, 'reject')
+        run: |
+          DESC="${{ github.event.review.user.login }} REJECTED build for ${{ github.event.review.commit_id }}"
+          echo "$DESC"
+          echo "conclusion=failure" >> "$GITHUB_ENV"
+          echo "description=$DESC" >> "$GITHUB_ENV"
+          exit 1
 
       - name: Post Status Check
         if:
