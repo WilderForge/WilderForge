@@ -13,6 +13,10 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  statuses: write
+
 jobs:
   build_commit:
     runs-on: [self-hosted, linux]
