@@ -3,6 +3,10 @@ name: Validate Approval
 on:
   pull_request_review:
     types: [submitted]
+	
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   approve_and_run:
@@ -24,29 +28,24 @@ jobs:
         )
       )
     steps:
-      - name: Checking Approval
+      - name: Handle Approved Review
+	  	if: |
+		  github.event.review.state == 'approved' || startsWith(github.event.review.body, 'approved')
         id: "checking_approval"
         run: |
-          DESC="null"
-          if [[ "${{ github.event.review.state }}" == "approved" || "${{ github.event.review.body }}" == approved* ]]; then
-            DESC="${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
-            echo $DESC
-            echo "conclusion=success" >> "$GITHUB_ENV"
-            echo "description=$DESC" >> "$GITHUB_ENV"
-            exit 0
-          elif [[ "${{ github.event.review.body }}" == reject* ]]; then
-            DESC="${{ github.event.review.user.login }} REJECTED build for ${{ github.event.review.commit_id }}"
-            echo $DESC
-            echo "conclusion=failure" >> "$GITHUB_ENV"
-            echo "description=$DESC" >> "$GITHUB_ENV"
-            exit 1
-          else
-            DESC="Assertion Error: Review body expected start with 'approved' or 'reject'. This step should have been skipped but it ran anyway!"
-            echo $DESC
-            echo "conclusion=failure" >> "$GITHUB_ENV"
-            echo "description=$DESC" >> "$GITHUB_ENV"
-            exit 1
-          fi
+		  DESC="${{ github.event.review.user.login }} APPROVED build for ${{ github.event.review.commit_id }}"
+		  echo "$DESC"
+		  echo "conclusion=success" >> "$GITHUB_ENV"
+		  echo "description=$DESC" >> "$GITHUB_ENV"
+		  
+	  - name: Rejected Review Handling
+	    if: startsWith(github.event.review.body, 'reject')
+	    run: |
+	      DESC="${{ github.event.review.user.login }} REJECTED build for ${{ github.event.review.commit_id }}"
+	      echo "$DESC"
+	      echo "conclusion=failure" >> "$GITHUB_ENV"
+	      echo "description=$DESC" >> "$GITHUB_ENV"
+	      exit 1
 
       - name: Post Status Check
         if:
