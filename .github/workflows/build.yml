@@ -19,9 +19,29 @@ permissions:
   statuses: write
 
 jobs:
+  codeql_analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.sha || github.sha }}
+      - name: Init CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
   build_commit:
+    needs: codeql_analysis
     runs-on: [self-hosted, linux]
-
     steps:
       - name: Determine Commit SHA
         id: determine_sha
