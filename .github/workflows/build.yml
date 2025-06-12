@@ -16,8 +16,6 @@ on:
 permissions:
   contents: read
   statuses: write
-  actions: read
-  security-events: write
 
 jobs:
   build_commit:
@@ -52,10 +50,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ env.COMMIT_SHA }}
-      - name: Init CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: java, actions
       - name: Set up JDK 17
         uses: actions/setup-java@v4.5.0
         with:
@@ -73,9 +67,6 @@ jobs:
 
       - name: Build With Gradle
         run: ./gradlew build
-
-      - name: Analyze
-        uses: github/codeql-action/analyze@v3
 
       - name: Publish Build
         if: ${{ github.event.inputs.publish == 'true' }}
