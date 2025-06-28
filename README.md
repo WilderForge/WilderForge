@@ -5,7 +5,7 @@
 If order to build WilderForge, you must have the following software installed:
 
 * Git
-* Java 17 or later
+* Java 21 or later
 * Wildermyth
 
 __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Currently, WilderWorkspace only supports the Eclipse IDE. Pull Requests to add support for additional IDEs are welcome, and can be submitted at the [WilderWorkspace repository](https://wildermods.com/wilderworkspace)
