@@ -45,7 +45,7 @@ public abstract class AttachmentEvent extends Event {
 	protected void setItem(Item item) {
 		ItemDTO itemDTO = WilderForge.getViewDependencies().dataContext.getItemData(null).itemsById.get(item.itemId);
 		if (itemDTO == null) {
-			LOGGER.warn("Could not locate itemDTO for " + item.itemId + ". Item will remain " + this.item != null ? this.item.itemId : null);
+			LOGGER.warn("Could not locate itemDTO for " + item.itemId + ". Item will remain " + (this.item != null ? this.item.itemId : null));
 			return;
 		}
 		this.item = item;
