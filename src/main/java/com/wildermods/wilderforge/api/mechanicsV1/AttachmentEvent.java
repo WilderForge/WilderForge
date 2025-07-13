@@ -37,16 +37,12 @@ public abstract class AttachmentEvent extends Event {
 		super(false);
 		this.attachments = attachments;
 		setItem(item);
-		if (itemDTO == null) {
-			throw new IllegalStateException("Could not locate itemDTO for " + item.itemId + ". Item registry corrupt???");
-		}
 	}
 
 	protected void setItem(Item item) {
 		ItemDTO itemDTO = WilderForge.getViewDependencies().dataContext.getItemData(null).itemsById.get(item.itemId);
 		if (itemDTO == null) {
 			LOGGER.warn("Could not locate itemDTO for " + item.itemId + ". Item will remain " + (this.item != null ? this.item.itemId : null));
-			return;
 		}
 		this.item = item;
 		this.setItemDTO(itemDTO);
