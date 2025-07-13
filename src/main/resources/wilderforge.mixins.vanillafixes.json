@@ -12,6 +12,7 @@
 		"LegacyImportVanillaFixMixin",
 		"OSUtilSecurityFixMixin",
 		"OverlandParticleRendererVanillaFixMixin",
+		"PortraitCardFixMixin",
 		"ServerDataContextVanillaFixMixin"
 	]
 }
