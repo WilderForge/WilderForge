@@ -67,7 +67,7 @@ public abstract class AttachmentEvent extends Event {
 	}
 
 	/**
-	 * @return The {@link ItemDTO} backing the item, fetched from the registry.
+	 * @return The {@link ItemDTO} backing the item, fetched from the registry. May be null.
 	 */
 	public ItemDTO getItemDTO() {
 		return itemDTO;
