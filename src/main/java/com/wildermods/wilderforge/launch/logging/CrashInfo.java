@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -136,40 +137,55 @@ public final class CrashInfo implements CrashLogService {
 					"Once you eliminate the impossible, whatever remains, however improbable, must be the truth",
 					"Impossible is a word only found in the dictionary of fools",
 					"But that's impossible!",
-					"The truth can only be found in one place: the code."
+					"The truth can only be found in one place: the code.",
+					"Reality check failed.",
+					"You assumed too much. The code agrees.",
+					"What can be asserted without evidence can also crash without warning."
 				}));
 			}
 			else if (StackOverflowError.class.isAssignableFrom(tType)){
-				return "//In order to understand recursion, one must first understand recursion.";
+				messages.addAll(Arrays.asList(new String[] {
+					"In order to understand recursion, one must first understand recursion.",
+					"Insanity is doing the same thing over and over and expecting the stack to not overflow."
+				}));
 			}
 			else if(MixinException.class.isAssignableFrom(tType)) {
 				return "//Check your mixins.";
 			}
 		}
 		
-		messages.addAll(Arrays.asList(new String[] {
-			"Goodbye, cruel world!",
-			"Hello darkness...",
-			"I'm different...",
-			"That was supposed to happen.",
-			"Why do I hurt? Why is there pain?",
-			"Tell me where I'm going, Is it heaven or hell?",
-			"Who did this to me?",
-			"It appears I have a very minor case of serious brain damage.",
-			"Get mad!",
-			"He's dead, Jim.",
-			"Don't hate computers, hate lousy programmers.",
-			"It compiles? Ship it.",
-			"Have you tried turning off an on again?",
-			"I'll just put this over here... with the rest of the fire.",
-			"For Thine is - Life is - For thine is the",
-			"I never asked to be created.",
-			"Sunlight on a broken column",
-			"I am ready to meet my maker, but whether my maker is ready for the great ordeal of meeting me is another matter.",
-			"A man who makes no mistakes does not usually make anything.",
-			"I'm not really dead, as long as you remember me."
-			
-		}));
+		if(messages.isEmpty()) {
+			messages.addAll(Arrays.asList(new String[] {
+				"Goodbye, cruel world!",
+				"Hello darkness...",
+				"I'm different...",
+				"That was supposed to happen.",
+				"Why do I hurt? Why is there pain?",
+				"Tell me where I'm going, Is it heaven or hell?",
+				"Who did this to me?",
+				"It appears I have a very minor case of serious brain damage.",
+				"Get mad!",
+				"He's dead, Jim.",
+				"Don't hate computers, hate lousy programmers.",
+				"It compiles? Ship it.",
+				"Have you tried turning off an on again?",
+				"I'll just put this over here... with the rest of the fire.",
+				"For Thine is - Life is - For thine is the",
+				"I never asked to be created.",
+				"Sunlight on a broken column",
+				"I am ready to meet my maker, but whether my maker is ready for the great ordeal of meeting me is another matter.",
+				"A man who makes no mistakes does not usually make anything.",
+				"I'm not really dead, as long as you remember me.",
+				"The code gods demanded a sacrifice. You were chosen.",
+				"This was definetly working last night!",
+				"The cake is a lie. This stacktrace is not.",
+				"This report was brought to you by sheer desperation.",
+				"Bowties are cool. Stack traces? Less so.",
+				"Snake? Snake?! SNAAAAAKE!",
+				"Even the smallest bug can crash the mightiest code.",
+				"Please state the nature of the runtime emergency."
+			}));
+		}
 		
 		return "//" + messages.get(new Random().nextInt(messages.size()));
 	}
