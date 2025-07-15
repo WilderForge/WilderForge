@@ -21,10 +21,9 @@ import java.util.Random;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.asm.mixin.throwables.MixinException;
 
-import com.wildermods.provider.services.CrashLogService;
-
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
+import com.wildermods.provider.services.CrashLogService;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
@@ -57,7 +56,7 @@ public final class CrashInfo implements CrashLogService {
 		catch(Throwable failedDate) {
 			s.append("COULD NOT APPEND TIME DUE TO THE FOLLOWING EXCPETION:").append('\n');
 			try {
-				s.append(ExceptionUtils.getStackFrames(failedDate));
+				s.append(ExceptionUtils.getStackTrace(failedDate));
 			}
 			catch(Throwable failedStack) {
 				s.append("YIKES! Couldn't get the stacktrace either! Printing to console instead!");
@@ -182,7 +181,7 @@ public final class CrashInfo implements CrashLogService {
 	private StringBuilder appendSystemDetails(StringBuilder s) {
 		try {
 			s.append("--System Details--").append('\n');
-			s.append("Wildermyth Version: ").append(Version.VERSION).append('\n');
+			s.append("Wildermyth Version: ").append(getWildermythVersion(s)).append('\n');
 			s.append("Operating System: ").append(System.getProperty("os.name")).append('\n');
 			s.append("\tArchitecture: ").append(System.getProperty("os.arch")).append('\n');
 			s.append("\tVersion: ").append(System.getProperty("os.version")).append('\n');
@@ -206,14 +205,70 @@ public final class CrashInfo implements CrashLogService {
 		return s;
 	}
 	
-	private void appendGraphicalDetails(StringBuilder s) {
-		s.append("Graphical information:\n");
-		if(GraphicalInfo.INSTANCE != null) {
-			GraphicalInfo.INSTANCE.appendGraphicalDetails(s);
+	private String getWildermythVersion(StringBuilder s) {
+		Class<?> wildermythVersionClass = null;
+		if(getGameClassloader() != null) {
+			try {
+				wildermythVersionClass = Class.forName("com.worldwalkergames.legacy.Version", true, getGameClassloader());
+			} catch (Throwable t) {
+				s.append("COULD NOT RETRIEVE VERSION INFO CLASS DUE TO THE FOLLOWING EXCPETION:\n");
+				s.append(ExceptionUtils.getStackTrace(t));
+			}
 		}
-		else {
+		if(wildermythVersionClass == null) {
+			wildermythVersionClass = Version.class;
+		}
+		
+		try {
+			return (String) wildermythVersionClass.getDeclaredField("VERSION").get(null);
+		} catch (Throwable t) {
+			s.append("COULD NOT PRINT VERSION INFORMATION DUE TO THE FOLLOWING EXCPETION:\n");
+			t.printStackTrace();
+			return Version.VERSION;
+		}
+		
+	}
+
+	private void appendGraphicalDetails(StringBuilder s) {
+		System.out.println(getClass().getClassLoader());
+		s.append("Graphical information:\n");
+		
+		Class<?> graphicalInfoClass = null;
+		Object graphicalInfo;
+		if(getGameClassloader() != null) {
+			try {
+				graphicalInfoClass = Class.forName("com.wildermods.wilderforge.launch.logging.GraphicalInfo", true, getGameClassloader());
+			} catch (Throwable t) {
+				s.append("COULD NOT RETRIEVE GRAPHICAL INFO CLASS DUE TO THE FOLLOWING EXCPETION:").append('\n');
+				s.append(ExceptionUtils.getStackTrace(t));
+			}
+		}
+		if(graphicalInfoClass == null) {
+			graphicalInfoClass = GraphicalInfo.class;
+		}
+		
+		try {
+			graphicalInfo = graphicalInfoClass.getDeclaredField("INSTANCE").get(null);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			graphicalInfo = null;
+		}
+		
+		boolean errored = false;
+		if(graphicalInfo != null) {
+			try {
+				Method getDetailsMethod = graphicalInfoClass.getDeclaredMethod("appendGraphicalDetails", StringBuilder.class);
+				getDetailsMethod.setAccessible(true);
+				getDetailsMethod.invoke(graphicalInfo, s);
+			} catch (Throwable t ) {
+				errored = true;
+				s.append("COULD NOT OPENGL GRAPHICAL INFO DUE TO THE FOLLOWING EXCPETION:").append('\n');
+				s.append(ExceptionUtils.getStackTrace(t));
+			}
+		}
+		
+		if(graphicalInfo == null || errored) {
 			s.append("\t\tTotal monitors (OpenGL):\n");
-			s.append("\t\t\tOpenGL context not fully intialized, no opengl information available\n");
+			s.append("\t\t\tOpenGL context not fully intialized or could not be obtained, no opengl information available\n");
 		}
 		try {
 			GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
