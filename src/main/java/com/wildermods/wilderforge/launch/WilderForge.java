@@ -29,6 +29,7 @@ import com.wildermods.wilderforge.launch.coremods.Configuration;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.wildermods.wilderforge.launch.exception.ConfigurationError;
 import com.wildermods.wilderforge.launch.logging.CrashInfo;
+import com.wildermods.wilderforge.vanillafixes.VanillaFixEvents;
 import com.worldwalkergames.legacy.LegacyDesktop;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.control.ClientControl;
@@ -219,6 +220,7 @@ public final class WilderForge {
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void onPreInit(PreInitializationEvent e) {
 		LOGGER.fatal("PRE-INIT");
+		MAIN_BUS.register(VanillaFixEvents.class);
 	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGH)
