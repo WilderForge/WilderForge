@@ -19,7 +19,7 @@ public class VanillaFixEvents {
 		if(popupManager != null) {
 			for(IPopUp popup : popupManager.getPopups()) {
 				if(popup instanceof CharacterSheetPopup) {
-					LOGGER.info("Removing character sheet popup after scene change. (Changing from " + e.getPrevScreen() + " to " + e.getNewScreen() + ")");
+					LOGGER.info("Removing character sheet popup before scene change. (Changing from " + e.getPrevScreen() + " to " + e.getNewScreen() + ")");
 					popupManager.removePopUp(popup);
 				}
 			}
