@@ -13,6 +13,9 @@ public class VanillaFixEvents {
 
 	private static final Logger LOGGER = new Logger(VanillaFixEvents.class);
 	
+	/**
+	 * Fixes #132
+	 */
 	@SubscribeEvent
 	public static void onMainScreenChange(TopLevelScreenChangeEvent.Pre e) {
 		final PopUpManager popupManager = WilderForge.getViewDependencies().popUpManager;
