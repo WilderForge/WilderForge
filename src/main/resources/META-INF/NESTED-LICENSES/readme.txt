@@ -1,0 +1,1 @@
+This directory contains the licenses of dependencies that are physically included (nested) inside the compiled JAR produced by this project.

@@ -21,9 +21,12 @@ wilderWorkspace {
 
 dependencies {
 
-	implementation libs.reflections8
-	implementation libs.commons.lang
+	nestTransitive(libs.reflections8)
+	
+	nest libs.commons.lang
+	
 	api libs.eventbus
+	nest libs.eventbus
 	
 	/**********
 	don't alter the dependencies below
@@ -34,4 +37,5 @@ dependencies {
 	
 	//All dependencies of Wildermyth itself
 	compileOnly fileTree(dir: './bin/lib/', include: ['*.jar'])
+
 }
