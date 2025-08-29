@@ -37,6 +37,7 @@
 		"minecraft":["*"]
 	},
 	"custom": {
+		"providerMod": true,
 		"credits":[
 			"",
 			"",
