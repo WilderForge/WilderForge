@@ -246,7 +246,7 @@ public class CoremodListPopup extends PopUp {
 			nameLabel.setAlignment(Align.left);
 			this.label = nameLabel;
 
-			this.add(modImage).height(screen.scale(48f)).padLeft(-screen.scale(4f)).padRight(screen.scale(6f)).width(screen.scale(48f)).align(Align.left);
+			this.add(modImage).height(screen.scale(48f)).padLeft(-screen.scale(4f)).padRight(screen.scale(6f)).width(screen.scale(48f)).align(Align.right);
 			this.add(nameLabel).expandX().fillX();
 			
 			this.align(Align.left);
@@ -259,7 +259,8 @@ public class CoremodListPopup extends PopUp {
 		
 		private Image constructImage() throws IOException {
 			CoremodInfo coremodInfo = getUserData();
-			FileHandle imageFile = Gdx.files.internal("assets/wilderforge/ui/coremodlist/exampleModImage.png");
+			FileHandle exampleImage = Gdx.files.internal("assets/wilderforge/ui/coremodlist/exampleModImage.png");
+			FileHandle imageFile = exampleImage;
 			Image modImage = new Image(new TextureFilterDrawable(imageFile.path(), WilderForge.modid, TextureFilter.Nearest)); 
 			
 			if(coremodInfo.getFolder() != null) {
@@ -267,7 +268,16 @@ public class CoremodListPopup extends PopUp {
 					imageFile = Gdx.files.internal("assets/ui/icon/wildermythIcon_256.png"); //OFFICE ACTION #1: Assets from the base game must be pulled from the user's filesystem.
 				}
 				else {
-					imageFile = Gdx.files.internal("assets/" + coremodInfo.modId + "/icon.png");
+					ModMetadata metadata = coremodInfo.getMetadata();
+					CustomValue val = metadata.getCustomValue("fabric-loom:generated");
+					if(val != null) {
+						if(val.getAsBoolean()) {
+							imageFile = Gdx.files.internal("assets/sites/scenery/bookPileSmall.png"); //OFFICE ACTION #1: Assets from the base game must be pulled from the user's filesystem.
+						}
+					}
+					if(imageFile == exampleImage) {
+						imageFile = Gdx.files.internal("assets/" + coremodInfo.modId + "/icon.png");
+					}
 				}
 			}
 
@@ -278,13 +288,14 @@ public class CoremodListPopup extends PopUp {
 			}
 			if(imageFile != null && imageFile.exists()) {
 				modImage = new Image(new TextureFilterDrawable(imageFile.path(), coremodInfo.modId, TextureFilter.Nearest));
+				modImage.setScaling(Scaling.fit);
 			}
 			else {
 				LOGGER.info("Could not find " + imageFile.path() + " " + imageFile.type());
 				LOGGER.info(coremodInfo.getClass().getSimpleName());
 			}
 
-			modImage.setScaling(Scaling.fill);
+			modImage.setScaling(Scaling.fit);
 			return modImage;
 		}
 		
