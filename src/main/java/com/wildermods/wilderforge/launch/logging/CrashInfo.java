@@ -87,7 +87,7 @@ public final class CrashInfo implements CrashLogService {
 		s.append("---- Additonal Information----").append('\n');
 		s.append('\n');
 		appendSystemDetails(s).append("\n\n");
-		appendCoremodDetails(s);
+		appendModDetails(s);
 		
 		if(this.dump != null || shouldCollectDump) {
 			s.append("\n\n");
@@ -306,11 +306,27 @@ public final class CrashInfo implements CrashLogService {
 		s.append(initializeThreadDump());
 	}
 	
-	private StringBuilder appendCoremodDetails(StringBuilder s) {
-		s.append("-- Coremod Details --").append('\n');
+	private StringBuilder appendModDetails(StringBuilder s) {
+		s.append("-- Mod Details --").append('\n');
 		s.append("Coremods Detected: " + Coremods.getCoremodCount()).append(":\n\n");
 		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 			s.append('\t').append(coremod.modId).append(' ').append(coremod.getMetadata().getVersion()).append('\n');
+		}
+		
+		Class<?> standardModCrashInfoClass;
+		Object dependencies;
+		try {
+			standardModCrashInfoClass = Class.forName("com.wildermods.wilderforge.launch.logging.StandardModCrashInfo", true, getGameClassloader());
+			s.append(standardModCrashInfoClass.newInstance().toString());
+		}
+		catch(Throwable t) {
+			s.append("COULD NOT RETRIEVE STANDARD MOD INFO DUE TO THE FOLLOWING EXCEPTION:").append('\n');
+			s.append(ExceptionUtils.getStackTrace(t));
+		}
+		
+		s.append("\n\n");
+		if(WilderForge.getViewDependencies() != null) {
+			
 		}
 		return s;
 	}
