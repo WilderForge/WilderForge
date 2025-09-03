@@ -1,22 +1,32 @@
 package com.wildermods.wilderforge.api.eventV2;
 
+import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
+import com.worldwalkergames.legacy.game.mods.IModAware;
 
-public abstract class ModEvent extends Event {
+import net.fabricmc.loader.api.ModContainer;
+
+public abstract class ModEvent<T extends ModContainer & Mod & IModAware> extends Event {
 	
-	protected final CoremodInfo coremod;
+	protected final T mod;
 	
-	public ModEvent(CoremodInfo coremod, boolean cancelable) {
+	public ModEvent(T mod, boolean cancelable) {
 		super(cancelable);
-		this.coremod = coremod;
+		this.mod = mod;
 	}
 	
+	public T getMod() {
+		return mod;
+	}
+	
+	@Deprecated(forRemoval = true)
 	public CoremodInfo getCoremod() {
-		return coremod;
+		return Cast.as(mod, CoremodInfo.class);
 	}
 	
 	public final String getModId() {
-		return coremod.modId;
+		return mod.modid();
 	}
 	
 }
