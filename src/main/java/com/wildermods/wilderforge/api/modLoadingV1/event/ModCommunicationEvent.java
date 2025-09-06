@@ -1,5 +1,6 @@
-package com.wildermods.wilderforge.api.eventV2;
+package com.wildermods.wilderforge.api.modLoadingV1.event;
 
+import com.wildermods.wilderforge.api.eventV3.ModEvent;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
 
@@ -12,7 +13,7 @@ import com.wildermods.wilderforge.launch.coremods.Coremods;
  *
  * @param <T> the type of data this communication event holds
  */
-public final class ModCommunicationEvent<T extends Object> extends ModEvent {
+public final class ModCommunicationEvent<T extends Object> extends ModEvent<CoremodInfo> {
 
 	private final T data;
 	

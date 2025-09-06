@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.uiV1;
 
-import com.wildermods.wilderforge.api.eventV2.Event;
+import com.wildermods.wilderforge.api.eventV3.Event;
 import com.worldwalkergames.ui.popup.IPopUp;
 
 public class PopUpEvent extends Event {

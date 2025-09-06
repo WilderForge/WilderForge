@@ -3,7 +3,7 @@ package com.wildermods.wilderforge.api.mechanicsV1;
 import net.minecraftforge.eventbus.api.Cancelable;
 
 import com.wildermods.provider.util.logging.Logger;
-import com.wildermods.wilderforge.api.eventV2.Event;
+import com.wildermods.wilderforge.api.eventV3.Event;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.worldwalkergames.legacy.game.model.Attachments;
 import com.worldwalkergames.legacy.game.model.item.Item;

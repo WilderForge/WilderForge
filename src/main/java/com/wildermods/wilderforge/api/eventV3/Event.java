@@ -1,4 +1,4 @@
-package com.wildermods.wilderforge.api.eventV2;
+package com.wildermods.wilderforge.api.eventV3;
 
 public abstract class Event extends net.minecraftforge.eventbus.api.Event {
 	
