@@ -55,11 +55,11 @@ public abstract class ServerDataContextMixin {
 	private ModInfo loadModInfo(String modId, boolean logIfMissing, Operation<ModInfo> original) {
 		ModInfo found = original.call(modId, false);
 		if(found == null) {
-			WilderForge.LOGGER.info("Attempting to load coremod " + modId, vanillaLoader);
+			WilderForge.LOGGER.debug("Attempting to load coremod " + modId, vanillaLoader);
 			CoremodInfo coremod = Coremods.getCoremod(modId);
 			if(!(coremod instanceof MissingCoremod)) {
-				WilderForge.LOGGER.info("Coremod " + modId + " is " + coremod + " " + coremod.getMetadata().getVersion(), vanillaLoader);
-				WilderForge.LOGGER.info("Coremod " + coremod + " is loaded.", vanillaLoader);
+				WilderForge.LOGGER.debug("Coremod " + modId + " is " + coremod + " " + coremod.getMetadata().getVersion(), vanillaLoader);
+				WilderForge.LOGGER.debug("Coremod " + coremod + " is loaded.", vanillaLoader);
 				found = coremod;
 			}
 			else {

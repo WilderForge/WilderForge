@@ -7,6 +7,7 @@
 	"mixinPriority": 1,
 	"mixins": [
 		"AggregatorMixin",
+		"DLCLogSpamDowngradeMixin",
 		"FancyImageDrawableAccessor",
 		"FileConsumerMixin",
 		"LegacyDesktopAccessor",
