@@ -10,6 +10,14 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 public class KatakanaJapaneseTextFixMixin {
 
 	@WrapMethod(method = "isChinese")
+	private static boolean checkIfHirigana(char c, Operation<Boolean> original) {
+		if(original.call(c) == true) {
+			return true; //already detected as non-breaking character, return true
+		}
+		return c >= 0x3040 && c <= 0x30A0; //if not detected as CJK, return true if hirigana
+	}
+	
+	@WrapMethod(method = "isChinese")
 	private static boolean checkIfKatakana(char c, Operation<Boolean> original) {
 		if(original.call(c) == true) {
 			return true; //already detected as a non-breaking character, return true
