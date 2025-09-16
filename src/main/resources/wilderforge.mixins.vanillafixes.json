@@ -10,7 +10,7 @@
 		"ContentEditorLoggingVanillaFixMixin",
 		"FModBinaryFixerMixin",
 		"GameSettingsVanillaFixMixin",
-		"KatakanaJapaneseTextFixMixin",
+		"JapaneseTextFixMixin",
 		"LegacyImportVanillaFixMixin",
 		"OSUtilSecurityFixMixin",
 		"OverlandParticleRendererVanillaFixMixin",

@@ -7,7 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 @Mixin(NiceFreeTypeBitmapFontData.class)
-public class KatakanaJapaneseTextFixMixin {
+public class JapaneseTextFixMixin {
 
 	@WrapMethod(method = "isChinese")
 	private static boolean checkIfHirigana(char c, Operation<Boolean> original) {
