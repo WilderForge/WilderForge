@@ -40,6 +40,9 @@ dependencies {
 	api libs.eventbus
 	nest libs.eventbus
 	
+	testImplementation(libs.junit)
+	testImplementation(libs.junit.platform)
+	
 	/**********
 	don't alter the dependencies below
 	***********/

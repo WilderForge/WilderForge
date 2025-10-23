@@ -3,11 +3,14 @@ eventbus_version = "7.4.4+WilderForge"
 reflections8_version = "0.11.7"
 workspace_version = "6.3.1.0"
 commons_lang_version = "3.19.0"
+junit_version = "6.0.0"
 
 [libraries]
 eventbus = { module = "net.minecraftforge:EventBus", version.ref = "eventbus_version" }
 reflections8 = { module = "net.oneandone.reflections8:reflections8", version.ref = "reflections8_version" }
 commons_lang = { module = "org.apache.commons:commons-lang3", version.ref = "commons_lang_version" }
+junit = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit_version" }
+junit_platform = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit_version" }
 
 [plugins]
 workspace = { id = "com.wildermods.workspace", version.ref = "workspace_version" }
