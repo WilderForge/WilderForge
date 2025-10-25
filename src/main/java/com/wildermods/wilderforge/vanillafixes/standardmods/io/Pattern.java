@@ -9,11 +9,57 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
+/**
+ * Provides a framework for matching filesystem paths against rsync-style patterns.
+ * <p>
+ * The {@code Pattern} class hierarchy converts rsync exclude syntax into Java
+ * {@link java.util.regex.Pattern regex} expressions, enabling consistent filtering
+ * of files and directories in a platform-agnostic way.
+ * <p>
+ * Each {@code Pattern} subclass implements a different kind of filter:
+ * <ul>
+ *   <li>{@link RegexBackedPattern} – A compiled regex derived from an rsync-style pattern.</li>
+ *   <li>{@link Empty} – A pattern representing a blank or null entry (never matches).</li>
+ *   <li>{@link Comment} – A pattern representing a comment line (never matches).</li>
+ * </ul>
+ *
+ * <p>
+ * The conversion logic is based closely on rsync’s documented matching rules, including
+ * support for wildcards ({@code *}, {@code **}, {@code ?}), POSIX character classes,
+ * and escape sequences.
+ *
+ * <h2>Examples</h2>
+ * <pre>{@code
+ * Pattern p = Pattern.compile("*.java");
+ * boolean matches = p.matches(Path.of("/home/user/Main.java")); // true
+ * }</pre>
+ *
+ * <p>
+ * Unsupported features:
+ * <ul>
+ *   <li>Include operations ({@code + }) are not supported and throw {@link PatternSyntaxException}.</li>
+ *   <li>Complex rsync negation patterns are not implemented.</li>
+ * </ul>
+ *
+ * @author Gamebuster
+ * 
+ * @see <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a>
+ * @see java.util.regex.Pattern
+ * @see java.nio.file.Path
+ */
 public abstract class Pattern implements FileFilter {
 
+	/** 
+	 * The original rsync-style pattern string. 
+	 */
 	public final String pattern;
 	
-	public Pattern(String rsyncPattern) {
+	/**
+	 * Constructs a new {@code Pattern} with the given rsync-style pattern string.
+	 *
+	 * @param rsyncPattern the raw rsync-style pattern (may be {@code null})
+	 */
+	protected Pattern(String rsyncPattern) {
 		this.pattern = rsyncPattern;
 	}
 	
@@ -30,19 +76,66 @@ public abstract class Pattern implements FileFilter {
 	@Override
 	public abstract boolean equals(Object o);
 	
+	
+	// ---------------------------------------------------------------------
+	// Regex-backed implementation
+	// ---------------------------------------------------------------------
+	
+	
+	/**
+	 * A {@link Pattern} implementation backed by a compiled regular expression.
+	 * <p>
+	 * Converts an rsync-style pattern into a Java regex via {@link #toRegex(String)}.
+	 * Supports all rsync wildcards, POSIX classes, and escape semantics.
+	 * 
+	 * @see <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a>
+	 */
 	public static class RegexBackedPattern extends Pattern {
 
+		/**
+		 *  The compiled regex equivalent of the rsync pattern. 
+		 */
 		protected final java.util.regex.Pattern regexPattern;
 		
+		
+		/**
+		 * Constructs a {@code RegexBackedPattern} by compiling the provided rsync-style pattern.
+		 *
+		 * @param rsyncPattern the rsync-style pattern to compile
+		 * @throws PatternSyntaxException if the pattern is syntactically invalid
+		 */
 		public RegexBackedPattern(String rsyncPattern) {
 			super(rsyncPattern);
 			this.regexPattern = java.util.regex.Pattern.compile(toRegex(rsyncPattern));
 		}
 		
+
+		/**
+		 * Returns the compiled Java regex representation of this pattern.
+		 *
+		 * @return the compiled {@link java.util.regex.Pattern}
+		 */
 		public java.util.regex.Pattern getRegex() {
 			return regexPattern;
 		}
 		
+		/**
+		 * Tests whether the provided {@code path} matches this pattern when interpreted
+		 * relative to the specified {@code root}.
+		 * <p>
+		 * If the rsync pattern ends with a slash ({@code /}), this method will only match
+		 * directories that are not symbolic links.
+		 * <p>
+		 * See <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a> 
+		 * for more detailed documentation.
+		 * 
+		 * @see <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a>
+		 *
+		 * @param root the absolute root directory against which {@code path} is resolved. Considered the 'Transfer-Root' in rsync lingo
+		 * @param path the relative or absolute path to test
+		 * @return {@code true} if the path matches the pattern, otherwise {@code false}
+		 * @throws IllegalArgumentException if {@code root} is not absolute
+		 */
 		public boolean matches(Path root, Path path) {
 			if(!root.isAbsolute()) {
 				throw new IllegalArgumentException("Root path must be absolute!");
@@ -67,6 +160,22 @@ public abstract class Pattern implements FileFilter {
 
 		}
 
+		/**
+		 * Tests whether the provided {@code path} matches this pattern.
+		 * <p>
+		 * The path must be absolute; otherwise an exception is thrown.
+		 * <p>
+		 * The transfer-root is considered to be the root directory of the
+		 * current working directory. Equivalent to calling {@code matches(Path.of(".").toAbsolutePath().getRoot(), path);}
+		 * <p>
+		 * See <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a> 
+		 * for more detailed documentation.
+		 * 
+		 * @see <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a>
+		 * @param path the absolute path to test
+		 * @return {@code true} if the path matches, otherwise {@code false}
+		 * @throws IllegalArgumentException if the path is not absolute
+		 */
 		@Override
 		public boolean matches(Path path) {
 			
@@ -97,6 +206,18 @@ public abstract class Pattern implements FileFilter {
 		
 	}
 	
+	/**
+	 * Compiles an rsync-style pattern into a {@link Pattern} instance.
+	 * <ul>
+	 *   <li>Blank or null strings produce an {@link Empty} pattern.</li>
+	 *   <li>Lines starting with {@code #} or {@code ;} produce a {@link Comment} pattern.</li>
+	 *   <li>All others produce a {@link RegexBackedPattern}.</li>
+	 * </ul>
+	 *
+	 * @param rsyncPattern the rsync-style pattern string
+	 * @return a compiled {@link Pattern}
+	 * @throws PatternSyntaxException if the pattern is invalid or unsupported
+	 */
 	public static Pattern compile(String rsyncPattern) {
 		if(rsyncPattern == null || rsyncPattern.isBlank()) {
 			return new Empty(rsyncPattern);
@@ -114,6 +235,26 @@ public abstract class Pattern implements FileFilter {
 	 * Eyes up buddy. There's nothing you want to see below.
 	 */
 	
+	/**
+	 * Converts an rsync-style pattern into an equivalent Java regular expression.
+	 * <p>
+	 * This method wraps the lower-level {@link #toRegexImpl(String)} translator with
+	 * rsync-specific semantics such as:
+	 * <ul>
+	 *   <li>Anchoring when the pattern starts with a slash ({@code /})</li>
+	 *   <li>Matching only the tail of the path if the pattern is not anchored</li>
+	 *   <li>Recursive matching when {@code **} or nested directories appear</li>
+	 *   <li>End-of-string enforcement to prevent partial matches</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * Include operations (patterns beginning with {@code "+ "}) are explicitly unsupported
+	 * and result in a {@link PatternSyntaxException}.
+	 *
+	 * @param rsyncPattern the rsync-style pattern string
+	 * @return a regex string equivalent to the provided rsync pattern
+	 * @throws PatternSyntaxException if the pattern is invalid or unsupported
+	 */
 	protected static String toRegex(String rsyncPattern) {
 		if(rsyncPattern == null || rsyncPattern.isBlank()) return "";
 		
@@ -131,7 +272,6 @@ public abstract class Pattern implements FileFilter {
 		 */
 		if(rsyncPattern.charAt(0) == '/') {
 			ret.append("^");
-			System.out.println("AAA");
 			rsyncPattern = rsyncPattern.substring(1);
 		}
 		else {
@@ -167,8 +307,35 @@ public abstract class Pattern implements FileFilter {
 	 * Edit this only if you enjoy hours of suffering and regex/rsync/posix induced nightmares.
 	 */
 	
+	/**
+	 * Performs the low-level translation of an rsync-style pattern into a regex fragment.
+	 * <p>
+	 * This method handles the actual character-by-character conversion of rsync meta
+	 * characters into their Java regex equivalents, including:
+	 * <ul>
+	 *   <li>{@code *} → {@code [^/]*}</li>
+	 *   <li>{@code **} → {@code .*}</li>
+	 *   <li>{@code ?} → {@code .}</li>
+	 *   <li>Proper escaping of the following regex-reserved characters:</li>
+	 *   <ul>
+	 *   	<li>{@code . ^ $ + { } | ( )}
+	 *   </ul>
+	 *   <li>Not escaping characters that have the same meaning across both patterns
+	 *   <li>Support for POSIX character classes such as {@code [[:alpha:]]}</li>
+	 *   <li>Preservation of literal backslashes when wildcards are absent</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * 
+	 * The translation is designed to match rsync’s documented wildcard rules as closely
+	 * as possible, including handling of escaped characters.
+	 *
+	 * @param rsyncPattern the rsync-style pattern string
+	 * @return a Java regex fragment suitable for concatenation
+	 * @throws PatternSyntaxException if the pattern is invalid or improperly escaped
+	 */
 	protected static String toRegexImpl(String rsyncPattern) {
-		// 19 hours were 
+		// 19 hours were spent below
 		if(rsyncPattern == null || rsyncPattern.isBlank()) return "";
 		
 		boolean hasWildcards = rsyncPattern.contains("*") || rsyncPattern.contains("?") || rsyncPattern.contains("[");
@@ -286,6 +453,13 @@ public abstract class Pattern implements FileFilter {
 			Map.entry("xdigit", "[A-Fa-f0-9]")
 		);
 	
+	/**
+	 * Converts a POSIX character class (e.g. {@code [[:alpha:]]}) into its Java regex equivalent.
+	 *
+	 * @param posixClass the full POSIX bracket expression
+	 * @return a regex-compatible string fragment
+	 * @throws IllegalArgumentException if the class name is unknown or malformed
+	 */
 	private static String posixToRegex(String posixClass) {
 		if (posixClass == null || !posixClass.startsWith("[[:") || !posixClass.endsWith(":]]")) {
 			throw new IllegalArgumentException("Invalid POSIX class format: " + posixClass);
@@ -300,9 +474,19 @@ public abstract class Pattern implements FileFilter {
 		}
 		
 		return replacement;
-	}
-
+	}	
+	
+	/**
+	 * Simple internal test harness for verifying rsync → regex conversions.
+	 * <p>
+	 * This class runs various validation cases and prints pass/fail results
+	 * directly to standard output. Intended for manual use during development.
+	 * 
+	 * Will be removed eventually
+	 */
+	
 	//TODO: Fix WilderWorkspace gradle plugin so JUnit can actually be used.
+	@Deprecated(forRemoval = true)
 	public static class Test {
 
 		public static void main(String[] args) {
@@ -459,6 +643,11 @@ public abstract class Pattern implements FileFilter {
 		}
 	}
 	
+	/**
+	 * An abstract {@link Pattern} implementation that never matches any path.
+	 * <p>
+	 * Used as a base for {@link Empty} and {@link Comment} pattern types.
+	 */
 	private static abstract class FalsePattern extends Pattern {
 
 		public FalsePattern(String rsyncPattern) {
@@ -472,6 +661,9 @@ public abstract class Pattern implements FileFilter {
 		
 	}
 	
+	/**
+	 * Represents a blank or empty rsync pattern that never matches any path.
+	 */
 	private static class Empty extends FalsePattern  {
 		public Empty(String rsyncPattern) {
 			super(rsyncPattern);
@@ -488,6 +680,11 @@ public abstract class Pattern implements FileFilter {
 		}
 	}
 	
+	/**
+	 * Represents a comment line in an rsync exclude/include file.
+	 * <p>
+	 * Comment patterns never match any path.
+	 */
 	private static class Comment extends FalsePattern {
 
 		public Comment(String rsyncPattern) {
