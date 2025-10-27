@@ -15,6 +15,7 @@
 		"OSUtilSecurityFixMixin",
 		"OverlandParticleRendererVanillaFixMixin",
 		"PortraitCardFixMixin",
-		"ServerDataContextVanillaFixMixin"
+		"ServerDataContextVanillaFixMixin",
+		"SteamWorkshopUploadSecurityFixMixin"
 	]
 }

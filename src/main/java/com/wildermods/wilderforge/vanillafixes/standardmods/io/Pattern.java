@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
+import com.wildermods.wilderforge.mixins.vanillafixes.SteamWorkshopUploadSecurityFixMixin;
+
 /**
  * Provides a framework for matching filesystem paths against rsync-style patterns.
  * <p>
@@ -40,12 +42,15 @@ import java.util.regex.PatternSyntaxException;
  *   <li>Include operations ({@code + }) are not supported and throw {@link PatternSyntaxException}.</li>
  *   <li>Complex rsync negation patterns are not implemented.</li>
  * </ul>
+ * 
+ * This Vanilla Fix class is used by {@link SteamWorkshopUploadSecurityFixMixin} to filter sensitive files during
+ * the steam workshop upload process.
  *
  * @author Gamebuster
  * 
  * @see <a href="https://man7.org/linux/man-pages/man1/rsync.1.html#FILTER_RULES">Rsync Filter rules - Pattern Matching Rules</a>
+ * @see SteamWorkshopSecurityFixMixin
  * @see java.util.regex.Pattern
- * @see java.nio.file.Path
  */
 public abstract class Pattern implements FileFilter {
 
@@ -648,7 +653,7 @@ public abstract class Pattern implements FileFilter {
 	 * <p>
 	 * Used as a base for {@link Empty} and {@link Comment} pattern types.
 	 */
-	private static abstract class FalsePattern extends Pattern {
+	public static abstract class FalsePattern extends Pattern {
 
 		public FalsePattern(String rsyncPattern) {
 			super(rsyncPattern);
@@ -664,7 +669,7 @@ public abstract class Pattern implements FileFilter {
 	/**
 	 * Represents a blank or empty rsync pattern that never matches any path.
 	 */
-	private static class Empty extends FalsePattern  {
+	public static class Empty extends FalsePattern  {
 		public Empty(String rsyncPattern) {
 			super(rsyncPattern);
 		}
@@ -685,7 +690,7 @@ public abstract class Pattern implements FileFilter {
 	 * <p>
 	 * Comment patterns never match any path.
 	 */
-	private static class Comment extends FalsePattern {
+	public static class Comment extends FalsePattern {
 
 		public Comment(String rsyncPattern) {
 			super(rsyncPattern);

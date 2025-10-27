@@ -13,11 +13,14 @@ public class Descriptor {
 	public static final String VOID = "V";
 	public static final String ARRAY_OF = "[";
 	
-	//methods
+	//common types
 	public static final String STRING = "Ljava/lang/String;";
 	public static final String OBJECT = "Ljava/lang/Object;";
+	public static final String FILE = "Ljava/io/File;";
+	public static final String PATH = "Ljava/nio/file/Path;";
 	public static final String GDX_ARRAY = "Lcom/badlogic/gdx/utils/Array;";
-
+	public static final String GDX_FILE = "Lcom/badlogic/gdx/files/FileHandle;";
+	
 	//fields
 	public static final String ENUM_VALUES = "$VALUES";
 }
