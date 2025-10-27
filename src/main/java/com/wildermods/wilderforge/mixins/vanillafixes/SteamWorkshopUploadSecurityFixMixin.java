@@ -102,7 +102,7 @@ import com.worldwalkergames.scratchpad.steamWorkshop.UploadToSteamWorkshopDialog
  * @see UploadToSteamWorkshopDialog#updateItem(SteamPublishedFileID)
  * @see ModDeploymentInfo
  * @see Pattern
- * @see <a href="https://github.com/WilderForge/WilderForge/blob/main/src/main/resources/assets/wilderforge/api/.deployignore"> .deployignore</a>
+ * @see <a href="https://github.com/WilderForge/WilderForge/blob/master/src/main/resources/assets/wilderforge/api/.deployignore"> .deployignore</a>
  */
 
 @Mixin(UploadToSteamWorkshopDialog.class)
