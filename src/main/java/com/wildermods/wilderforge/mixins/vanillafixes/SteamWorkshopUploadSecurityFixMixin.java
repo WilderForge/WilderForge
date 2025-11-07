@@ -26,9 +26,9 @@ import com.codedisaster.steamworks.SteamPublishedFileID;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.wildermods.jrsync.RSyncPattern;
+import com.wildermods.jrsync.RSyncPattern.FalsePattern;
 import com.wildermods.wilderforge.api.modLoadingV1.ModDeploymentInfo;
-import com.wildermods.wilderforge.vanillafixes.standardmods.io.Pattern;
-import com.wildermods.wilderforge.vanillafixes.standardmods.io.Pattern.FalsePattern;
 import com.worldwalkergames.legacy.game.mods.ModInfo;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.scratchpad.steamWorkshop.UploadToSteamWorkshopDialog;
@@ -182,10 +182,10 @@ public class SteamWorkshopUploadSecurityFixMixin {
 				LOGGER.log3("No .deployignore found for mod " + selectedModInfo.modId + ": " + deployIgnore);
 			}
 			
-			List<Pattern> ignorePatterns = new ArrayList<>();
+			List<RSyncPattern> ignorePatterns = new ArrayList<>();
 			for(String s : ignores) {
 				LOGGER.log1(s);
-				Pattern pattern = Pattern.compile(s);
+				RSyncPattern pattern = RSyncPattern.compile(s);
 				if(!(pattern instanceof FalsePattern)) {
 					ignorePatterns.add(pattern);
 				}
@@ -198,7 +198,7 @@ public class SteamWorkshopUploadSecurityFixMixin {
 			Files.walkFileTree(originalDir, new FileVisitor<Path>() {
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					for (Pattern pattern : ignorePatterns) {
+					for (RSyncPattern pattern : ignorePatterns) {
 						if (pattern.matches(dir)) {
 							LOGGER.log1("Not including directory: " + dir);
 							return FileVisitResult.SKIP_SUBTREE;
@@ -215,7 +215,7 @@ public class SteamWorkshopUploadSecurityFixMixin {
 
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					for (Pattern pattern : ignorePatterns) {
+					for (RSyncPattern pattern : ignorePatterns) {
 						if (pattern.matches(file)) {
 							LOGGER.log1("Not including file: " + file);
 							return FileVisitResult.CONTINUE;

@@ -40,6 +40,8 @@ dependencies {
 	api libs.eventbus
 	nest libs.eventbus
 	
+	nest libs.jrsync
+	
 	testImplementation(libs.junit)
 	testImplementation(libs.junit.platform)
 	
