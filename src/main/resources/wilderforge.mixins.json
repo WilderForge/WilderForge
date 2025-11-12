@@ -21,6 +21,7 @@
 		"PopUpAccessorMixin",
 		"PopUpManagerMixin",
 		"RootMenuMixin",
+		"ServerDataContextAccessor",
 		"ServerDataContextMixin"
 	]
 }
