@@ -5,10 +5,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.worldwalkergames.legacy.context.ClientDataContext;
 import com.worldwalkergames.legacy.game.model.player.PlayerAccount;
 
 @Mixin(remap = false, value = ClientDataContext.class)
+@Require(@Mod(modid = "wildermyth", version = "<1.4.374")) //patched in version 1.4+374
 public abstract class ClientDataContextVanillaFixMixin {
 	
 	@Inject(

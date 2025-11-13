@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.worldwalkergames.legacy.game.campaign.render.OverlandParticleRenderer;
 import com.worldwalkergames.legacy.render.particles.ParticleData;
 import com.worldwalkergames.render.MeshWriter;
@@ -32,6 +34,7 @@ import com.worldwalkergames.render.MeshWriter;
  */
 @Debug(export = true)
 @Mixin(OverlandParticleRenderer.class)
+@Require(@Mod(modid = "wildermyth", version = "<1.16.559")) //patched in 1.16+559
 public class OverlandParticleRendererVanillaFixMixin {
 
 	private @Shadow int particlesToDraw;

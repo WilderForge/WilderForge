@@ -7,10 +7,13 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.wildermods.wilderforge.api.mixins.v1.Descriptor;
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.worldwalkergames.legacy.editor.ContentEditor;
 import com.worldwalkergames.logging.ALogger;
 
 @Mixin(ContentEditor.class)
+@Require(@Mod(modid = "wildermyth", version = "<1.16+560")) //patched in 1.16+560
 public class ContentEditorLoggingVanillaFixMixin {
 
 	@WrapOperation(

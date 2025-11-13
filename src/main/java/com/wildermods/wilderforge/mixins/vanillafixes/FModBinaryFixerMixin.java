@@ -18,6 +18,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.mixins.v1.Descriptor;
 import com.wildermods.wilderforge.api.mixins.v1.Impossible;
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 
 /**
  * Mixin patch to native library loading failures caused by the executable stack flag
@@ -64,6 +66,7 @@ import com.wildermods.wilderforge.api.mixins.v1.Impossible;
  * 
  */
 @Mixin(FMODLoader.class)
+@Require(@Mod(modid = "wildermyth", version = "<1.16.560")) //fixed in version 1.16+560
 public abstract class FModBinaryFixerMixin {
 
 	private static final Logger LOGGER = new Logger("FMOD-FIXER");

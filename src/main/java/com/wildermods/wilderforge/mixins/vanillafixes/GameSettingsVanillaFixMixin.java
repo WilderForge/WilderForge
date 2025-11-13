@@ -5,10 +5,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.worldwalkergames.engine.EntitiesCollection;
 import com.worldwalkergames.legacy.game.campaign.model.GameSettings;
 
 @Mixin(GameSettings.class)
+@Require(@Mod(modid = "wildermyth", version = "<=1.16.549")) //patched in version 1.16+549
 public class GameSettingsVanillaFixMixin {
 
 	/**

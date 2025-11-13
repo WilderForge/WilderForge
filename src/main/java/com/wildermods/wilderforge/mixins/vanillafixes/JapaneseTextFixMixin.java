@@ -5,8 +5,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.badlogic.gdx.graphics.g2d.freetype.NiceFreeTypeBitmapFontData;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 
 @Mixin(NiceFreeTypeBitmapFontData.class)
+@Require(@Mod(modid = "wildermyth", version = "<1.16.560")) //patched in 1.16+560
 public class JapaneseTextFixMixin {
 
 	@WrapMethod(method = "isChinese")
