@@ -9,6 +9,7 @@
 	"mixins": [
 		"ClientDataContextVanillaFixMixin",
 		"ContentEditorLoggingVanillaFixMixin",
+		"DebuggingWithLWJGLFixMixin",
 		"FModBinaryFixerMixin",
 		"GameSettingsVanillaFixMixin",
 		"JapaneseTextFixMixin",
