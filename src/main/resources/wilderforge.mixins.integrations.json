@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.wildermods.wilderforge.mixins.integrations",
+	"plugin": "com.wildermods.wilderforge.launch.mixin.plugin.RequirementsPlugin",
+	"target": "@env(DEFAULT)",
+	"compatibilityLevel": "JAVA_25",
+	"mixinPriority": 1,
+	"mixins": [
+		"SteamManagerAccessor",
+		"SteamManagerMixin"
+	]
+}

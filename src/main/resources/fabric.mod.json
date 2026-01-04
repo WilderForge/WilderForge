@@ -17,6 +17,7 @@
 	
 	"mixins": [
 		"wilderforge.mixins.input.json",
+		"wilderforge.mixins.integrations.json",
 		"wilderforge.mixins.json",
 		"wilderforge.mixins.mechanics.json",
 		"wilderforge.mixins.vanillafixes.json"
