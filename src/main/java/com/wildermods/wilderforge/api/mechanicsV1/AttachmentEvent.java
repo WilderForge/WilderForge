@@ -33,7 +33,12 @@ public abstract class AttachmentEvent extends Event {
 	 * @param cancellable Ignored in this implementation; events are non-cancellable.
 	 * @throws IllegalStateException If the {@link ItemDTO} for the provided item cannot be resolved.
 	 */
+	@Deprecated(forRemoval = true)
 	public AttachmentEvent(Attachments attachments, Item item, boolean cancellable) {
+		this(attachments, item);
+	}
+	
+	public AttachmentEvent(Attachments attachments, Item item) {
 		super(false);
 		this.attachments = attachments;
 		setItem(item);
@@ -98,8 +103,13 @@ public abstract class AttachmentEvent extends Event {
 		 */
 		protected final R vanillaResult;
 		
+		@Deprecated(forRemoval = true)
 		public AttachmentEventReturnable(Attachments attachments, Item item, R vanillaResult, boolean cancellable) {
-			super(attachments, item, cancellable);
+			this(attachments, item, vanillaResult);
+		}
+		
+		public AttachmentEventReturnable(Attachments attachments, Item item, R vanillaResult) {
+			super(attachments, item);
 			this.vanillaResult = vanillaResult;
 		}
 		
@@ -139,7 +149,7 @@ public abstract class AttachmentEvent extends Event {
 		 * @param item        The item being checked for legality.
 		 */
 		public ItemEquipLegalityCheckEvent(Attachments attachments, Item item, boolean vanillaResult) {
-			super(attachments, item, vanillaResult, false);
+			super(attachments, item, vanillaResult);
 		}
 	}
 
@@ -163,7 +173,7 @@ public abstract class AttachmentEvent extends Event {
 		 * @param item        The item being checked for current equip eligibility.
 		 */
 		public CanEquipCheckEvent(Attachments attachments, Item item, boolean vanillaResult) {
-			super(attachments, item, vanillaResult, false);
+			super(attachments, item, vanillaResult);
 		}
 	}
 
@@ -185,7 +195,7 @@ public abstract class AttachmentEvent extends Event {
 		 * @param item        The armor item being checked for legality.
 		 */
 		public ArmorEquipLegalityCheckEvent(Attachments attachments, Item item, boolean vanillaResult) {
-			super(attachments, item, vanillaResult, false);
+			super(attachments, item, vanillaResult);
 		}
 	}
 }
