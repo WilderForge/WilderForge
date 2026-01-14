@@ -25,6 +25,7 @@
 	"depends":{
 		"wildermyth": ">=1.16.0",
 		"eventbus": ">=7.4.4",
+		"java": ">=25",
 		"net_oneandone_reflections8_reflections8": ">=0.11.7",
 		"org_javassist_javassist": "3.*.*"
 	},

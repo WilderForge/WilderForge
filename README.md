@@ -5,7 +5,7 @@
 If order to build WilderForge, you must have the following software installed:
 
 * Git
-* Java 21 or later
+* Java 25 or later
 * Wildermyth
 * 4GB of free ram available
 
