@@ -6,7 +6,7 @@ plugins {
 
 version = wilderForgeVersion
 group = "com.wildermods"
-archivesBaseName = "wilderforge"
+base.archivesName = "wilderforge"
 
 apply plugin: 'com.wildermods.workspace'
 apply from: 'replaceTokenScript.gradle'
@@ -24,11 +24,14 @@ repositories {
     }
 }
 
-sourceCompatibility = '21'
-targetCompatibility = '21'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
 
 wilderWorkspace {
-	useDependency("1.16+559")
+	useDependency("1.16+561-unstable")
 }
 
 dependencies {
