@@ -84,6 +84,7 @@ public class DebuggingWithLWJGLFixMixin {
 				LOGGER.fatal("If you are experiencing a native crash, ensure org.lwjgl.system.ThreadLocalUtil#JNI_NATIVE_INTERFACE_FUNCTION_COUNT is correct for your version of java");
 				LOGGER.fatal("******************************************************");
 			case "24":
+			case "25":
 				original.call(233 + reservedCount);
 				break;
 		}
