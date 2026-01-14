@@ -23,6 +23,7 @@ public abstract class AttachmentEvent extends Event {
 	private final Logger LOGGER = new Logger(getClass());
 	private final Attachments attachments;
 	private Item item;
+	@Deprecated(forRemoval = true)
 	private ItemDTO itemDTO;
 
 	/**
@@ -53,6 +54,7 @@ public abstract class AttachmentEvent extends Event {
 		this.setItemDTO(itemDTO);
 	}
 
+	@Deprecated(forRemoval = true)
 	protected void setItemDTO(ItemDTO itemDTO) {
 		this.itemDTO = itemDTO;
 	}
@@ -74,7 +76,9 @@ public abstract class AttachmentEvent extends Event {
 	/**
 	 * @return The {@link ItemDTO} backing the item, fetched from the registry. May be null.
 	 */
+	@Deprecated(forRemoval = true)
 	public ItemDTO getItemDTO() {
+		LOGGER.error("getItemDTO() is terminally deprecated. This function will be removed in a future release. You should be able to retrieve all the data you need from getItem().");
 		return itemDTO;
 	}
 	
