@@ -1,6 +1,6 @@
 package com.wildermods.wilderforge.api.mixins.v1;
 
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.wildermods.wilderforge.api.modLoadingV1.Mod;
@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * @see Mod
  * @see Requires
  */
-@Target(TYPE)
+@Target({TYPE, FIELD, METHOD})
 @Retention(RUNTIME)
 @Repeatable(Requires.class)
 @SuppressWarnings("deprecation")
@@ -51,5 +51,10 @@ public @interface Require {
 	public static final String ABSENT = "ABSENT";
 	
 	public Mod value();
+	
+	/**
+	 * @since 0.7.0.0
+	 */
+	boolean crash() default false;
 	
 }
