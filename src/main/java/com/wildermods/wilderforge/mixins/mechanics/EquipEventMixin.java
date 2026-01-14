@@ -12,6 +12,8 @@ import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.CanEquipInacti
 import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.ItemEquipLegalityCheckEvent;
 import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.CheckRequiredAndForbiddenAspectsEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.worldwalkergames.legacy.game.model.Attachments;
 import com.worldwalkergames.legacy.game.model.item.Item;
@@ -40,7 +42,8 @@ public class EquipEventMixin {
 	}
 	
 	@SuppressWarnings("deprecation")
-	@WrapMethod(method = "checkRequiredAndForbiddenAspects", require = 1, expect = 1) //require and expect set to 0 because this method doesn't exist on versions prior to 1.16+561
+	@WrapMethod(method = "checkRequiredAndForbiddenAspects") 
+	@Require(@Mod(modid = "wildermyth", version = ">=1.16.561")) //this method doesn't exist on versions prior to 1.16+561
 	private boolean fireCheckRequiredAndForbiddenAspectsEvent(Item item, Operation<Boolean> original) {
 		return fireBoolReturnableAttachmentEvent(new CheckRequiredAndForbiddenAspectsEvent(Cast.from(this), item, original.call(item)));
 	}
