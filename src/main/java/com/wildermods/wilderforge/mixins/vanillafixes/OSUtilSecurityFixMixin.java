@@ -1,5 +1,9 @@
 package com.wildermods.wilderforge.mixins.vanillafixes;
 
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.BOOLEAN;
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.STRING;
+import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.VOID;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
@@ -7,105 +11,61 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.wildermods.wilderforge.api.mixins.v1.Descriptor.*;
-
-import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.wildermods.provider.util.logging.LogLevel;
-import com.wildermods.wilderforge.api.modLoadingV1.VersionHelper;
-import com.wildermods.wilderforge.api.utils.vanillafixes.TranslateForShellStatus;
+import com.wildermods.wilderforge.api.mixins.v1.Require;
+import com.wildermods.wilderforge.api.modLoadingV1.Mod;
 import com.wildermods.wilderforge.launch.WilderForge;
-import com.wildermods.wilderforge.launch.coremods.Coremods;
 import com.worldwalkergames.logging.ALogger;
 import com.worldwalkergames.util.OSUtil;
-
-import net.fabricmc.loader.api.Version;
 
 /**
  * Patches arbitrary code execution vulnerabilities in OSUtil
  */
 @Debug(export = true)
 @Mixin(OSUtil.class)
-public class OSUtilSecurityFixMixin implements TranslateForShellStatus {
+public class OSUtilSecurityFixMixin {
 
 	private static @Final @Shadow ALogger LOGGER;
 	
-	@ModifyVariable(
-		at = @At("HEAD"),
-		method = "openBrowser(" + STRING + ")" + VOID,
-		require = 1
-	)
-	private static String patchOpenBrowser(String url) throws IOException { 
-		if(shouldPatchOpenBrowser()) {
-			return checkURL(url).toASCIIString();
+	@WrapMethod(method = "openBrowser("+ STRING +")" + VOID)
+	@Require(@Mod(modid = "wildermyth", version = "<1.16.549")) //patched in version 1.16.549
+	private static void catchOpenBrowser(String url, Operation<Void> original) throws IOException {
+		try {
+			WilderForge.LOGGER.fatal("Running patched openBrowser()");
+			original.call(checkURL(url).toASCIIString());
 		}
-		else {
-			return url;
+		catch(Throwable t) { //Cannot catch IOException directly, won't compile
+			if(!(t instanceof IOException)) {
+				throw t;
+			}
+			IOException e = (IOException) t;
+			LOGGER.log5("unable to open a browser on {0} for url {1} with error {2}", System.getProperty("os.name"), url, e);
 		}
 	}
 	
 	@WrapMethod(
-		method = "openBrowser("+ STRING +")" + VOID
-	)
-	private static void catchOpenBrowser(String url, Operation<Void> original) {
-		if(shouldPatchOpenBrowser()) {
-			try {
-				original.call(url);
-			}
-			catch(Throwable t) { //Cannot catch IOException directly, won't compile
-				if(!(t instanceof IOException)) {
-					throw t;
-				}
-				IOException e = (IOException) t;
-				LOGGER.log5("unable to open a browser on {0} for url {1} with error {2}", System.getProperty("os.name"), url, e);
-			}
-		}
-		else {
-			original.call(url);
-		}
-	}
-	
-	@ModifyVariable(
-		at = @At("HEAD"),
-		method = "showFile(" + STRING +")" + BOOLEAN,
+		method = "showFile(" + STRING + ")" + BOOLEAN,
 		require = 1
 	)
-	private static final String patchShowFile(String absolutePath) throws IOException {
-		if(shouldPatchShowFile()) {
-			return checkPath(absolutePath).toASCIIString().substring(5);
+	private static boolean catchShowFile(String absolutePath, Operation<Boolean> original) throws IOException {
+		try {
+			WilderForge.LOGGER.fatal("Running patched showFile()");
+			return original.call(checkPath(absolutePath).toASCIIString().substring(5));
 		}
-		else {
-			return absolutePath;
-		}
-	}
-	
-	@WrapMethod(
-		method = "showFile(" + STRING + ")" + BOOLEAN
-	)
-	private static boolean catchShowFile(String absolutePath, Operation<Boolean> original) {
-		if(shouldPatchShowFile()) {
-			try {
-				return original.call(absolutePath);
+		catch(Throwable t) { //Cannot catch IOException directly, won't compile
+			if(!(t instanceof IOException)) {
+				throw t;
 			}
-			catch(Throwable t) { //Cannot catch IOException directly, won't compile
-				if(!(t instanceof IOException)) {
-					throw t;
-				}
-				IOException e = (IOException) t;
-				LOGGER.log5("unable to open a file viewer on {0} for path {1} with error {2}", System.getProperty("os.name"), absolutePath, e);
-				return false;
-			}
-		}
-		else {
-			return original.call(absolutePath);
+			IOException e = (IOException) t;
+			LOGGER.log5("unable to open a file viewer on {0} for path {1} with error {2}", System.getProperty("os.name"), absolutePath, e);
+			return false;
 		}
 	}
 
@@ -169,30 +129,5 @@ public class OSUtilSecurityFixMixin implements TranslateForShellStatus {
 
 		return toOpen;
 
-	}
-	
-	private static @Unique final Version patchedOpenBrowser = VersionHelper.parseVersion("1.16+549");
-	
-	private static @Unique final boolean shouldPatchOpenBrowser() {
-		boolean patch = VersionHelper.compareVersionIncludingBuild(Coremods.getCoremod("wildermyth").getMetadata().getVersion(), patchedOpenBrowser) < 0;
-		WilderForge.LOGGER.log(LogLevel.FATAL, patchedOpenBrowser);
-		WilderForge.LOGGER.log(LogLevel.FATAL, Coremods.getCoremod("wildermyth").getMetadata().getVersion());
-		WilderForge.LOGGER.log(VersionHelper.compareVersionIncludingBuild(Coremods.getCoremod("wildermyth").getMetadata().getVersion(), patchedOpenBrowser) < 0);
-		WilderForge.LOGGER.log(LogLevel.FATAL, "Patching openBrowser(): " + patch);
-		return patch;
-	}
-
-	private static @Unique final boolean shouldPatchShowFile() {
-		return true;
-	}
-
-	@Override
-	public boolean isWilderforgePatchingOpenBrowser() {
-		return shouldPatchOpenBrowser();
-	}
-
-	@Override
-	public boolean isWilderforgePatchingShowFile() {
-		return shouldPatchShowFile();
 	}
 }
