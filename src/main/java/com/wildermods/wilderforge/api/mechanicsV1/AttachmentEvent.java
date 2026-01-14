@@ -180,6 +180,16 @@ public abstract class AttachmentEvent extends Event {
 			super(attachments, item, vanillaResult);
 		}
 	}
+	
+	/**
+	 * Unknown purpose, fired around {@link Attachments#canEquipInactive}
+	 */
+	@HasResult
+	public static class CanEquipInactiveCheckEvent extends AttachmentEventReturnable<Boolean> {
+		public CanEquipInactiveCheckEvent(Attachments attachments, Item item, boolean vanillaResult) {
+			super(attachments, item, vanillaResult);
+		}
+	}
 
 	/**
 	 * Event fired specifically when checking armor legality.
@@ -199,6 +209,15 @@ public abstract class AttachmentEvent extends Event {
 		 * @param item        The armor item being checked for legality.
 		 */
 		public ArmorEquipLegalityCheckEvent(Attachments attachments, Item item, boolean vanillaResult) {
+			super(attachments, item, vanillaResult);
+		}
+	}
+	
+	@HasResult
+	@Deprecated(forRemoval = false)
+	public static class CheckRequiredAndForbiddenAspectsEvent extends AttachmentEventReturnable<Boolean> {
+		@Deprecated(forRemoval = false)
+		public CheckRequiredAndForbiddenAspectsEvent(Attachments attachments, Item item, boolean vanillaResult) {
 			super(attachments, item, vanillaResult);
 		}
 	}

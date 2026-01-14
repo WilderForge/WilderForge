@@ -8,7 +8,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.ArmorEquipLegalityCheckEvent;
 import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.AttachmentEventReturnable;
 import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.CanEquipCheckEvent;
+import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.CanEquipInactiveCheckEvent;
 import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.ItemEquipLegalityCheckEvent;
+import com.wildermods.wilderforge.api.mechanicsV1.AttachmentEvent.CheckRequiredAndForbiddenAspectsEvent;
 import com.wildermods.wilderforge.api.mixins.v1.Cast;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.worldwalkergames.legacy.game.model.Attachments;
@@ -27,9 +29,20 @@ public class EquipEventMixin {
 		return fireBoolReturnableAttachmentEvent(new CanEquipCheckEvent(Cast.from(this), item, original.call(item)));
 	}
 	
+	@WrapMethod(method = "canEquipInactive")
+	private boolean fireCanEquipInactiveCheckEvent(Item item, Operation<Boolean> original) {
+		return fireBoolReturnableAttachmentEvent(new CanEquipInactiveCheckEvent(Cast.from(this), item, original.call(item)));
+	}
+	
 	@WrapMethod(method = "isArmorLegal")
 	private boolean fireArmorLegalityEquipCheckEvent(Item item, Operation<Boolean> original) {
 		return fireBoolReturnableAttachmentEvent(new ArmorEquipLegalityCheckEvent(Cast.from(this), item, original.call(item)));
+	}
+	
+	@SuppressWarnings("deprecation")
+	@WrapMethod(method = "checkRequiredAndForbiddenAspects", require = 1, expect = 1) //require and expect set to 0 because this method doesn't exist on versions prior to 1.16+561
+	private boolean fireCheckRequiredAndForbiddenAspectsEvent(Item item, Operation<Boolean> original) {
+		return fireBoolReturnableAttachmentEvent(new CheckRequiredAndForbiddenAspectsEvent(Cast.from(this), item, original.call(item)));
 	}
 	
 	private @Unique Boolean fireBoolReturnableAttachmentEvent(AttachmentEventReturnable<Boolean> e) {
