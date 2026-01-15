@@ -11,12 +11,17 @@ import java.lang.annotation.Target;
 
 
 /**
- * Declares a mod dependency requirement for a mixin class.
+ * Declares a mod dependency requirement for a mixin class or element.
  * <p>
- * This annotation can be applied multiple times to a single mixin class to
- * require multiple mods. The mixin plugin will only load the annotated mixin
+ * This annotation can be applied multiple times to a single element to
+ * require multiple mods. The mixin plugin will only load the annotated element
  * if <em>all</em> specified coremod requirements are satisfied.
  * </p>
+ * 
+ * If a mixin class is annotated and its requirements are not satisfied, then
+ * the mixin is not applied, even if elements declared within are unannotated
+ * or have their requirements satisfied.
+ * 
  * <p>
  * Each {@link Require} refers to a {@link Mod} instance. For mixins, the
  * {@link Mod#version()} value may be:
@@ -41,7 +46,7 @@ import java.lang.annotation.Target;
 public @interface Require {
 
 	/**
-	 * Speical version string that matches any version of the mod
+	 * Special version string that matches any version of the mod
 	 */
 	public static final String ANY = "ANY";
 	
