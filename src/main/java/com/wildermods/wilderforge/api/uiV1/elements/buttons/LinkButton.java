@@ -7,13 +7,15 @@ import java.net.URL;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.uiV1.UIButton;
-import com.wildermods.wilderforge.api.utils.vanillafixes.TranslateForShellStatus;
 import com.wildermods.wilderforge.mixins.PopUpAccessorMixin;
 import com.worldwalkergames.legacy.context.LegacyViewDependencies;
 import com.worldwalkergames.legacy.ui.PopUp;
 import com.worldwalkergames.util.OSUtil;
 
-public class LinkButton extends UIButton<URL> implements TranslateForShellStatus {
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.Version;
+
+public class LinkButton extends UIButton<URL> {
 
 	public static final Logger LOGGER = new Logger(LinkButton.class);
 	
@@ -43,7 +45,7 @@ public class LinkButton extends UIButton<URL> implements TranslateForShellStatus
 	public void clickImpl() {
 		String url = this.url;
 		try {
-			if(!isWilderforgePatchingOpenBrowser()) { //we are running a patched version of the game, remove the scheme
+			if(FabricLoader.getInstance().getModContainer("wildermyth").get().getMetadata().getVersion().compareTo(Version.parse("1.16.549")) >= 0) {
 				url = removeScheme(url);
 			}
 			OSUtil.openBrowser(url);
