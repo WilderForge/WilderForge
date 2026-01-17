@@ -56,6 +56,9 @@ jobs:
           java-version: '25'
           distribution: 'adopt'
 
+      - name: Add steamcmd to PATH
+        run: echo "/usr/games" >> $GITHUB_PATH
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
