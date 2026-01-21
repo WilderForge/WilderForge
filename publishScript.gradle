@@ -3,6 +3,8 @@
 
 ext.mavenLocalUrl = repositories.mavenLocal().url.toString()
 
+def archiveBaseName = project.base.archivesName.get()
+
 tasks.register('checkArtifactExists') {
     doLast {
     
@@ -12,14 +14,14 @@ tasks.register('checkArtifactExists') {
 		}
 		
         def repoUrl = project.hasProperty('mavenRepoUrl') ? project.mavenRepoUrl : mavenLocalUrl
-        def artifactPath = "${repoUrl}/${project.group.replace('.', '/')}/${project.base.archivesName}/${project.version}/${project.base.archivesName}-${project.version}.jar"
+        def artifactPath = "${repoUrl}/${project.group.replace('.', '/')}/${archiveBaseName}/${project.version}/${archiveBaseName}-${project.version}.jar"
         logger.lifecycle("Checking if artifact exists at: $artifactPath")
         
         if (artifactPath.startsWith('file:/')) {
             // Handle file URLs
             def file = new File(new URI(artifactPath))
             if (file.exists()) {
-                throw new IllegalStateException("Artifact '${project.group}:${project.base.archivesName}:${project.version}' already exists. Publishing aborted.")
+                throw new IllegalStateException("Artifact '${project.group}:${archiveBaseName}:${project.version}' already exists. Publishing aborted.")
             }
         } else {
             // Handle HTTP URLs
@@ -27,7 +29,7 @@ tasks.register('checkArtifactExists') {
             def connection = url.openConnection()
             connection.setRequestMethod('HEAD')
             if (connection.responseCode == 200) {
-				throw new IllegalStateException("Artifact '${project.group}:${project.base.archivesName}:${project.version}' already exists. Publishing aborted.")
+				throw new IllegalStateException("Artifact '${project.group}:${archiveBaseName}:${project.version}' already exists. Publishing aborted.")
             }
         }
         logger.lifecycle("Artifact does not exist, proceeding with publish.")
@@ -43,7 +45,7 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             groupId = project.group
-            artifactId = project.base.archivesName
+            artifactId = archiveBaseName
             version = project.version
 
             // Attach sources JAR to the publication
