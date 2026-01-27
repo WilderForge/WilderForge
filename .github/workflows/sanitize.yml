@@ -15,5 +15,7 @@ jobs:
       github.event.pull_request.user.login == 'dependabot[bot]' &&
       startsWith(github.event.pull_request.title, 'Bump gradle-wrapper')
     steps:
-     - name: "Sanitize Gradle Wrapper"
-       uses: WilderForge/dependabot-gradle-sanitizer@v1
+      - name: "Sanitize Gradle Wrapper"
+        uses: WilderForge/dependabot-gradle-sanitizer@v1
+        with:
+          access_token: ${{ secrets.SANITIZER_ACCESS_TOKEN }}
