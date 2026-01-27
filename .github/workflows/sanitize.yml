@@ -1,0 +1,16 @@
+name: Dependabot Gradle Wrapper Sanitizer
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  sanitize-wrapper:
+    runs-on: [self-hosted, linux]
+    # Only run for Dependabot PRs with title starting with "Bump gradle-wrapper"
+    if: >
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      startsWith(github.event.pull_request.title, 'Bump gradle-wrapper')
+    steps:
+     - name: "Sanitize Gradle Wrapper"
+       uses: WilderForge/dependabot-gradle-sanitizer@v1
