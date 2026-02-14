@@ -25,10 +25,10 @@ import org.spongepowered.asm.mixin.throwables.MixinException;
 import static com.wildermods.wilderforge.api.utils.io.ByteUtils.*;
 
 import com.wildermods.provider.services.CrashLogService;
+import com.wildermods.provider.util.logging.Logger;
 import com.wildermods.wilderforge.api.modLoadingV1.CoremodInfo;
 import com.wildermods.wilderforge.launch.WilderForge;
 import com.wildermods.wilderforge.launch.coremods.Coremods;
-import com.worldwalkergames.legacy.Version;
 
 public final class CrashInfo implements CrashLogService {
 
@@ -104,7 +104,17 @@ public final class CrashInfo implements CrashLogService {
 			s.append("IN ADDITION TO THE ABOVE ERROR, WILDERLOADER COULD NOT CREATE CRASH REPORT FILE:");
 			s.append(ExceptionUtils.getStackTrace(t2));
 		}
-		WilderForge.LOGGER.fatal(s);
+		Logger logger;
+		try {
+			logger = WilderForge.LOGGER;
+		}
+		catch(Throwable t2) {
+			logger = new Logger("WilderForge");
+		}
+		if(logger == null) {
+			logger = new Logger("WilderForge");
+		}
+		logger.fatal(s);
 	}
 	
 	public void doThreadDump(boolean dumpThreads) {
@@ -223,24 +233,25 @@ public final class CrashInfo implements CrashLogService {
 	
 	private String getWildermythVersion(StringBuilder s) {
 		Class<?> wildermythVersionClass = null;
-		if(getGameClassloader() != null) {
-			try {
+		try {
+			if(getGameClassloader() != null) {
 				wildermythVersionClass = Class.forName("com.worldwalkergames.legacy.Version", true, getGameClassloader());
-			} catch (Throwable t) {
-				s.append("COULD NOT RETRIEVE VERSION INFO CLASS DUE TO THE FOLLOWING EXCPETION:\n");
-				s.append(ExceptionUtils.getStackTrace(t));
+			}
+			else if(wildermythVersionClass == null) {
+				wildermythVersionClass = Class.forName("com.worldwalkergames.legacy.Version");
 			}
 		}
-		if(wildermythVersionClass == null) {
-			wildermythVersionClass = Version.class;
+		catch(Throwable t) {
+			s.append("COULD NOT RETRIEVE VERSION INFO CLASS DUE TO THE FOLLOWING EXCPETION:\n");
+			s.append(ExceptionUtils.getStackTrace(t));
 		}
 		
 		try {
 			return (String) wildermythVersionClass.getDeclaredField("VERSION").get(null);
 		} catch (Throwable t) {
 			s.append("COULD NOT PRINT VERSION INFORMATION DUE TO THE FOLLOWING EXCPETION:\n");
-			t.printStackTrace();
-			return Version.VERSION;
+			s.append(ExceptionUtils.getStackTrace(t));
+			return "UNKNOWN";
 		}
 		
 	}
@@ -277,7 +288,7 @@ public final class CrashInfo implements CrashLogService {
 				getDetailsMethod.invoke(graphicalInfo, s);
 			} catch (Throwable t ) {
 				errored = true;
-				s.append("COULD NOT OPENGL GRAPHICAL INFO DUE TO THE FOLLOWING EXCPETION:").append('\n');
+				s.append("COULD NOT APPEND OPENGL GRAPHICAL INFO DUE TO THE FOLLOWING EXCPETION:").append('\n');
 				s.append(ExceptionUtils.getStackTrace(t));
 			}
 		}
@@ -308,13 +319,18 @@ public final class CrashInfo implements CrashLogService {
 	
 	private StringBuilder appendModDetails(StringBuilder s) {
 		s.append("-- Mod Details --").append('\n');
-		s.append("Coremods Detected: " + Coremods.getCoremodCount()).append(":\n\n");
-		for(CoremodInfo coremod : Coremods.getAllCoremods()) {
-			s.append('\t').append(coremod.modId).append(' ').append(coremod.getMetadata().getVersion()).append('\n');
+		try {
+			s.append("Coremods Detected: " + Coremods.getCoremodCount()).append(":\n\n");
+			for(CoremodInfo coremod : Coremods.getAllCoremods()) {
+				s.append('\t').append(coremod.modid()).append(' ').append(coremod.getMetadata().getVersion()).append('\n');
+			}
+		}
+		catch(Throwable t) {
+			s.append("\tCOULD NOT APPEND MOD INFO DUE TO THE FOLLOWING EXCPETION:").append('\n');
+			s.append(ExceptionUtils.getStackTrace(t));
 		}
 		
 		Class<?> standardModCrashInfoClass;
-		Object dependencies;
 		try {
 			standardModCrashInfoClass = Class.forName("com.wildermods.wilderforge.launch.logging.StandardModCrashInfo", true, getGameClassloader());
 			s.append(standardModCrashInfoClass.newInstance().toString());
@@ -325,9 +341,6 @@ public final class CrashInfo implements CrashLogService {
 		}
 		
 		s.append("\n\n");
-		if(WilderForge.getViewDependencies() != null) {
-			
-		}
 		return s;
 	}
 	
