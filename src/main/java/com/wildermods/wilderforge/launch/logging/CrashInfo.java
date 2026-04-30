@@ -140,6 +140,8 @@ public final class CrashInfo implements CrashLogService {
 		
 		ArrayList<String> messages = new ArrayList<String>();
 		
+		boolean more = false;
+		
 		for(Class<Throwable> tType : throwables) {
 			if(AssertionError.class.isAssignableFrom(tType)) {
 				messages.addAll(Arrays.asList(new String[] {
@@ -152,19 +154,35 @@ public final class CrashInfo implements CrashLogService {
 					"You assumed too much. The code agrees.",
 					"What can be asserted without evidence can also crash without warning."
 				}));
+				more = true;
 			}
-			else if (StackOverflowError.class.isAssignableFrom(tType)){
+			if (StackOverflowError.class.isAssignableFrom(tType)){
 				messages.addAll(Arrays.asList(new String[] {
 					"In order to understand recursion, one must first understand recursion.",
 					"Insanity is doing the same thing over and over and expecting the stack to not overflow."
 				}));
 			}
-			else if(MixinException.class.isAssignableFrom(tType)) {
+			if (NoClassDefFoundError.class.isAssignableFrom(tType) || ClassNotFoundException.class.isAssignableFrom(tType)) {
+				messages.addAll(Arrays.asList(new String[] {
+					"Have you seen this class? Missing since compile time.",
+					"{T}: Target artifact phases out.",
+					"Classpath not included.",
+					"As an additional cost to cast this program, sacrifice a dependency."
+				}));
+				break;
+			}
+			if(NullPointerException.class.isAssignableFrom(tType)) {
+				messages.addAll(Arrays.asList(new String[] {
+					"The void answers your call."	
+				}));
+				more = true;
+			}
+			if(MixinException.class.isAssignableFrom(tType)) {
 				return "//Check your mixins.";
 			}
 		}
 		
-		if(messages.isEmpty()) {
+		if(messages.isEmpty() || (more && new Random().nextInt(11) == 10)) {
 			messages.addAll(Arrays.asList(new String[] {
 				"Goodbye, cruel world!",
 				"Hello darkness...",
