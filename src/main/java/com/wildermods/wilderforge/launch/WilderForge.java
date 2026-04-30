@@ -91,7 +91,7 @@ public final class WilderForge {
 
 	@InternalOnly
 	public static void init(LegacyViewDependencies dependencies) {
-		
+		LOGGER.fatal("Classpath: " + System.getProperty("java.class.path"));
 		try {
 			for(CoremodInfo coremod : Coremods.getAllCoremods()) {
 				try {

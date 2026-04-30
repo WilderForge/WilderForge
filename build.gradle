@@ -8,6 +8,8 @@ version = wilderForgeVersion
 group = "com.wildermods"
 base.archivesName = "wilderforge"
 
+ext.gameVersion = "1.16+562"
+
 apply plugin: 'com.wildermods.workspace'
 apply from: 'replaceTokenScript.gradle'
 apply from: 'publishScript.gradle'
@@ -30,32 +32,18 @@ java {
 	}
 }
 
-wilderWorkspace {
-	useDependency("1.16+562")
-}
-
 dependencies {
 
 	nestTransitive(libs.reflections8)
 	
 	nest libs.commons.lang
 	
-	api libs.eventbus
+	//api libs.eventbus
 	nest libs.eventbus
 	
 	nest libs.jrsync
 	
 	testImplementation(libs.junit)
 	testImplementation(libs.junit.platform)
-	
-	/**********
-	don't alter the dependencies below
-	***********/
-	
-	//Wildermyth, Scratchpad
-	compileOnly fileTree(dir: './bin/', include: ['*.jar'])
-	
-	//All dependencies of Wildermyth itself
-	compileOnly fileTree(dir: './bin/lib/', include: ['*.jar'])
 
 }
