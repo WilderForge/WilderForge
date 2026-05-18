@@ -65,6 +65,9 @@ jobs:
       - name: Clear Game Files
         run: ./gradlew clearLocalRuntime --stacktrace --info
 
+      - name: Install Game
+        run: ./gradlew prepare --stacktrace --info
+
       - name: Setup Decompiled Workspace
         run: ./gradlew setupDecompWorkspace --stacktrace --info
 
