@@ -24,7 +24,14 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
     cd ./wilderforge
     ```
     ***
-3. Setup the project workspace:
+
+3. Prepare the project:
+    ```shell
+    ./gradlew prepare
+    ```
+
+    This ensures that the game exists so it can be decompiled
+4. Setup the project workspace:
 
     ```shell
     ./gradlew setupDecompWorkspace
@@ -43,7 +50,7 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
     ```
 
     ***
-4. Configure the project for your IDE:
+5. Configure the project for your IDE:
 
     Configure the project for your IDE. If you only want to build the jar, and don't want to modify WilderForge itself, you can skip this step.
 
@@ -64,7 +71,7 @@ __Note:__ This project uses WilderWorkspace to configure itself for IDEs. Curren
 
     ***
 
-5. Build the project:
+6. Build the project:
 
     To build the project, run:
     ```shell
