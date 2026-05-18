@@ -38,7 +38,7 @@ dependencies {
 	
 	nest libs.commons.lang
 	
-	//api libs.eventbus
+	api libs.eventbus
 	nest libs.eventbus
 	
 	nest libs.jrsync
