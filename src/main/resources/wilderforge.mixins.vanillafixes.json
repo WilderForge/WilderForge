@@ -10,6 +10,7 @@
 		"ClientDataContextVanillaFixMixin",
 		"ContentEditorLoggingVanillaFixMixin",
 		"DebuggingWithLWJGLFixMixin",
+		"FactionStatusAbiltiyBarVanillaFixMixin",
 		"FModBinaryFixerMixin",
 		"GameSettingsVanillaFixMixin",
 		"JapaneseTextFixMixin",
