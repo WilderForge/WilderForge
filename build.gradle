@@ -33,14 +33,16 @@ java {
 }
 
 dependencies {
-
+	implementation(libs.reflections8)
 	nestTransitive(libs.reflections8)
 	
+	implementation libs.commons.lang
 	nest libs.commons.lang
 	
 	api libs.eventbus
 	nest libs.eventbus
 	
+	implementation libs.jrsync
 	nest libs.jrsync
 	
 	testImplementation(libs.junit)
